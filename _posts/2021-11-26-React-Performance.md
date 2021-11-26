@@ -3,6 +3,8 @@ title: Técnicas de optimización para aplicaciones React
 published: true
 ---
 
+La *performance* es un factor importante en la calidad de una aplicación. Depende mucho de como codificamos y como está configurada la infraestructura. Es importante, ya que impacta en la experiencia del usuario. Por su parte React ofrece mucha optimización para diseñar aplicaciones de reacción de alto rendimiento, que para lograrlas se deben seguir algunas buenas prácticas.
+
 # [](#header-1)React.Fragment
 
 
