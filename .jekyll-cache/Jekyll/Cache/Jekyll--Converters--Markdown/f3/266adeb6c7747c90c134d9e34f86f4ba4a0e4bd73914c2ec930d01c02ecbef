@@ -1,4 +1,4 @@
-I"A�<p>Performance is the main factor in the quality of an application. Performance depends on how we are coding and configure the infrastructure. Performance optimization is an important technique to consider, before delivering any application. Because it will impact the user experience. In this article, we are going to explore performance optimization techniques in React.</p>
+I"Y�<p>La <em>performance</em> es un factor importante en la calidad de una aplicación. Depende mucho de como codificamos y como está configurada la infraestructura. Es importante, ya que impacta en la experiencia del usuario. Por su parte React ofrece mucha optimización para diseñar aplicaciones de reacción de alto rendimiento, que para lograrlas se deben seguir algunas buenas prácticas.</p>
 
 <h1 id="reactfragment"><a href="#header-1"></a>React.Fragment</h1>
 
@@ -28,19 +28,13 @@
 <span class="nt">&lt;/&gt;</span>
 </code></pre></div></div>
 
-<h1 id="usar-production-en-el-mode-de-webpack"><a href="#header-1"></a>Usar <em>production</em> en el <em>mode</em> de <em>webpack</em></h1>
+<h1 id="usar-la-construcción-de-producción"><a href="#header-1"></a>Usar la Construcción de Producción</h1>
 
-<p>En caso de usar <em>webpack</em> como empaquetador de módulos (<em>bundler</em>) debería configurar la opción <em>mode</em> como <em>production</em> para el archivo de configuración de producción. Esto hará que <em>webpack</em> ejecute optimizaciones durante el empaquetado de la aplicación.</p>
+<p>Cuando se desarrolla una aplicación con React, se presentan advertencias y mensajes de errores muy útiles. Estos hacen la identificación de bugs y problemas durante el desarrollo muy fácil. Pero también cuestan parte del desempeño.</p>
 
-<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
-<span class="c1">// webpack.production.config.js</span>
-<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="p">{</span>
-  <span class="na">mode</span><span class="p">:</span> <span class="dl">'</span><span class="s1">production</span><span class="dl">'</span>
-<span class="p">};</span>
+<p>Si observas el código fuente de React, verás muchas marcas de <code class="language-plaintext highlighter-rouge">if (process.env.NODE_ENV != 'production')</code>. Estos trozos de código que React está ejecutando en tu ambiente de desarrollo no es algo que el usuario necesite. Para ambientes de producción, todo este código innecesario se puede descartar.</p>
 
-<span class="c1">//o se puede pasar como argumento en el CLI</span>
-<span class="nx">webpack</span> <span class="o">--</span><span class="nx">mode</span><span class="o">=</span><span class="nx">production</span>
-</code></pre></div></div>
+<p>Si impulsaste tu proyecto usando create-react-app, entonces puedes ejecutar npm run build para producir la construcción de producción sin este código extra. Si estás usando Webpack directamente, puedes ejecutar <code class="language-plaintext highlighter-rouge">webpack -p</code> (el cual es el equivalente de <code class="language-plaintext highlighter-rouge">webpack --optimize-minimize --define process.env.NODE_ENV="'production'"</code>).</p>
 
 <h1 id="implemente-el-método-shouldcomponentupdate"><a href="#header-1"></a>Implemente el método shouldComponentUpdate()</h1>
 
@@ -303,61 +297,161 @@
 
 <h3 id="estilos-css"><a href="#header-3"></a>Estilos Css</h3>
 
+<p>El navegador a menudo invierte mucho tiempo en la creación de <em>scripts</em> y la renderización; cuando implica atributos de estilo en línea en el código.</p>
+
 <p>Al usar ExtractTextWebpackPlugin, puedes extraer todo código CSS a un archivo CSS separado. También se obtiene en general los mismos beneficios que el nivel anterior.</p>
 
-<h1 id="use-functionalstateless-components"><a href="#header-1"></a>Use Functional/Stateless Components</h1>
+<h1 id="usar-componentes-functionalesstateless"><a href="#header-1"></a>Usar Componentes Functionales/<em>Stateless</em></h1>
 
-<p>The functional component prevents the construction of the class instance. It reduces the overall bundle size better than classes.</p>
+<p>El componente funcional evita la construcción de la instancia de clase. Reduce el tamaño general del paquete mejor que las clases.</p>
 
-<h1 id="binding-the-functions-in-early"><a href="#header-1"></a>Binding the Functions in Early</h1>
+<h1 id="virtualizar-listas-largas"><a href="#header-1"></a>Virtualizar listas largas</h1>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Bind the functions with elements in the render function will cause the performance issue. Because render() function to create a new function on every render.
-If the arrow function is used inside the render() function, then each time browser executes an arrow function ("=&gt;") statement and it create a new function object. This can be an expensive operation depends on the situation.
-If you are using the arrow function as props then it will break the performance optimizations such as shouldComponentUpdate and PureComponent.
+<p>Si su aplicación renderiza largas listas de datos (cientos o miles de filas), recomendamos que uses una técnica conocida como “windowing”. Esta técnica solo renderiza un pequeño subconjunto de tus filas en un momento dado, y puede reducir dramáticamente el tiempo que demora en re-renderizar los componentes, así como el numero de nodos creados en el DOM.</p>
+
+<p><a href="https://react-window.vercel.app/#/examples/list/fixed-size">react-window</a> y <a href="https://bvaughn.github.io/react-virtualized/#/components/List">react-virtualized</a> son bibliotecas de windowing populares. Estas proveen varios componentes reusables para mostrar listas, grillas y datos tabulares.</p>
+
+<h1 id="throttling-y-debouncing"><a href="#header-1"></a><em>Throttling</em> y <em>Debouncing</em></h1>
+
+<p><em>Throttling</em> y <em>Debouncing</em> son conceptos de optimización importantes para evitar hacer múltiples llamadas a APIs.</p>
+
+<h2 id="throttling"><a href="#header-2"></a>Throttling</h2>
+
+<p><em>Throttling</em> significa ejecutar la función a intervalos regulares, lo que significa que una vez que se ejecuta la función, comenzará de nuevo solo después de que haya transcurrido un período de tiempo específico.</p>
+
+<h3 id="implementar-con-lodash"><a href="#header-3"></a>Implementar con <em>lodash</em></h3>
+
+<p>Primero instalar lodash:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">npm</span> <span class="nx">i</span> <span class="nx">lodash</span>
 </code></pre></div></div>
 
-<h1 id="virtualizing-the-long-lists"><a href="#header-1"></a>Virtualizing the long lists</h1>
+<p>La implementación de <em>throttling</em> para un componente que se encarga de autocompletar:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>If you want to render a large list of data, then just render the smaller portion of the list at a time (limited to viewport of the component) and render the remaining data whenever scrolled. This is called "windowing".
-It will reduce the re-rendering time and avoid the number of DOM nodes to be created. 
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// ...</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">throttle</span> <span class="p">}</span> <span class="k">from</span> <span class="nx">lodash</span><span class="p">;</span><span class="kd">class</span> <span class="nx">autocomp</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
+    <span class="kd">constructor</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">super</span><span class="p">(</span><span class="nx">props</span><span class="p">);</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">state</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="na">results</span><span class="p">:</span> <span class="p">[]</span>
+        <span class="p">}</span>
+       <span class="k">this</span><span class="p">.</span><span class="nx">handleInputThrottled</span> <span class="o">=</span> <span class="nx">throttle</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">handleInput</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="p">}</span>    <span class="nx">handleInput</span> <span class="o">=</span> <span class="nx">evt</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="kd">const</span> <span class="nx">value</span> <span class="o">=</span> <span class="nx">evt</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">value</span>
+        <span class="kd">const</span> <span class="nx">filteredRes</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">filter</span><span class="p">((</span><span class="nx">item</span><span class="p">)</span><span class="o">=&gt;</span> <span class="p">{</span>
+            <span class="c1">// algoritmo para buscar a través del array `data`</span>
+        <span class="p">})</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">setState</span><span class="p">({</span> <span class="na">results</span><span class="p">:</span> <span class="nx">filteredRes</span> <span class="p">})</span>
+    <span class="p">}</span>    <span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
+        <span class="kd">let</span> <span class="p">{</span> <span class="nx">results</span> <span class="p">}</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="dl">'</span><span class="s1">autocomp_wrapper</span><span class="dl">'</span><span class="o">&gt;</span>
+                <span class="o">&lt;</span><span class="nx">input</span> <span class="nx">placeholder</span><span class="o">=</span><span class="dl">"</span><span class="s2">Enter your search..</span><span class="dl">"</span> <span class="nx">onChange</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">handleInputThrottled</span><span class="p">}</span> <span class="sr">/</span><span class="err">&gt;
+</span>                <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
+                    <span class="p">{</span><span class="nx">results</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">result</span><span class="o">=&gt;</span><span class="p">{</span><span class="nx">result</span><span class="p">})}</span>
+                <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>            <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>        <span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
 </code></pre></div></div>
 
-<p>https://reactjs.org/docs/optimizing-performance.html</p>
+<p>La función <em>throttle</em> se le pasa una función que quiere ser <em>throttled</em> y la cantidad de tiempo que debe ser <em>throttled</em>, esto devuelve una función que está <em>throttled</em>. En nuestro caso, el método handleInput se pasa a la función <em>throttle</em> y queremos que se acelere a 100 ms.</p>
 
-<h1 id="throttling-and-debouncing"><a href="#header-1"></a>Throttling and Debouncing</h1>
+<p>Ahora, si escribimos fidudusola a una velocidad normal de 1 letra por 200ms. En nuestra composición <em>throttled</em>, se necesitarían 10 * 200ms = (2000ms) 2s para escribir fidudusola, donde el método handleInput se llamaría 2 (2000ms / 100ms = 2) veces en lugar de 10 veces si nuestro componente de autocomp no se le hubiera aplicado <em>throttled</em>.</p>
 
-<p>Throttling and Debouncing are important optimization concepts to avoid multiple API calls.</p>
+<h2 id="debouncing"><a href="#header-2"></a>Debouncing</h2>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Throttling
-Throttling means executing the function at regular intervals, which means once the function is executed, it will start again only after a specified amount of time is over.
- 
-Debouncing
-Debouncing means the function will execute when a user hasn't carried out an event in a specified amount of time.
+<p><em>Debouncing</em> significa que la función se ejecutará cuando un usuario no haya realizado un evento en un período de tiempo específico. Ignora todas las llamadas a una función y espera hasta que la función deje de llamarse durante un período de tiempo específico.</p>
+
+<h3 id="implementar-con-lodash-1"><a href="#header-3"></a>Implementar con <em>lodash</em></h3>
+
+<p>Primero instalar lodash:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">npm</span> <span class="nx">i</span> <span class="nx">lodash</span>
 </code></pre></div></div>
 
-<h1 id="the-power-of-not-mutating-data"><a href="#header-1"></a>The Power Of Not Mutating Data</h1>
+<p>La implementación de <em>throttling</em> para un componente que se encarga de autocompletar:</p>
 
-<p>https://reactjs.org/docs/optimizing-performance.html</p>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// ...</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">debounce</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">lodash</span><span class="dl">'</span><span class="p">;</span><span class="kd">class</span> <span class="nx">autocomp</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
+    <span class="kd">constructor</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">super</span><span class="p">(</span><span class="nx">props</span><span class="p">);</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">state</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="na">results</span><span class="p">:</span> <span class="p">[]</span>
+        <span class="p">}</span>
+       <span class="k">this</span><span class="p">.</span><span class="nx">handleInputThrottled</span> <span class="o">=</span> <span class="nx">debounce</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">handleInput</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="p">}</span>    <span class="nx">handleInput</span> <span class="o">=</span> <span class="nx">evt</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="kd">const</span> <span class="nx">value</span> <span class="o">=</span> <span class="nx">evt</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">value</span>
+        <span class="kd">const</span> <span class="nx">filteredRes</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">filter</span><span class="p">((</span><span class="nx">item</span><span class="p">)</span><span class="o">=&gt;</span> <span class="p">{</span>
+             <span class="c1">// algoritmo para buscar a través del array `data`</span>
+        <span class="p">})</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">setState</span><span class="p">({</span> <span class="na">results</span><span class="p">:</span> <span class="nx">filteredRes</span> <span class="p">})</span>
+    <span class="p">}</span>    <span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
+        <span class="kd">let</span> <span class="p">{</span> <span class="nx">results</span> <span class="p">}</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="dl">'</span><span class="s1">autocomp_wrapper</span><span class="dl">'</span><span class="o">&gt;</span>
+                <span class="o">&lt;</span><span class="nx">input</span> <span class="nx">placeholder</span><span class="o">=</span><span class="dl">"</span><span class="s2">Enter your search..</span><span class="dl">"</span> <span class="nx">onChange</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">handleInputThrottled</span><span class="p">}</span> <span class="sr">/</span><span class="err">&gt;
+</span>                <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
+                    <span class="p">{</span><span class="nx">results</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">result</span><span class="o">=&gt;</span><span class="p">{</span><span class="nx">result</span><span class="p">})}</span>
+                <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>            <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>        <span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
 
-<h1 id="avoid-implying-inline-style-attribute"><a href="#header-1"></a>Avoid Implying Inline Style Attribute</h1>
+<h1 id="activar-gzip-en-tu-servidor-web"><a href="#header-1"></a>Activar Gzip en tu Servidor Web</h1>
 
-<h1 id="dependency-optimization"><a href="#header-1"></a>Dependency Optimization</h1>
+<p>El grupo de archivos JS de la aplicación React son, comúnmente, muy grandes así que para hacer que la página web cargue más rápido, podemos activar Gzip en el servidor web (Apache, Nginx, etc.)</p>
 
-<h1 id="reactjs-developer-can-use-multiple-chunk-files"><a href="#header-1"></a>ReactJS developer can use multiple Chunk Files</h1>
+<p>Todos los buscadores modernos apoyan y negocian automáticamente la compresión de Gzip para las peticiones HTTP. Activar la compresión Gzip puede reducir el tamaño de la respuesta transferida en un 90%, lo cual puede reducir la cantidad de tiempo para descargar un recurso, reducir el uso de data para el cliente y mejorar el tiempo para la renderización de tus páginas.</p>
 
-<h1 id="bundle-analitic"><a href="#header-1"></a>Bundle Analitic</h1>
+<p>Verifica la documentación para tu servidor web para ver cómo activar la compresión:</p>
 
-<p>medir con react-addons-perf p</p>
+<ul>
+  <li>Apache: Usa <a href="http://httpd.apache.org/docs/current/mod/mod_deflate.html">mod_deflate</a></li>
+  <li>Nginx: Usa <a href="https://nginx.org/en/docs/http/ngx_http_gzip_module.html">ngx_http_gzip_module</a></li>
+</ul>
 
-<p>https://medium.com/swlh/9-performance-optimization-strategies-for-reactjs-development-36f6d03a0912</p>
+<h1 id="herramientas-útiles"><a href="#header-1"></a>Herramientas Útiles</h1>
 
-<p>https://www.toptal.com/react/componentes-react-eficientes-una-guia-para-optimizar-el-desempeno-de-react</p>
+<h2 id="react-addons-perf"><a href="#header-2"></a>react-addons-perf</h2>
 
-<p>https://latteandcode.medium.com/react-hooks-para-optimizar-el-rendimiento-7e4e5ec4894</p>
+<p>react-addons-perf te permite obtener un resumen del desempeño general de tu aplicación.</p>
 
-<p>https://ichi.pro/es/22-tecnicas-de-optimizacion-del-rendimiento-de-react-230208723231561</p>
+<p>El uso es el siguiente:</p>
 
-<p>https://ichi.pro/es/tecnicas-de-optimizacion-del-rendimiento-en-react-123769334290435</p>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">Import</span> <span class="nx">Perf</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react-addons-perf</span><span class="dl">'</span>
+<span class="nx">Perf</span><span class="p">.</span><span class="nx">start</span><span class="p">();</span>
+<span class="c1">// use the app</span>
+<span class="nx">Perf</span><span class="p">.</span><span class="nx">stop</span><span class="p">();</span>
+<span class="nx">Perf</span><span class="p">.</span><span class="nx">printWasted</span><span class="p">();</span>
+</code></pre></div></div>
 
-<p>https://ourcodeworld.co/articulos/leer/934/top-9-las-mejores-tecnicas-de-optimizacion-para-aplicaciones-react</p>
+<p>Esto imprimirá una tabla con la cantidad de componentes de tiempo perdido al renderizar.</p>
+
+<p>La librería proporciona otras funciones que te permiten imprimir diferentes aspectos del tiempo perdido por separado (ej., al usar las funciones printInclusive() o printExclusive()), o hasta imprimir las operaciones de manipulación DOM (usando la función printOperations()).</p>
+
+<p>Para más detalle ver <a href="https://reactjs.org/docs/perf.html">aquí</a></p>
+
+<h2 id="webpack-bundle-analyzer"><a href="#header-2"></a>Webpack Bundle Analyzer</h2>
+
+<p>Realmente no podemos hablar de <em>performance</em> a menos que haya algo que podamos medir. Para saber dónde mejorar, necesitamos tener algunas ideas. En el contexto del <em>code splitting</em>, debemos ser conscientes de qué tan grandes son nuestros paquetes y qué hay realmente en ellos.</p>
+
+<p><em>Webpack Bundle Analyzer</em> proporciona una representación visual de los paquetes de tu aplicación para que pueda ver qué va en cada uno.</p>
+
+<p>Para más detalle ver <a href="https://github.com/webpack-contrib/webpack-bundle-analyzer">aquí</a></p>
+
+<h1 id="fuentes"><a href="#header-1"></a>Fuentes</h1>
+
+<ul>
+  <li><a href="https://hackernoon.com/lessons-learned-code-splitting-with-webpack-and-react-f012a989113">Lessons Learned: Code Splitting with Webpack and React</a></li>
+  <li><a href="https://www.freecodecamp.org/news/learn-webpack-for-react-a36d4cac5060/">How to use Webpack with React: an in-depth tutorial</a></li>
+  <li><a href="https://es.reactjs.org/docs/optimizing-performance.html">Optimizando el Rendimiento</a></li>
+  <li><a href="https://www.c-sharpcorner.com/article/performance-optimization-techniques-for-react-applications/">Performance Optimization Techniques For React Applications</a></li>
+  <li><a href="https://blog.bitsrc.io/improve-your-react-app-performance-by-using-throttling-and-debouncing-101afbe9055">Improve Your React App Performance by Using Throttling and Debouncing</a></li>
+  <li><a href="https://medium.com/swlh/9-performance-optimization-strategies-for-reactjs-development-36f6d03a0912">9 Performance Optimization Strategies for ReactJS Development</a></li>
+  <li><a href="https://www.toptal.com/react/componentes-react-eficientes-una-guia-para-optimizar-el-desempeno-de-react">Componentes React Eficientes: Una Guía para Optimizar el Desempeño de React</a></li>
+</ul>
 :ET

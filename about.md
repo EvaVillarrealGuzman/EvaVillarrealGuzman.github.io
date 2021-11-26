@@ -3,7 +3,7 @@ layout: page
 title: About
 ---
 
-I'm Eva Villarreal Guzmán from Villa María, Argentina. I'm a passionate self-taught Full Stack Web Developer and a freelance software engineer with 5+ years of experience. I like to have a pro-active role at work, identifying ideas to improve the optimization and availability of the system.
+I'm Eva Villarreal Guzmán from Villa María, Argentina. I'm a passionate self-taught Full Stack Web Developer and a Freelance Software Engineer with 5+ years of experience. I like to have a pro-active role at work, identifying ideas to improve the optimization and availability of the system.
 
 Results driven, team player, enthusiast, self-taught and always giving my best.
     

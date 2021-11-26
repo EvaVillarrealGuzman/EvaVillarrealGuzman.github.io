@@ -13,7 +13,9 @@
     
       <item>
         <title>Técnicas de optimización para aplicaciones React</title>
-        <description>&lt;h1 id=&quot;reactfragment&quot;&gt;&lt;a href=&quot;#header-1&quot;&gt;&lt;/a&gt;React.Fragment&lt;/h1&gt;
+        <description>&lt;p&gt;La &lt;em&gt;performance&lt;/em&gt; es un factor importante en la calidad de una aplicación. Depende mucho de como codificamos y como está configurada la infraestructura. Es importante, ya que impacta en la experiencia del usuario. Por su parte React ofrece mucha optimización para diseñar aplicaciones de reacción de alto rendimiento, que para lograrlas se deben seguir algunas buenas prácticas.&lt;/p&gt;
+
+&lt;h1 id=&quot;reactfragment&quot;&gt;&lt;a href=&quot;#header-1&quot;&gt;&lt;/a&gt;React.Fragment&lt;/h1&gt;
 
 &lt;p&gt;Muchas veces pasa que queremos renderizar un conjunto de elementos dentro de un y se agrupan estos elementos dentro de un elemento padre “div”:&lt;/p&gt;
 
@@ -455,8 +457,6 @@
 &lt;p&gt;&lt;em&gt;Webpack Bundle Analyzer&lt;/em&gt; proporciona una representación visual de los paquetes de tu aplicación para que pueda ver qué va en cada uno.&lt;/p&gt;
 
 &lt;p&gt;Para más detalle ver &lt;a href=&quot;https://github.com/webpack-contrib/webpack-bundle-analyzer&quot;&gt;aquí&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;medir con react-addons-perf p&lt;/p&gt;
 
 &lt;h1 id=&quot;fuentes&quot;&gt;&lt;a href=&quot;#header-1&quot;&gt;&lt;/a&gt;Fuentes&lt;/h1&gt;
 
