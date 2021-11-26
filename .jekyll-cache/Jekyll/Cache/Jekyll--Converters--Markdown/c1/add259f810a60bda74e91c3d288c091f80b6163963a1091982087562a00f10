@@ -1,0 +1,253 @@
+I"�'<p>Performance is the main factor in the quality of an application. Performance depends on how we are coding and configure the infrastructure. Performance optimization is an important technique to consider, before delivering any application. Because it will impact the user experience. In this article, we are going to explore performance optimization techniques in React.</p>
+
+<h1 id="reactfragment"><a href="#header-1"></a>React.Fragment</h1>
+
+<p>Muchas veces pasa que queremos renderizar un conjunto de elementos dentro de un y se agrupan estos elementos dentro de un elemento padre “div”:</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;div&gt;</span>
+    <span class="nt">&lt;h1&gt;</span>Title<span class="nt">&lt;/h1&gt;</span>
+    <span class="nt">&lt;p&gt;</span>Content<span class="nt">&lt;/p&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<p>In this case, you are adding an extra node to the DOM. It is an unnecessary node because it is used to just wrap the group of elements. Think, if we are keeping on adding the unnecessary extra nodes in the application, then it will impact the performance. How to remove this in the best way?</p>
+
+<React.Fragment> is allowed us to group the elements without adding an extra node.
+
+```js
+<React.Fragment>
+    <h1>Title</h1>
+    <p>Content</p>
+</React.Fragment>
+```
+
+There is an alternate syntax for React.Fragment. You can also use the short syntax &lt;&gt;&lt;/&gt; for declaring a <React.Fragment>.
+
+```js
+&lt;&gt;
+    <h1>Title</h1>
+    <p>Content</p>
+&lt;/&gt;
+``` 
+
+# [](#header-1)Using Production Build in Webpack
+
+If "webpack" is a module bundler for your application, then you have to set the "mode" option as "production" in the webpack config file. It means "webpack" to use the built-in optimization during bundling the application.
+
+```js
+
+// webpack.production.config.js
+module.exports = {
+  mode: 'production'
+};
+
+//or pass it as a CLI argument
+webpack --mode=development
+``` 
+
+
+# [](#header-1)Use Lazy loading components
+
+Lazy loading is an important concept in modern web apps which allows us to load only the resources (scripts, images, etc.) we really needed.  Instead of loading the entire web page and rendering in the browser all at once, just render the critical component first, then render the remaining components later or when required.
+
+There are two features to implement lazy loading in React applications.
+
+    React.lazy() - React.lazy() is the function that allows implementing the dynamic import for regular components in React.
+    React.Suspense - React.suspense has a fallback property which takes the react element that wants to render while the component is being loaded using React.lazy.
+
+
+```js
+import React, { Suspense } from 'react';
+
+const LazyComponent = React.lazy(() =&gt; import('./LazyComponent'));
+
+function MyComponent() {
+  return (
+  <div>
+    &lt;Suspense fallback={<div>Loading....</div>}&gt;
+      <LazyComponent />
+    &lt;/Suspense&gt;
+  </div>
+ );
+}
+``` 
+
+# [](#header-1)Implement shouldComponentUpdate()
+
+
+In React class component, "shouldComponentUpdate()" life cycle method is invoked before rendering when new props are received or states are changed.
+By default "shouldComponentUpdate()" returns true which means every time the component will re-render if any props or states getting changed (even if current and previous values are the same).
+To avoid this re-rendering, we need to implement the shouldComponentUpdate() method and check the previous value with current values and decide whether the component needs to be re-rendered or not.
+
+
+```js
+import React from "react";
+
+export default class TestComponent extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      data: ""
+    }
+  }
+
+  handleClick = () =&gt; {
+    let value = document.getElementById("textvalue").value;
+    this.setState({ data: value })
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    if (nextState.data === this.state.data)
+      return false
+    return true
+  }
+
+  render() {
+    console.log("Rendering");
+    return (
+      <div>
+        <input id="textvalue" type="text" />
+        &lt;button onClick={this.handleClick}&gt;Click&lt;/button&gt;
+        {this.state.data}
+      </div>
+    )
+  }
+}
+``` 
+
+Consider, if the above code doesn't have the "shouldComponentUpdate()" method then, the component re-renders every time of button clicks (even the text box has the same value). 
+
+
+
+In the above code, "shouldComponentUpdate()" lifecycle method has implemented explicitly. In this method, the previous value is compared with the current value and if both are the same returns false (which means no re-rendering) otherwise returns true (re-render the component).
+
+https://reactjs.org/docs/optimizing-performance.html
+
+# [](#header-1)React.PureComponent
+
+Instead of implementing the "shouldComponentUpdate()" lifecycle method, we can use React.PureComponent.
+A React.PureComponent is exactly the same as React.Component that checks the props and state values(shallow comparison) and decides whether the component needs to re-render or not.
+No need to implement the "shouldComponentUpdate()" life cycle method explicitly. React.PureComponent optimizes the class components by reducing the number of unwanted renders.
+It performs a shallow comparison only when
+    props or states contain primitive data.
+    props and states have complex data, but know when to call forceUpdate() to update the component.
+
+The above "TestComponent" has been implemented using "React.PureComponent". Here component itself handled the "shouldComponentUpdate()" method for both shallow comparison and re-rendering.
+
+```js
+import React from "react";
+
+export default class TestComponent extends React.PureComponent {
+  constructor(props) {
+    super(props)
+    this.state = {
+      data: ""
+    }
+  }
+  handleClick = () =&gt; {
+    let value = document.getElementById("textvalue").value;
+    this.setState({ data: value })
+  }
+  render() {
+    console.log("Rendering");
+    return (
+      <div>
+        <input id="textvalue" type="text" />
+        &lt;button onClick={this.handleClick}&gt;Click&lt;/button&gt;
+        {this.state.data}
+      </div>
+    )
+  }
+}
+```
+
+# [](#header-1)Use Memoization
+
+Memoization is an optimization technique to increase the performance of the application by storing the results and returning the cached result when the same inputs occur again. 
+React.memo or useMemo is used to optimize the performance with the help of caching the components in React.
+React.memo is a higher-order component and it’s similar to React.PureComponent but for using functional components instead of class components.
+When functional component is rendered using React.Memo or useMemo then its result has saved in the memory and next time the component getting called with the same props then the cached result will return without any execution.
+
+
+```js
+import React, { Suspense } from 'react';
+
+const LazyComponent = React.lazy(() =&gt; import('./LazyComponent'));
+
+function MyComponent() {
+  return (
+  <div>
+    &lt;Suspense fallback={<div>Loading....</div>}&gt;
+      <LazyComponent />
+    &lt;/Suspense&gt;
+  </div>
+ );
+}
+``` 
+
+https://ichi.pro/es/optimizacion-de-las-aplicaciones-react-con-componentes-de-funcion-react-memo-usememo-lists-keys-76395047615674
+
+https://alihacks.com/react-detras-de-escena-y-tecnicas-de-optimizacion-usememo-usecallback-react-memo/
+
+https://platzi.com/clases/2118-react-hooks/34007-optimizacion-de-componentes-en-react-con-reactmemo/
+
+# [](#header-1)Use Functional/Stateless Components
+
+The functional component prevents the construction of the class instance. It reduces the overall bundle size better than classes.
+
+# [](#header-1)Binding the Functions in Early
+
+
+    Bind the functions with elements in the render function will cause the performance issue. Because render() function to create a new function on every render.
+    If the arrow function is used inside the render() function, then each time browser executes an arrow function ("=&gt;") statement and it create a new function object. This can be an expensive operation depends on the situation.
+    If you are using the arrow function as props then it will break the performance optimizations such as shouldComponentUpdate and PureComponent.
+
+# [](#header-1)Virtualizing the long lists
+
+
+    If you want to render a large list of data, then just render the smaller portion of the list at a time (limited to viewport of the component) and render the remaining data whenever scrolled. This is called "windowing".
+    It will reduce the re-rendering time and avoid the number of DOM nodes to be created. 
+
+https://reactjs.org/docs/optimizing-performance.html
+
+# [](#header-1)Throttling and Debouncing
+
+Throttling and Debouncing are important optimization concepts to avoid multiple API calls. 
+
+    Throttling
+    Throttling means executing the function at regular intervals, which means once the function is executed, it will start again only after a specified amount of time is over.
+     
+    Debouncing
+    Debouncing means the function will execute when a user hasn't carried out an event in a specified amount of time.
+
+
+
+# [](#header-1)The Power Of Not Mutating Data 
+
+https://reactjs.org/docs/optimizing-performance.html
+
+# [](#header-1)Avoid Implying Inline Style Attribute
+
+
+# [](#header-1)Dependency Optimization
+
+
+# [](#header-1)ReactJS developer can use multiple Chunk Files
+
+
+# [](#header-1)Bundle Analitic 
+
+
+https://medium.com/swlh/9-performance-optimization-strategies-for-reactjs-development-36f6d03a0912
+
+https://www.toptal.com/react/componentes-react-eficientes-una-guia-para-optimizar-el-desempeno-de-react
+
+https://latteandcode.medium.com/react-hooks-para-optimizar-el-rendimiento-7e4e5ec4894
+
+https://ichi.pro/es/22-tecnicas-de-optimizacion-del-rendimiento-de-react-230208723231561
+
+https://ichi.pro/es/tecnicas-de-optimizacion-del-rendimiento-en-react-123769334290435
+
+https://ourcodeworld.co/articulos/leer/934/top-9-las-mejores-tecnicas-de-optimizacion-para-aplicaciones-react
+</React.Fragment></React.Fragment>
+:ET

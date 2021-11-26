@@ -1,0 +1,428 @@
+I"?�<p>Performance is the main factor in the quality of an application. Performance depends on how we are coding and configure the infrastructure. Performance optimization is an important technique to consider, before delivering any application. Because it will impact the user experience. In this article, we are going to explore performance optimization techniques in React.</p>
+
+<h1 id="reactfragment"><a href="#header-1"></a>React.Fragment</h1>
+
+<p>Muchas veces pasa que queremos renderizar un conjunto de elementos dentro de un y se agrupan estos elementos dentro de un elemento padre “div”:</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;div&gt;</span>
+    <span class="nt">&lt;h1&gt;</span>Title<span class="nt">&lt;/h1&gt;</span>
+    <span class="nt">&lt;p&gt;</span>Content<span class="nt">&lt;/p&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<p>Esto agrega un nodo extra al DOM, el cual es innecesario ya que solo tiene la función de agrupar elementos. Esto puede afectar a la performance.</p>
+
+<p>Para agrupar elementos existe <React.Fragment>, el cuál no agrega ningún nodo extra:</React.Fragment></p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;React.Fragment&gt;</span>
+    <span class="nt">&lt;h1&gt;</span>Title<span class="nt">&lt;/h1&gt;</span>
+    <span class="nt">&lt;p&gt;</span>Content<span class="nt">&lt;/p&gt;</span>
+<span class="nt">&lt;/React.Fragment&gt;</span>
+</code></pre></div></div>
+
+<p>React.Fragment tiene la sintaxis corta que es  &lt;&gt;&lt;/&gt;. Por lo que el código de arriba también se puede escribir:</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;&gt;</span>
+    <span class="nt">&lt;h1&gt;</span>Title<span class="nt">&lt;/h1&gt;</span>
+    <span class="nt">&lt;p&gt;</span>Content<span class="nt">&lt;/p&gt;</span>
+<span class="nt">&lt;/&gt;</span>
+</code></pre></div></div>
+
+<h1 id="usar-production-en-el-mode-de-webpack"><a href="#header-1"></a>Usar <em>production</em> en el <em>mode</em> de <em>webpack</em></h1>
+
+<p>En caso de usar <em>webpack</em> como empaquetador de módulos (<em>bundler</em>) debería configurar la opción <em>mode</em> como <em>production</em> para el archivo de configuración de producción. Esto hará que <em>webpack</em> ejecute optimizaciones durante el empaquetado de la aplicación.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="c1">// webpack.production.config.js</span>
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">mode</span><span class="p">:</span> <span class="dl">'</span><span class="s1">production</span><span class="dl">'</span>
+<span class="p">};</span>
+
+<span class="c1">//o se puede pasar como argumento en el CLI</span>
+<span class="nx">webpack</span> <span class="o">--</span><span class="nx">mode</span><span class="o">=</span><span class="nx">production</span>
+</code></pre></div></div>
+
+<h1 id="implemente-el-método-shouldcomponentupdate"><a href="#header-1"></a>Implemente el método shouldComponentUpdate()</h1>
+
+<p>Cuando una propiedad o estado de un componente cambia, React decide si es necesario actualizar el DOM comparando el elemento recién retornado con el previamente renderizado. Si no son iguales, React actualizará el DOM.</p>
+
+<p>Aunque React solo actualiza los nodos DOM modificados, el re-renderizado aun lleva algo de tiempo. En muchos casos no es un problema, pero si la desaceleración es notable puedes acelerar el proceso anulando la función del ciclo de vida shouldComponentUpdate, el cual se ejecuta antes de que el proceso de re-renderizado comience, es decir, cuando nuevos <em>props</em> son recibidos o algún estado cambia. La implementación por defecto de esta función retorna true, permitiendo a React hacer la actualización, incluso si ningún <em>props</em> o estado ha cambiado (los valores actuales y previos son los mismos).</p>
+
+<p>Si sabes que en algunas situaciones tu componente no necesita actualizarse, puedes retornar false desde shouldComponentUpdate para omitir todo el proceso de renderizacion, incluida la invocación de render() en este componente y debajo de él.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nx">React</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">react</span><span class="dl">"</span><span class="p">;</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="kd">class</span> <span class="nx">TestComponent</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
+  <span class="kd">constructor</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">super</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">state</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="na">data</span><span class="p">:</span> <span class="dl">""</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="nx">handleClick</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="kd">let</span> <span class="nx">value</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="dl">"</span><span class="s2">textvalue</span><span class="dl">"</span><span class="p">).</span><span class="nx">value</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">setState</span><span class="p">({</span> <span class="na">data</span><span class="p">:</span> <span class="nx">value</span> <span class="p">})</span>
+  <span class="p">}</span>
+
+  <span class="nx">shouldComponentUpdate</span><span class="p">(</span><span class="nx">nextProps</span><span class="p">,</span> <span class="nx">nextState</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">nextState</span><span class="p">.</span><span class="nx">data</span> <span class="o">===</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">data</span><span class="p">)</span>
+      <span class="k">return</span> <span class="kc">false</span>
+    <span class="k">return</span> <span class="kc">true</span>
+  <span class="p">}</span>
+
+  <span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Rendering</span><span class="dl">"</span><span class="p">);</span>
+    <span class="k">return</span> <span class="p">(</span>
+      <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="nx">input</span> <span class="nx">id</span><span class="o">=</span><span class="dl">"</span><span class="s2">textvalue</span><span class="dl">"</span> <span class="nx">type</span><span class="o">=</span><span class="dl">"</span><span class="s2">text</span><span class="dl">"</span> <span class="o">/&gt;</span>
+        <span class="o">&lt;</span><span class="nx">button</span> <span class="nx">onClick</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">handleClick</span><span class="p">}</span><span class="o">&gt;</span><span class="nx">Click</span><span class="o">&lt;</span><span class="sr">/button</span><span class="err">&gt;
+</span>        <span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">data</span><span class="p">}</span>
+      <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>    <span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Si el código de arriba no tuviera el método shouldComponentUpdate implementado, el componente se vuelve a renderizar cada vez que se hace click en un botón (incluso si el <em>input</em> de texto tiene el mismo valor).</p>
+
+<h1 id="reactpurecomponent"><a href="#header-1"></a>React.PureComponent</h1>
+
+<p>En lugar de implementar shouldComponentUpdate, podemos usar React.PureComponent.</p>
+
+<p>Un React.PureComponent es lo mismo que un React.Component que implementa una función shouldComponentUpdate() con una comparación superficial. Es decir, chequea los <em>props</em> y los valores de los estados superficiales y decide si el componente necesita renderizar o no. De esta manera React.PureComponent optimiza los componentes de la clase reduciendo el número de renderizados no deseados.</p>
+
+<p>Debido a que sólo hace una comparación superficial, no puede usarlo si las propiedades o el estado han sido mutados de una manera que una comparación superficial pasaría por alto. Esto puede ser un problema con estructuras de datos más complejas.</p>
+
+<p>Por ejemplo, en el siguiente código el problema es que PureComponent hará una comparación simple entre los valores antiguos y nuevos de this.props.words. Dado que este código muta la matriz wordsen el método handleClick de WordAdder, los valores antiguos y nuevos de this.props.words se compararán como iguales, aunque las palabras actuales de la matriz hayan cambiado. La ListOfWords no se actualizará a pesar de que tiene nuevas palabras que se deben renderizar.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nx">CounterButton</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">PureComponent</span> <span class="p">{</span>
+  <span class="kd">constructor</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">super</span><span class="p">(</span><span class="nx">props</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">state</span> <span class="o">=</span> <span class="p">{</span><span class="na">count</span><span class="p">:</span> <span class="mi">1</span><span class="p">};</span>
+  <span class="p">}</span>
+
+  <span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span>
+      <span class="o">&lt;</span><span class="nx">button</span>
+        <span class="nx">color</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">color</span><span class="p">}</span>
+        <span class="nx">onClick</span><span class="o">=</span><span class="p">{()</span> <span class="o">=&gt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">setState</span><span class="p">(</span><span class="nx">state</span> <span class="o">=&gt;</span> <span class="p">({</span><span class="na">count</span><span class="p">:</span> <span class="nx">state</span><span class="p">.</span><span class="nx">count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">}))}</span><span class="o">&gt;</span>
+        <span class="nx">Count</span><span class="p">:</span> <span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">count</span><span class="p">}</span>
+      <span class="o">&lt;</span><span class="sr">/button</span><span class="err">&gt;
+</span>    <span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Por lo tanto, React.PureComponent es útil solo cuando:</p>
+<ul>
+  <li><em>props</em> y estados contienen datos primitivos</li>
+  <li><em>props</em> y estados tienen datos complejos pero saben cuándo llamar a forceUpdate() para actualizar el componente</li>
+</ul>
+
+<p>La implementación de shouldComponentUpdate en el ejemplo anterior de TestComponent se podría implementar como React.PureComponent de la siguiente manera:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nx">React</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">react</span><span class="dl">"</span><span class="p">;</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="kd">class</span> <span class="nx">TestComponent</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">PureComponent</span> <span class="p">{</span>
+  <span class="kd">constructor</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">super</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">state</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="na">data</span><span class="p">:</span> <span class="dl">""</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="nx">handleClick</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="kd">let</span> <span class="nx">value</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="dl">"</span><span class="s2">textvalue</span><span class="dl">"</span><span class="p">).</span><span class="nx">value</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">setState</span><span class="p">({</span> <span class="na">data</span><span class="p">:</span> <span class="nx">value</span> <span class="p">})</span>
+  <span class="p">}</span>
+  <span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Rendering</span><span class="dl">"</span><span class="p">);</span>
+    <span class="k">return</span> <span class="p">(</span>
+      <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="nx">input</span> <span class="nx">id</span><span class="o">=</span><span class="dl">"</span><span class="s2">textvalue</span><span class="dl">"</span> <span class="nx">type</span><span class="o">=</span><span class="dl">"</span><span class="s2">text</span><span class="dl">"</span> <span class="o">/&gt;</span>
+        <span class="o">&lt;</span><span class="nx">button</span> <span class="nx">onClick</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">handleClick</span><span class="p">}</span><span class="o">&gt;</span><span class="nx">Click</span><span class="o">&lt;</span><span class="sr">/button</span><span class="err">&gt;
+</span>        <span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">data</span><span class="p">}</span>
+      <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>    <span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h1 id="usar-memorización"><a href="#header-1"></a>Usar memorización</h1>
+
+<p>Memorización es una técnica de optimización para incrementar la performance de la aplicación guardando los resultados y devolviendo el resultado en caché cuando se repiten las mismas entradas.</p>
+
+<p>React provee React.memo y useMemo para memorización, los cuales guardan en caché componentes.</p>
+
+<p>React.memo es un componente de alto nivel para usar en componentes funcionales. Cuando el componente funcional se procesa usando React.Memo o useMemo, entonces su resultado se ha guardado en la memoria y la próxima vez que se llame al componente con los mismos <em>props</em>, el resultado en caché regresará sin ninguna ejecución.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">UserDisplay</span> <span class="o">=</span> <span class="p">(</span><span class="nx">userDetails</span><span class="p">)</span> <span class="o">=&gt;</span><span class="p">{</span>
+    <span class="kd">const</span> <span class="p">{</span><span class="nx">name</span><span class="p">,</span> <span class="nx">age</span><span class="p">,</span> <span class="nx">address</span><span class="p">}</span> <span class="o">=</span> <span class="nx">userDetails</span><span class="p">;</span>
+
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="o">&lt;&gt;</span>
+            <span class="o">&lt;</span><span class="nx">h4</span><span class="o">&gt;</span><span class="p">{</span><span class="nx">name</span><span class="p">}</span><span class="o">&lt;</span><span class="sr">/h4</span><span class="err">&gt;
+</span>            <span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="p">{</span><span class="nx">age</span><span class="p">}</span> <span class="p">,</span> <span class="p">{</span><span class="nx">address</span><span class="p">}</span><span class="o">&lt;</span><span class="sr">/p</span><span class="err">&gt;
+</span>        <span class="o">&lt;</span><span class="sr">/</span><span class="err">&gt;
+</span>    <span class="p">)</span>
+<span class="p">}</span>
+<span class="k">export</span> <span class="k">default</span> <span class="nx">React</span><span class="p">.</span><span class="nx">memo</span><span class="p">(</span><span class="nx">UserDisplay</span><span class="p">);</span>
+<span class="c1">// First - UserDisplay component gets called and executed, and then rendered.</span>
+<span class="o">&lt;</span><span class="nx">UserDisplay</span>
+  <span class="nx">name</span><span class="o">=</span><span class="dl">"</span><span class="s2">Test</span><span class="dl">"</span>
+  <span class="nx">age</span><span class="o">=</span><span class="dl">"</span><span class="s2">30</span><span class="dl">"</span>
+  <span class="nx">address</span><span class="o">=</span><span class="dl">"</span><span class="s2">Test address</span><span class="dl">"</span>
+<span class="o">/&gt;</span>
+<span class="c1">// Second - The cached result will render without any execution.</span>
+<span class="o">&lt;</span><span class="nx">UserDisplay</span>
+  <span class="nx">name</span><span class="o">=</span><span class="dl">"</span><span class="s2">Test</span><span class="dl">"</span>
+  <span class="nx">age</span><span class="o">=</span><span class="dl">"</span><span class="s2">30</span><span class="dl">"</span>
+  <span class="nx">address</span><span class="o">=</span><span class="dl">"</span><span class="s2">Test address</span><span class="dl">"</span>
+<span class="o">/&gt;</span>
+<span class="c1">// Third - UserDisplay component gets called and executed, and then rendered.(because here value of the name value different)</span>
+<span class="o">&lt;</span><span class="nx">UserDisplay</span>
+  <span class="nx">name</span><span class="o">=</span><span class="dl">"</span><span class="s2">New Test</span><span class="dl">"</span>
+  <span class="nx">age</span><span class="o">=</span><span class="dl">"</span><span class="s2">30</span><span class="dl">"</span>
+  <span class="nx">address</span><span class="o">=</span><span class="dl">"</span><span class="s2">Test address</span><span class="dl">"</span>
+<span class="o">/&gt;</span>
+</code></pre></div></div>
+
+<h1 id="code-splitting"><a href="#header-1"></a><em>Code Splitting</em></h1>
+
+<p>Primero es importante entender el concepto de <em>Lazy loading</em>, el cuál indica que los recursos (imaǵenes, <em>scripts</em>, etc.) deberían ser cargados cuando realmente se necesitan. En lugar de cargar una página web entera y renderizarla en el navegador todo de una vez, solo renderiza los componente críticos primero y luego aquellos componentes restantes o cuando se vayan requiriendo. De esta manera no perdemos tiempo ni memoria en procesos que no beneficiarán la experiencia del usuario del producto.</p>
+
+<p><em>Code Splitting</em> es una técnica en la cual podemos tratar costos de cargar Javascript y cumplir con el concepto de <em>lazy loading</em> al mismo tiempo.  En lugar de entregar tu aplicación en un único archivo, se divide en varios archivos. La página en principio solo renderiza los componente críticos primero y luego aquellos componentes restantes o cuando se vayan requiriendo.</p>
+
+<h2 id="react"><a href="#header-2"></a>React</h2>
+
+<p>React provee dos elementos para implementarlo:</p>
+
+<ul>
+  <li>React.lazy() - React.lazy() es la función que permite implementar la importación dinámica para componentes regulares en React.</li>
+  <li>React.Suspense - React.suspense tiene una propiedad <em>fallback</em> que toma el elemento react que quiere renderizar mientras el componente se carga usando React.lazy.</li>
+</ul>
+
+<h2 id="webpack"><a href="#header-2"></a>Webpack</h2>
+
+<p>La forma en que le indicamos a <em>webpack</em> que queremos dividir en un código en paquetes separados es mediante <em>dynamic imports</em>. La palabra clave <em>import</em> se puede usar como una función que toma la ruta del módulo que queremos dividir en un paquete separado y devuelve una <em>promise</em>:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span><span class="p">(</span><span class="dl">'</span><span class="s1">/module/name/here</span><span class="dl">'</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span><span class="nx">module</span> <span class="o">=&gt;</span> <span class="p">...)</span>
+</code></pre></div></div>
+
+<p>Cuando el módulo es cargado y la promesa resulta, podemos acceder a lo que exporta. Cuando usamos React.lazy internamente lo que esta pasando es <em>dynamic import</em>.</p>
+
+<h2 id="niveles"><a href="#header-2"></a>Niveles</h2>
+
+<p>Existen diferentes paradigmas de <em>code splitting</em>. Algunos de los más comunes son:</p>
+
+<h3 id="por-rutas"><a href="#header-3"></a>Por rutas</h3>
+
+<p>Es uno de los enfoques más comunes. Esto nos dejará con un paquete separado para cada ruta de nivel superior. Por ejemplo:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nx">React</span><span class="p">,</span> <span class="p">{</span><span class="nx">Suspense</span><span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react</span><span class="dl">'</span>
+<span class="k">import</span> <span class="p">{</span><span class="nx">Switch</span><span class="p">,</span> <span class="nx">BrowserRouter</span> <span class="k">as</span> <span class="nx">Router</span><span class="p">,</span> <span class="nx">Route</span><span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react-router-dom</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">importedComponent</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react-imported-component</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="k">import</span> <span class="nx">Home</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./Home</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">Loading</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./Loading</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="kd">const</span> <span class="nx">AsyncDynamicPAge</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">lazy</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="k">import</span><span class="p">(</span><span class="cm">/* webpackChunkName:'DynamicPage' */</span> <span class="dl">'</span><span class="s1">./DynamicPage</span><span class="dl">'</span><span class="p">));</span>
+<span class="kd">const</span> <span class="nx">AsyncNoMatch</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">lazy</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="k">import</span><span class="p">(</span><span class="cm">/* webpackChunkName:'NoMatch' */</span> <span class="dl">'</span><span class="s1">./NoMatch</span><span class="dl">'</span><span class="p">));</span>
+
+<span class="kd">const</span> <span class="nx">App</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="o">&lt;</span><span class="nx">Router</span><span class="o">&gt;</span>
+            <span class="o">&lt;</span><span class="nx">Suspense</span> <span class="nx">fallback</span><span class="o">=</span><span class="p">{</span><span class="nx">Loading</span><span class="p">}</span><span class="o">&gt;</span>
+                <span class="o">&lt;</span><span class="nx">Switch</span><span class="o">&gt;</span>
+                    <span class="o">&lt;</span><span class="nx">Route</span> <span class="nx">exact</span> <span class="nx">path</span><span class="o">=</span><span class="dl">"</span><span class="s2">/</span><span class="dl">"</span> <span class="nx">component</span><span class="o">=</span><span class="p">{</span><span class="nx">Home</span><span class="p">}</span><span class="sr">/</span><span class="err">&gt;
+</span>                    <span class="o">&lt;</span><span class="nx">Route</span> <span class="nx">exact</span> <span class="nx">path</span><span class="o">=</span><span class="dl">"</span><span class="s2">/dynamic</span><span class="dl">"</span> <span class="nx">component</span><span class="o">=</span><span class="p">{</span><span class="nx">AsyncDynamicPAge</span><span class="p">}</span><span class="sr">/</span><span class="err">&gt;
+</span>                    <span class="o">&lt;</span><span class="nx">Route</span> <span class="nx">component</span><span class="o">=</span><span class="p">{</span><span class="nx">AsyncNoMatch</span><span class="p">}</span><span class="sr">/</span><span class="err">&gt;
+</span>                <span class="o">&lt;</span><span class="sr">/Switch</span><span class="err">&gt;
+</span>            <span class="o">&lt;</span><span class="sr">/Suspense</span><span class="err">&gt;
+</span>        <span class="o">&lt;</span><span class="sr">/Router</span><span class="err">&gt;
+</span>    <span class="p">)</span>
+        <span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="nx">App</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>Esto creará tres paquetes, uno para el componente DynamicPage, uno para el componente NoMatch y otro para la aplicación principal.</p>
+
+<p>Cambiemos también el nombre del archivo del paquete. Abra webpack.config.js y cámbielo de la siguiente manera:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">...</span>
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="p">...</span>
+  <span class="na">output</span><span class="p">:</span> <span class="p">{</span>
+    <span class="na">filename</span><span class="p">:</span> <span class="dl">'</span><span class="s1">[name].[hash].js</span><span class="dl">'</span><span class="p">,</span>
+    <span class="p">...</span>
+  <span class="p">},</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="por-vendor"><a href="#header-3"></a>Por <em>Vendor</em></h3>
+
+<p>Dividamos la aplicación por <em>vendor</em>. En el archivo webpack.config.js se debe agregar lo siguiente:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">...</span>
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">entry</span><span class="p">:</span> <span class="p">{</span>
+    <span class="na">vendor</span><span class="p">:</span> <span class="p">[</span><span class="dl">'</span><span class="s1">semantic-ui-react</span><span class="dl">'</span><span class="p">],</span>
+    <span class="na">app</span><span class="p">:</span> <span class="dl">'</span><span class="s1">./src/index.js</span><span class="dl">'</span>
+  <span class="p">},</span>
+  <span class="p">...</span>
+  <span class="na">optimization</span><span class="p">:</span> <span class="p">{</span>
+    <span class="na">splitChunks</span><span class="p">:</span> <span class="p">{</span>
+      <span class="na">cacheGroups</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">styles</span><span class="p">:</span> <span class="p">{</span>
+          <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">styles</span><span class="dl">'</span><span class="p">,</span>
+          <span class="na">test</span><span class="p">:</span> <span class="sr">/</span><span class="se">\.</span><span class="sr">css$/</span><span class="p">,</span>
+          <span class="na">chunks</span><span class="p">:</span> <span class="dl">'</span><span class="s1">all</span><span class="dl">'</span><span class="p">,</span>
+          <span class="na">enforce</span><span class="p">:</span> <span class="kc">true</span>
+        <span class="p">},</span>
+        <span class="na">vendor</span><span class="p">:</span> <span class="p">{</span>
+          <span class="na">chunks</span><span class="p">:</span> <span class="dl">'</span><span class="s1">initial</span><span class="dl">'</span><span class="p">,</span>
+          <span class="na">test</span><span class="p">:</span> <span class="dl">'</span><span class="s1">vendor</span><span class="dl">'</span><span class="p">,</span>
+          <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">vendor</span><span class="dl">'</span><span class="p">,</span>
+          <span class="na">enforce</span><span class="p">:</span> <span class="kc">true</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">},</span>
+  <span class="p">...</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<ul>
+  <li>entry.vendor: [‘semantic-ui-react’]: especifica qué biblioteca queremos extraer de nuestra aplicación principal y en el bloque del proveedor.</li>
+  <li>optimization: si omite esta entrada, <em>webpack</em> aún dividirá su aplicación por <em>vendor</em>, sin embargo, los tamaños de los paquetes serán grandes y, después de agregar esta entrada, los tamaños de los paquetes se reducirán significativamente.</li>
+</ul>
+
+<p>Este tipo de <em>code splitting</em> te ayudará de dos maneras. Ayuda al buscador a almacenar aquellos recursos que cambian con menos frecuencia. También ayudará al buscador a tomar ventaja de la descarga paralela para reducir, potencialmente, el tiempo de carga.</p>
+
+<h3 id="estilos-css"><a href="#header-3"></a>Estilos Css</h3>
+
+<p>El navegador a menudo invierte mucho tiempo en la creación de <em>scripts</em> y la renderización; cuando implica atributos de estilo en línea en el código.</p>
+
+<p>Al usar ExtractTextWebpackPlugin, puedes extraer todo código CSS a un archivo CSS separado. También se obtiene en general los mismos beneficios que el nivel anterior.</p>
+
+<h1 id="usar-componentes-functionalesstateless"><a href="#header-1"></a>Usar Componentes Functionales/<em>Stateless</em></h1>
+
+<p>El componente funcional evita la construcción de la instancia de clase. Reduce el tamaño general del paquete mejor que las clases.</p>
+
+<h1 id="virtualizar-listas-largas"><a href="#header-1"></a>Virtualizar listas largas</h1>
+
+<p>Si su aplicación renderiza largas listas de datos (cientos o miles de filas), recomendamos que uses una técnica conocida como “windowing”. Esta técnica solo renderiza un pequeño subconjunto de tus filas en un momento dado, y puede reducir dramáticamente el tiempo que demora en re-renderizar los componentes, así como el numero de nodos creados en el DOM.</p>
+
+<p><a href="https://react-window.vercel.app/#/examples/list/fixed-size">react-window</a> y <a href="https://bvaughn.github.io/react-virtualized/#/components/List">react-virtualized</a> son bibliotecas de windowing populares. Estas proveen varios componentes reusables para mostrar listas, grillas y datos tabulares.</p>
+
+<h1 id="throttling-y-debouncing"><a href="#header-1"></a><em>Throttling</em> y <em>Debouncing</em></h1>
+
+<p><em>Throttling</em> y <em>Debouncing</em> son conceptos de optimización importantes para evitar hacer múltiples llamadas a APIs.</p>
+
+<h2 id="throttling"><a href="#header-2"></a>Throttling</h2>
+
+<p><em>Throttling</em> significa ejecutar la función a intervalos regulares, lo que significa que una vez que se ejecuta la función, comenzará de nuevo solo después de que haya transcurrido un período de tiempo específico.</p>
+
+<h3 id="implementar-con-lodash"><a href="#header-3"></a>Implementar con <em>lodash</em></h3>
+
+<p>Primero instalar lodash:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">npm</span> <span class="nx">i</span> <span class="nx">lodash</span>
+</code></pre></div></div>
+
+<p>La implementación de <em>throttling</em> para un componente que se encarga de autocompletar:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// ...</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">throttle</span> <span class="p">}</span> <span class="k">from</span> <span class="nx">lodash</span><span class="p">;</span><span class="kd">class</span> <span class="nx">autocomp</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
+    <span class="kd">constructor</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">super</span><span class="p">(</span><span class="nx">props</span><span class="p">);</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">state</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="na">results</span><span class="p">:</span> <span class="p">[]</span>
+        <span class="p">}</span>
+       <span class="k">this</span><span class="p">.</span><span class="nx">handleInputThrottled</span> <span class="o">=</span> <span class="nx">throttle</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">handleInput</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="p">}</span>    <span class="nx">handleInput</span> <span class="o">=</span> <span class="nx">evt</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="kd">const</span> <span class="nx">value</span> <span class="o">=</span> <span class="nx">evt</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">value</span>
+        <span class="kd">const</span> <span class="nx">filteredRes</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">filter</span><span class="p">((</span><span class="nx">item</span><span class="p">)</span><span class="o">=&gt;</span> <span class="p">{</span>
+            <span class="c1">// algoritmo para buscar a través del array `data`</span>
+        <span class="p">})</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">setState</span><span class="p">({</span> <span class="na">results</span><span class="p">:</span> <span class="nx">filteredRes</span> <span class="p">})</span>
+    <span class="p">}</span>    <span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
+        <span class="kd">let</span> <span class="p">{</span> <span class="nx">results</span> <span class="p">}</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="dl">'</span><span class="s1">autocomp_wrapper</span><span class="dl">'</span><span class="o">&gt;</span>
+                <span class="o">&lt;</span><span class="nx">input</span> <span class="nx">placeholder</span><span class="o">=</span><span class="dl">"</span><span class="s2">Enter your search..</span><span class="dl">"</span> <span class="nx">onChange</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">handleInputThrottled</span><span class="p">}</span> <span class="sr">/</span><span class="err">&gt;
+</span>                <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
+                    <span class="p">{</span><span class="nx">results</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">result</span><span class="o">=&gt;</span><span class="p">{</span><span class="nx">result</span><span class="p">})}</span>
+                <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>            <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>        <span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>La función <em>throttle</em> se le pasa una función que quiere ser <em>throttled</em> y la cantidad de tiempo que debe ser <em>throttled</em>, esto devuelve una función que está <em>throttled</em>. En nuestro caso, el método handleInput se pasa a la función <em>throttle</em> y queremos que se acelere a 100 ms.</p>
+
+<p>Ahora, si escribimos fidudusola a una velocidad normal de 1 letra por 200ms. En nuestra composición <em>throttled</em>, se necesitarían 10 * 200ms = (2000ms) 2s para escribir fidudusola, donde el método handleInput se llamaría 2 (2000ms / 100ms = 2) veces en lugar de 10 veces si nuestro componente de autocomp no se le hubiera aplicado <em>throttled</em>.</p>
+
+<h2 id="debouncing"><a href="#header-2"></a>Debouncing</h2>
+
+<p><em>Debouncing</em> significa que la función se ejecutará cuando un usuario no haya realizado un evento en un período de tiempo específico. Ignora todas las llamadas a una función y espera hasta que la función deje de llamarse durante un período de tiempo específico.</p>
+
+<h3 id="implementar-con-lodash-1"><a href="#header-3"></a>Implementar con <em>lodash</em></h3>
+
+<p>Primero instalar lodash:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">npm</span> <span class="nx">i</span> <span class="nx">lodash</span>
+</code></pre></div></div>
+
+<p>La implementación de <em>throttling</em> para un componente que se encarga de autocompletar:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// ...</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">debounce</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">lodash</span><span class="dl">'</span><span class="p">;</span><span class="kd">class</span> <span class="nx">autocomp</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
+    <span class="kd">constructor</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">super</span><span class="p">(</span><span class="nx">props</span><span class="p">);</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">state</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="na">results</span><span class="p">:</span> <span class="p">[]</span>
+        <span class="p">}</span>
+       <span class="k">this</span><span class="p">.</span><span class="nx">handleInputThrottled</span> <span class="o">=</span> <span class="nx">debounce</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">handleInput</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="p">}</span>    <span class="nx">handleInput</span> <span class="o">=</span> <span class="nx">evt</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="kd">const</span> <span class="nx">value</span> <span class="o">=</span> <span class="nx">evt</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">value</span>
+        <span class="kd">const</span> <span class="nx">filteredRes</span> <span class="o">=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">filter</span><span class="p">((</span><span class="nx">item</span><span class="p">)</span><span class="o">=&gt;</span> <span class="p">{</span>
+             <span class="c1">// algoritmo para buscar a través del array `data`</span>
+        <span class="p">})</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">setState</span><span class="p">({</span> <span class="na">results</span><span class="p">:</span> <span class="nx">filteredRes</span> <span class="p">})</span>
+    <span class="p">}</span>    <span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
+        <span class="kd">let</span> <span class="p">{</span> <span class="nx">results</span> <span class="p">}</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="dl">'</span><span class="s1">autocomp_wrapper</span><span class="dl">'</span><span class="o">&gt;</span>
+                <span class="o">&lt;</span><span class="nx">input</span> <span class="nx">placeholder</span><span class="o">=</span><span class="dl">"</span><span class="s2">Enter your search..</span><span class="dl">"</span> <span class="nx">onChange</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">handleInputThrottled</span><span class="p">}</span> <span class="sr">/</span><span class="err">&gt;
+</span>                <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
+                    <span class="p">{</span><span class="nx">results</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">result</span><span class="o">=&gt;</span><span class="p">{</span><span class="nx">result</span><span class="p">})}</span>
+                <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>            <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>        <span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h1 id="the-power-of-not-mutating-data"><a href="#header-1"></a>The Power Of Not Mutating Data</h1>
+
+<p>https://reactjs.org/docs/optimizing-performance.html</p>
+
+<h1 id="bundle-analitic"><a href="#header-1"></a>Bundle Analitic</h1>
+
+<p>medir con react-addons-perf p</p>
+
+<h1 id="fuentes"><a href="#header-1"></a>Fuentes</h1>
+
+<ul>
+  <li><a href="https://hackernoon.com/lessons-learned-code-splitting-with-webpack-and-react-f012a989113">Lessons Learned: Code Splitting with Webpack and React</a></li>
+  <li><a href="https://www.freecodecamp.org/news/learn-webpack-for-react-a36d4cac5060/">How to use Webpack with React: an in-depth tutorial</a></li>
+  <li><a href="https://es.reactjs.org/docs/optimizing-performance.html">Optimizando el Rendimiento</a></li>
+  <li><a href="https://www.c-sharpcorner.com/article/performance-optimization-techniques-for-react-applications/">Performance Optimization Techniques For React Applications</a></li>
+  <li><a href="https://blog.bitsrc.io/improve-your-react-app-performance-by-using-throttling-and-debouncing-101afbe9055">Improve Your React App Performance by Using Throttling and Debouncing</a></li>
+  <li><a href="https://medium.com/swlh/9-performance-optimization-strategies-for-reactjs-development-36f6d03a0912">9 Performance Optimization Strategies for ReactJS Development</a></li>
+</ul>
+:ET
