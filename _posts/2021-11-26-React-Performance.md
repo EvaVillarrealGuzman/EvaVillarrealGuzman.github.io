@@ -3,60 +3,60 @@ title: Técnicas de optimización para aplicaciones React
 published: true
 ---
 
-La *performance* es un factor importante en la calidad de una aplicación. Depende mucho de como codificamos y como está configurada la infraestructura. Es importante, ya que impacta en la experiencia del usuario. Por su parte React ofrece mucha optimización para diseñar aplicaciones de reacción de alto rendimiento, que para lograrlas se deben seguir algunas buenas prácticas.
+La *performance* es un factor importante en la calidad de una aplicación. Depende mucho de cómo codificamos y cómo está configurada la infraestructura. Es importante, ya que impacta en la experiencia del usuario. Por su parte React ofrece mucha optimización para diseñar aplicaciones de reacción de alto rendimiento, que para que se luzca debemos seguir algunas buenas prácticas.
 
 # [](#header-1)React.Fragment
 
 
-Muchas veces pasa que queremos renderizar un conjunto de elementos dentro de un y se agrupan estos elementos dentro de un elemento padre "div": 
+Muchas veces pasa que queremos renderizar un conjunto de elementos y para agruparlos se suelen poner dentro de un elemento padre ```div```: 
 
-```html
+```react
 <div>
     <h1>Title</h1>
     <p>Content</p>
 </div>
 ```
 
-Esto agrega un nodo extra al DOM, el cual es innecesario ya que solo tiene la función de agrupar elementos. Esto puede afectar a la performance.
+Esto agrega un nodo extra al DOM, el cual es innecesario ya que solo tiene la función de agrupar elementos. Esto puede afectar a la *performance*.
 
-Para agrupar elementos existe <React.Fragment>, el cuál no agrega ningún nodo extra:
+Para agrupar elementos debemos usar ```<React.Fragment>```, el cuál no agrega ningún nodo extra:
 
-```html
+```react
 <React.Fragment>
     <h1>Title</h1>
     <p>Content</p>
 </React.Fragment>
 ```
 
-React.Fragment tiene la sintaxis corta que es  <></>. Por lo que el código de arriba también se puede escribir:
+React.Fragment tiene una sintaxis corta que es  <></>. Por lo que el código de arriba también se puede escribir:
 
-```html
+```react
 <>
     <h1>Title</h1>
     <p>Content</p>
 </>
 ``` 
 
-# [](#header-1)Usar la Construcción de Producción
+# [](#header-1)Usar el empaquetado en modo  Producción
 
 Cuando se desarrolla una aplicación con React, se presentan advertencias y mensajes de errores muy útiles. Estos hacen la identificación de bugs y problemas durante el desarrollo muy fácil. Pero también cuestan parte del desempeño.
 
 Si observas el código fuente de React, verás muchas marcas de ```if (process.env.NODE_ENV != 'production')```. Estos trozos de código que React está ejecutando en tu ambiente de desarrollo no es algo que el usuario necesite. Para ambientes de producción, todo este código innecesario se puede descartar.
 
-Si impulsaste tu proyecto usando create-react-app, entonces puedes ejecutar npm run build para producir la construcción de producción sin este código extra. Si estás usando Webpack directamente, puedes ejecutar ```webpack -p``` (el cual es el equivalente de ```webpack --optimize-minimize --define process.env.NODE_ENV="'production'"```).
+Si impulsaste tu proyecto usando create-react-app, entonces puedes ejecutar ``npm run build`` para producir la construcción de producción sin este código extra. Si estás usando *webpack* puedes ejecutar ```webpack -p``` (el cual es el equivalente de ```webpack --optimize-minimize --define process.env.NODE_ENV="'production'"```).
 
 
 # [](#header-1)Implemente el método shouldComponentUpdate()
 
 
-Cuando una propiedad o estado de un componente cambia, React decide si es necesario actualizar el DOM comparando el elemento recién retornado con el previamente renderizado. Si no son iguales, React actualizará el DOM.
+Cuando una propiedad (*props*) o estado de un componente cambia, React decide si es necesario actualizar el DOM comparando el elemento recién retornado con el previamente renderizado. Si no son iguales, React actualizará el DOM.
 
-Aunque React solo actualiza los nodos DOM modificados, el re-renderizado aun lleva algo de tiempo. En muchos casos no es un problema, pero si la desaceleración es notable puedes acelerar el proceso anulando la función del ciclo de vida shouldComponentUpdate, el cual se ejecuta antes de que el proceso de re-renderizado comience, es decir, cuando nuevos *props* son recibidos o algún estado cambia. La implementación por defecto de esta función retorna true, permitiendo a React hacer la actualización, incluso si ningún *props* o estado ha cambiado (los valores actuales y previos son los mismos).
+Aunque React solo actualiza los nodos DOM modificados, el re-renderizado aún lleva algo de tiempo. En muchos casos no es un problema, pero si la desaceleración es notable puedes acelerar el proceso anulando la función del ciclo de vida shouldComponentUpdate, el cual se ejecuta antes de que el proceso de re-renderizado comience, es decir, cuando nuevos *props* son recibidos o algún estado cambia. La implementación por defecto de esta función retorna true, permitiendo a React hacer la actualización, incluso si ningún *props* o estado ha cambiado (los valores actuales y previos son los mismos).
 
-Si sabes que en algunas situaciones tu componente no necesita actualizarse, puedes retornar false desde shouldComponentUpdate para omitir todo el proceso de renderizacion, incluida la invocación de render() en este componente y debajo de él.
+Si sabes que en algunas situaciones tu componente no necesita actualizarse, puedes retornar false desde shouldComponentUpdate para omitir todo el proceso de renderización, incluida la invocación de render() en este componente y debajo de él.
 
 
-```js
+```react
 import React from "react";
 
 export default class TestComponent extends React.Component {
@@ -98,13 +98,13 @@ Si el código de arriba no tuviera el método shouldComponentUpdate implementado
 
 En lugar de implementar shouldComponentUpdate, podemos usar React.PureComponent.
 
-Un React.PureComponent es lo mismo que un React.Component que implementa una función shouldComponentUpdate() con una comparación superficial. Es decir, chequea los *props* y los valores de los estados superficiales y decide si el componente necesita renderizar o no. De esta manera React.PureComponent optimiza los componentes de la clase reduciendo el número de renderizados no deseados.
+Un React.PureComponent es lo mismo que un React.Component pero que implementa una función shouldComponentUpdate() con una comparación superficial. Es decir, chequea los *props* y los valores de los estados superficiales y decide si el componente necesita renderizar o no. De esta manera React.PureComponent optimiza los componentes de la clase reduciendo el número de renderizados no deseados.
 
 Debido a que sólo hace una comparación superficial, no puede usarlo si las propiedades o el estado han sido mutados de una manera que una comparación superficial pasaría por alto. Esto puede ser un problema con estructuras de datos más complejas.
 
 Por ejemplo, en el siguiente código el problema es que PureComponent hará una comparación simple entre los valores antiguos y nuevos de this.props.words. Dado que este código muta la matriz wordsen el método handleClick de WordAdder, los valores antiguos y nuevos de this.props.words se compararán como iguales, aunque las palabras actuales de la matriz hayan cambiado. La ListOfWords no se actualizará a pesar de que tiene nuevas palabras que se deben renderizar.
 
-```js
+```react
 class CounterButton extends React.PureComponent {
   constructor(props) {
     super(props);
@@ -130,7 +130,7 @@ Por lo tanto, React.PureComponent es útil solo cuando:
 
 La implementación de shouldComponentUpdate en el ejemplo anterior de TestComponent se podría implementar como React.PureComponent de la siguiente manera:
 
-```js
+```react
 import React from "react";
 
 export default class TestComponent extends React.PureComponent {
@@ -159,14 +159,14 @@ export default class TestComponent extends React.PureComponent {
 
 # [](#header-1)Usar memorización
 
-Memorización es una técnica de optimización para incrementar la performance de la aplicación guardando los resultados y devolviendo el resultado en caché cuando se repiten las mismas entradas.
+Memorización es una técnica de optimización para incrementar la *performance* de la aplicación guardando los resultados y devolviendo el resultado en caché cuando se repiten las mismas entradas.
 
-React provee React.memo y useMemo para memorización, los cuales guardan en caché componentes.
+React provee React.memo y useMemo para memorización, los cuáles guardan en caché componentes.
 
 React.memo es un componente de alto nivel para usar en componentes funcionales. Cuando el componente funcional se procesa usando React.Memo o useMemo, entonces su resultado se ha guardado en la memoria y la próxima vez que se llame al componente con los mismos *props*, el resultado en caché regresará sin ninguna ejecución. 
 
 
-```js
+```react
 const UserDisplay = (userDetails) =>{
     const {name, age, address} = userDetails;
 
@@ -178,19 +178,20 @@ const UserDisplay = (userDetails) =>{
     )
 }
 export default React.memo(UserDisplay);
-// First - UserDisplay component gets called and executed, and then rendered.
+// Primero - UserDisplay se llama y se ejecuta, luego se procesa.
 <UserDisplay
   name="Test"
   age="30"
   address="Test address"
 />
-// Second - The cached result will render without any execution.
+// Segundo - El resultado almacenado en caché se procesará sin ninguna ejecución.
 <UserDisplay
   name="Test"
   age="30"
   address="Test address"
 />
-// Third - UserDisplay component gets called and executed, and then rendered.(because here value of the name value different)
+// Tercero - UserDisplay se llama y se ejecuta, luego se procesa.
+// Porque aquí el valor *name* es diferente.
 <UserDisplay
   name="New Test"
   age="30"
@@ -202,7 +203,17 @@ export default React.memo(UserDisplay);
 
 Primero es importante entender el concepto de *Lazy loading*, el cuál indica que los recursos (imaǵenes, *scripts*, etc.) deberían ser cargados cuando realmente se necesitan. En lugar de cargar una página web entera y renderizarla en el navegador todo de una vez, solo renderiza los componente críticos primero y luego aquellos componentes restantes o cuando se vayan requiriendo. De esta manera no perdemos tiempo ni memoria en procesos que no beneficiarán la experiencia del usuario del producto.
 
-*Code Splitting* es una técnica en la cual podemos tratar costos de cargar Javascript y cumplir con el concepto de *lazy loading* al mismo tiempo.  En lugar de entregar tu aplicación en un único archivo, se divide en varios archivos. La página en principio solo renderiza los componente críticos primero y luego aquellos componentes restantes o cuando se vayan requiriendo.
+*Code Splitting* es una técnica en la cual podemos tratar costos de cargar Javascript y cumplir con el concepto de *lazy loading* al mismo tiempo.  En lugar de entregar tu aplicación en un único archivo, se divide en varios archivos.
+
+## [](#header-2)Webpack
+
+La forma en que le indicamos a *webpack* que queremos dividir un código en paquetes separados es mediante *dynamic imports*. La palabra clave *import* se puede usar como una función que toma la ruta del módulo que queremos dividir en un paquete separado y devuelve una *promise*:
+
+```js
+import('/module/name/here').then(module => ...)
+``` 
+
+Cuando el módulo es cargado y la promesa resulta, podemos acceder a lo que exporta.
 
 ## [](#header-2)React
 
@@ -211,26 +222,16 @@ React provee dos elementos para implementarlo:
 - React.lazy() - React.lazy() es la función que permite implementar la importación dinámica para componentes regulares en React.
 - React.Suspense - React.suspense tiene una propiedad *fallback* que toma el elemento react que quiere renderizar mientras el componente se carga usando React.lazy.
 
-## [](#header-2)Webpack
-
-La forma en que le indicamos a *webpack* que queremos dividir en un código en paquetes separados es mediante *dynamic imports*. La palabra clave *import* se puede usar como una función que toma la ruta del módulo que queremos dividir en un paquete separado y devuelve una *promise*:
-
-```js
-import('/module/name/here').then(module => ...)
-``` 
-
-Cuando el módulo es cargado y la promesa resulta, podemos acceder a lo que exporta. Cuando usamos React.lazy internamente lo que esta pasando es *dynamic import*.
-
 ## [](#header-2)Niveles
 
 
-Existen diferentes paradigmas de *code splitting*. Algunos de los más comunes son:
+Existen diferentes paradigmas de *code splitting*. Algunos de los más comunes y que se pueden combinar son:
 
-### [](#header-3)Por rutas
+### [](#header-3)Dividir por rutas
 
 Es uno de los enfoques más comunes. Esto nos dejará con un paquete separado para cada ruta de nivel superior. Por ejemplo:
 
-```js
+```react
 import React, {Suspense} from 'react'
 import {Switch, BrowserRouter as Router, Route} from 'react-router-dom';
 import importedComponent from 'react-imported-component';
@@ -261,9 +262,9 @@ export default App;
 
 Esto creará tres paquetes, uno para el componente DynamicPage, uno para el componente NoMatch y otro para la aplicación principal.
 
-Cambiemos también el nombre del archivo del paquete. Abra webpack.config.js y cámbielo de la siguiente manera: 
+Cambiemos también el nombre del archivo del paquete. En el archivo webpack.config.js se debería cambiar de la siguiente manera: 
 
-```js
+```react
 ...
 module.exports = {
   ...
@@ -274,11 +275,11 @@ module.exports = {
 }
 ``` 
 
-### [](#header-3)Por *Vendor*
+### [](#header-3)Dividir por *Vendor*
 
 Dividamos la aplicación por *vendor*. En el archivo webpack.config.js se debe agregar lo siguiente: 
 
-```js
+```react
 ...
 module.exports = {
   entry: {
@@ -308,18 +309,16 @@ module.exports = {
 };
 ``` 
 
-- entry.vendor: [‘semantic-ui-react’]: especifica qué biblioteca queremos extraer de nuestra aplicación principal y en el bloque del proveedor.
-- optimization: si omite esta entrada, *webpack* aún dividirá su aplicación por *vendor*, sin embargo, los tamaños de los paquetes serán grandes y, después de agregar esta entrada, los tamaños de los paquetes se reducirán significativamente.
+- entry.vendor: [‘semantic-ui-react’]: especifica qué biblioteca queremos extraer de nuestra aplicación principal.
+- optimization: si omite esta entrada, *webpack* aún dividirá su aplicación por *vendor*, sin embargo, los tamaños de los paquetes serán grandes. En cambio, agregando esta entrada, los tamaños de los paquetes se reducirán significativamente.
 
 
 Este tipo de *code splitting* te ayudará de dos maneras. Ayuda al buscador a almacenar aquellos recursos que cambian con menos frecuencia. También ayudará al buscador a tomar ventaja de la descarga paralela para reducir, potencialmente, el tiempo de carga.
 
 
-### [](#header-3)Estilos Css
+### [](#header-3)Extraer estilos Css
 
-El navegador a menudo invierte mucho tiempo en la creación de *scripts* y la renderización; cuando implica atributos de estilo en línea en el código. 
-
-Al usar ExtractTextWebpackPlugin, puedes extraer todo código CSS a un archivo CSS separado. También se obtiene en general los mismos beneficios que el nivel anterior.
+Al usar ExtractTextWebpackPlugin, puedes extraer todo código CSS a un archivo CSS separado. También se obtienen en general los mismos beneficios que el nivel anterior.
 
 # [](#header-1)Usar Componentes Functionales/*Stateless* 
 
@@ -328,9 +327,9 @@ El componente funcional evita la construcción de la instancia de clase. Reduce 
 
 # [](#header-1)Virtualizar listas largas
 
-Si su aplicación renderiza largas listas de datos (cientos o miles de filas), recomendamos que uses una técnica conocida como “windowing”. Esta técnica solo renderiza un pequeño subconjunto de tus filas en un momento dado, y puede reducir dramáticamente el tiempo que demora en re-renderizar los componentes, así como el numero de nodos creados en el DOM.
+Si su aplicación renderiza largas listas de datos (cientos o miles de filas), recomendamos que uses una técnica conocida como *windowing*. Esta técnica solo renderiza un pequeño subconjunto de tus filas en un momento dado, y puede reducir dramáticamente el tiempo que demora en re-renderizar los componentes, así como el número de nodos creados en el DOM.
 
-[react-window](https://react-window.vercel.app/#/examples/list/fixed-size) y [react-virtualized](https://bvaughn.github.io/react-virtualized/#/components/List) son bibliotecas de windowing populares. Estas proveen varios componentes reusables para mostrar listas, grillas y datos tabulares.
+[react-window](https://react-window.vercel.app/#/examples/list/fixed-size) y [react-virtualized](https://bvaughn.github.io/react-virtualized/#/components/List) son bibliotecas de *windowing* populares. Estas proveen varios componentes reusables para mostrar listas, grillas y datos tabulares.
 
 # [](#header-1)*Throttling* y *Debouncing*
 
@@ -338,7 +337,7 @@ Si su aplicación renderiza largas listas de datos (cientos o miles de filas), r
 
 ## [](#header-2)Throttling
 
-*Throttling* significa ejecutar la función a intervalos regulares, lo que significa que una vez que se ejecuta la función, comenzará de nuevo solo después de que haya transcurrido un período de tiempo específico. 
+*Throttling* significa ejecutar la función a intervalos regulares, es decir que una vez que se ejecuta la función, comenzará de nuevo sólo después de que haya transcurrido un período de tiempo específico. 
 
 ### [](#header-3)Implementar con *lodash*
 
@@ -350,7 +349,7 @@ npm i lodash
 
 La implementación de *throttling* para un componente que se encarga de autocompletar:
 
-```js
+```react
 // ...
 import { throttle } from lodash;class autocomp extends React.Component {
     constructor(props) {
@@ -391,13 +390,13 @@ Ahora, si escribimos fidudusola a una velocidad normal de 1 letra por 200ms. En 
 
 Primero instalar lodash:
 
-```js
+```react
 npm i lodash
 ```
 
-La implementación de *throttling* para un componente que se encarga de autocompletar:
+La implementación de *debouncing* para un componente que se encarga de autocompletar:
 
-```js
+```react
 // ...
 import { debounce } from 'lodash';class autocomp extends React.Component {
     constructor(props) {
@@ -440,6 +439,8 @@ Verifica la documentación para tu servidor web para ver cómo activar la compre
 
 # [](#header-1)Herramientas Útiles
 
+Realmente no podemos hablar de *performance* a menos que haya algo que podamos medir. Para saber dónde mejorar, necesitamos tener algunas ideas. Algunas herramientas que te pueden ayudar a medir son:
+
 ## [](#header-2)react-addons-perf
 
 react-addons-perf te permite obtener un resumen del desempeño general de tu aplicación.
@@ -456,13 +457,13 @@ Perf.printWasted();
 
 Esto imprimirá una tabla con la cantidad de componentes de tiempo perdido al renderizar.
 
-La librería proporciona otras funciones que te permiten imprimir diferentes aspectos del tiempo perdido por separado (ej., al usar las funciones printInclusive() o printExclusive()), o hasta imprimir las operaciones de manipulación DOM (usando la función printOperations()).
+La librería proporciona otras funciones que te permiten imprimir diferentes aspectos del tiempo perdido por separado (por ejemplo al usar las funciones printInclusive() o printExclusive()), o hasta imprimir las operaciones de manipulación DOM (usando la función printOperations()).
 
 Para más detalle ver [aquí](https://reactjs.org/docs/perf.html)
 
 ## [](#header-2)Webpack Bundle Analyzer
 
-Realmente no podemos hablar de *performance* a menos que haya algo que podamos medir. Para saber dónde mejorar, necesitamos tener algunas ideas. En el contexto del *code splitting*, debemos ser conscientes de qué tan grandes son nuestros paquetes y qué hay realmente en ellos.
+En el contexto del *code splitting*, debemos ser conscientes de qué tan grandes son nuestros paquetes y qué hay realmente en ellos.
 
 *Webpack Bundle Analyzer* proporciona una representación visual de los paquetes de tu aplicación para que pueda ver qué va en cada uno. 
 

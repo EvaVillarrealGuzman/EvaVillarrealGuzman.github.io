@@ -1,56 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-  <meta name="generator" content="Jekyll">
-
-  <title>Técnicas de optimización para aplicaciones React</title>
-
-  <link rel="stylesheet" href="/css/main.css">
-  
-  <link href="/atom.xml" type="application/atom+xml" rel="alternate" title="ATOM Feed" /> <!-- Begin Jekyll SEO tag v2.7.1 -->
-<title>Técnicas de optimización para aplicaciones React | Blog</title>
-<meta name="generator" content="Jekyll v4.2.1" />
-<meta property="og:title" content="Técnicas de optimización para aplicaciones React" />
-<meta name="author" content="Eva Villarreal Guzmán" />
-<meta property="og:locale" content="en_US" />
-<meta name="description" content="La performance es un factor importante en la calidad de una aplicación. Depende mucho de cómo codificamos y cómo está configurada la infraestructura. Es importante, ya que impacta en la experiencia del usuario. Por su parte React ofrece mucha optimización para diseñar aplicaciones de reacción de alto rendimiento, que para que se luzca debemos seguir algunas buenas prácticas." />
-<meta property="og:description" content="La performance es un factor importante en la calidad de una aplicación. Depende mucho de cómo codificamos y cómo está configurada la infraestructura. Es importante, ya que impacta en la experiencia del usuario. Por su parte React ofrece mucha optimización para diseñar aplicaciones de reacción de alto rendimiento, que para que se luzca debemos seguir algunas buenas prácticas." />
-<link rel="canonical" href="http://localhost:8001/React-Performance" />
-<meta property="og:url" content="http://localhost:8001/React-Performance" />
-<meta property="og:site_name" content="Blog" />
-<meta property="og:type" content="article" />
-<meta property="article:published_time" content="2021-11-26T00:00:00-03:00" />
-<meta name="twitter:card" content="summary" />
-<meta property="twitter:title" content="Técnicas de optimización para aplicaciones React" />
-<script type="application/ld+json">
-{"mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:8001/React-Performance"},"@type":"BlogPosting","url":"http://localhost:8001/React-Performance","author":{"@type":"Person","name":"Eva Villarreal Guzmán"},"headline":"Técnicas de optimización para aplicaciones React","dateModified":"2021-11-26T00:00:00-03:00","datePublished":"2021-11-26T00:00:00-03:00","description":"La performance es un factor importante en la calidad de una aplicación. Depende mucho de cómo codificamos y cómo está configurada la infraestructura. Es importante, ya que impacta en la experiencia del usuario. Por su parte React ofrece mucha optimización para diseñar aplicaciones de reacción de alto rendimiento, que para que se luzca debemos seguir algunas buenas prácticas.","@context":"https://schema.org"}</script>
-<!-- End Jekyll SEO tag -->
-
-</head>
-
-<body>
-  <div id="wrapper">
-    <header>
-  <div>
-    <a href="/">
-    
-    <h1>Eva Villarreal Guzmán</h1>
-    </a>
-    <div class="header-links">
-      <a href="/archive"><h2 class="header-link">Archive</h2></a>
-<a href="/about"><h2 class="header-link">About</h2></a>
-<a href="/atom.xml"><h2 class="header-link">RSS</h2></a>
-    </div>
-  </div>
-</header>
-    <div class="container">
-      <section id="main_content">
-        <article>
-  <h2>Técnicas de optimización para aplicaciones React</h2>
-  <time datetime="2021-11-26T00:00:00-03:00" class="by-line">26 Nov 2021</time>
-  <p>La <em>performance</em> es un factor importante en la calidad de una aplicación. Depende mucho de cómo codificamos y cómo está configurada la infraestructura. Es importante, ya que impacta en la experiencia del usuario. Por su parte React ofrece mucha optimización para diseñar aplicaciones de reacción de alto rendimiento, que para que se luzca debemos seguir algunas buenas prácticas.</p>
+I"��<p>La <em>performance</em> es un factor importante en la calidad de una aplicación. Depende mucho de cómo codificamos y cómo está configurada la infraestructura. Es importante, ya que impacta en la experiencia del usuario. Por su parte React ofrece mucha optimización para diseñar aplicaciones de reacción de alto rendimiento, que para que se luzca debemos seguir algunas buenas prácticas.</p>
 
 <h1 id="reactfragment"><a href="#header-1"></a>React.Fragment</h1>
 
@@ -368,7 +316,7 @@
 
 <h2 id="throttling"><a href="#header-2"></a>Throttling</h2>
 
-<p><em>Throttling</em> significa ejecutar la función a intervalos regulares, es decir que una vez que se ejecuta la función, comenzará de nuevo sólo después de que haya transcurrido un período de tiempo específico.</p>
+<p><em>Throttling</em> significa ejecutar la función a intervalos regulares, es decir que una vez que se ejecuta la función, comenzará de nuevo solo después de que haya transcurrido un período de tiempo específico.</p>
 
 <h3 id="implementar-con-lodash"><a href="#header-3"></a>Implementar con <em>lodash</em></h3>
 
@@ -379,7 +327,7 @@
 
 <p>La implementación de <em>throttling</em> para un componente que se encarga de autocompletar:</p>
 
-<div class="language-react highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// ...</span>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// ...</span>
 <span class="k">import</span> <span class="p">{</span> <span class="nx">throttle</span> <span class="p">}</span> <span class="k">from</span> <span class="nx">lodash</span><span class="p">;</span><span class="kd">class</span> <span class="nx">autocomp</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
     <span class="kd">constructor</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span> <span class="p">{</span>
         <span class="k">super</span><span class="p">(</span><span class="nx">props</span><span class="p">);</span>
@@ -396,13 +344,13 @@
     <span class="p">}</span>    <span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
         <span class="kd">let</span> <span class="p">{</span> <span class="nx">results</span> <span class="p">}</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">;</span>
         <span class="k">return</span> <span class="p">(</span>
-            <span class="p">&lt;</span><span class="nt">div</span> <span class="na">className</span><span class="p">=</span><span class="s">'autocomp_wrapper'</span><span class="p">&gt;</span>
-                <span class="p">&lt;</span><span class="nt">input</span> <span class="na">placeholder</span><span class="p">=</span><span class="s">"Enter your search.."</span> <span class="na">onChange</span><span class="p">=</span><span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">handleInputThrottled</span><span class="si">}</span> <span class="p">/&gt;</span>
-                <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
-                    <span class="si">{</span><span class="nx">results</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">result</span><span class="o">=&gt;</span><span class="p">{</span><span class="nx">result</span><span class="p">})</span><span class="si">}</span>
-                <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
-            <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
-        <span class="p">);</span>
+            <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="dl">'</span><span class="s1">autocomp_wrapper</span><span class="dl">'</span><span class="o">&gt;</span>
+                <span class="o">&lt;</span><span class="nx">input</span> <span class="nx">placeholder</span><span class="o">=</span><span class="dl">"</span><span class="s2">Enter your search..</span><span class="dl">"</span> <span class="nx">onChange</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">handleInputThrottled</span><span class="p">}</span> <span class="sr">/</span><span class="err">&gt;
+</span>                <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
+                    <span class="p">{</span><span class="nx">results</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">result</span><span class="o">=&gt;</span><span class="p">{</span><span class="nx">result</span><span class="p">})}</span>
+                <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>            <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>        <span class="p">);</span>
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div></div>
@@ -419,12 +367,12 @@
 
 <p>Primero instalar lodash:</p>
 
-<div class="language-react highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">npm</span> <span class="nx">i</span> <span class="nx">lodash</span>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">npm</span> <span class="nx">i</span> <span class="nx">lodash</span>
 </code></pre></div></div>
 
-<p>La implementación de <em>debouncing</em> para un componente que se encarga de autocompletar:</p>
+<p>La implementación de <em>throttling</em> para un componente que se encarga de autocompletar:</p>
 
-<div class="language-react highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// ...</span>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// ...</span>
 <span class="k">import</span> <span class="p">{</span> <span class="nx">debounce</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">lodash</span><span class="dl">'</span><span class="p">;</span><span class="kd">class</span> <span class="nx">autocomp</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
     <span class="kd">constructor</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span> <span class="p">{</span>
         <span class="k">super</span><span class="p">(</span><span class="nx">props</span><span class="p">);</span>
@@ -441,13 +389,13 @@
     <span class="p">}</span>    <span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
         <span class="kd">let</span> <span class="p">{</span> <span class="nx">results</span> <span class="p">}</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">;</span>
         <span class="k">return</span> <span class="p">(</span>
-            <span class="p">&lt;</span><span class="nt">div</span> <span class="na">className</span><span class="p">=</span><span class="s">'autocomp_wrapper'</span><span class="p">&gt;</span>
-                <span class="p">&lt;</span><span class="nt">input</span> <span class="na">placeholder</span><span class="p">=</span><span class="s">"Enter your search.."</span> <span class="na">onChange</span><span class="p">=</span><span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">handleInputThrottled</span><span class="si">}</span> <span class="p">/&gt;</span>
-                <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
-                    <span class="si">{</span><span class="nx">results</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">result</span><span class="o">=&gt;</span><span class="p">{</span><span class="nx">result</span><span class="p">})</span><span class="si">}</span>
-                <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
-            <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
-        <span class="p">);</span>
+            <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="dl">'</span><span class="s1">autocomp_wrapper</span><span class="dl">'</span><span class="o">&gt;</span>
+                <span class="o">&lt;</span><span class="nx">input</span> <span class="nx">placeholder</span><span class="o">=</span><span class="dl">"</span><span class="s2">Enter your search..</span><span class="dl">"</span> <span class="nx">onChange</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">handleInputThrottled</span><span class="p">}</span> <span class="sr">/</span><span class="err">&gt;
+</span>                <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
+                    <span class="p">{</span><span class="nx">results</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">result</span><span class="o">=&gt;</span><span class="p">{</span><span class="nx">result</span><span class="p">})}</span>
+                <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>            <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
+</span>        <span class="p">);</span>
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div></div>
@@ -467,8 +415,6 @@
 
 <h1 id="herramientas-útiles"><a href="#header-1"></a>Herramientas Útiles</h1>
 
-<p>Realmente no podemos hablar de <em>performance</em> a menos que haya algo que podamos medir. Para saber dónde mejorar, necesitamos tener algunas ideas. Algunas herramientas que te pueden ayudar a medir son:</p>
-
 <h2 id="react-addons-perf"><a href="#header-2"></a>react-addons-perf</h2>
 
 <p>react-addons-perf te permite obtener un resumen del desempeño general de tu aplicación.</p>
@@ -484,13 +430,13 @@
 
 <p>Esto imprimirá una tabla con la cantidad de componentes de tiempo perdido al renderizar.</p>
 
-<p>La librería proporciona otras funciones que te permiten imprimir diferentes aspectos del tiempo perdido por separado (por ejemplo al usar las funciones printInclusive() o printExclusive()), o hasta imprimir las operaciones de manipulación DOM (usando la función printOperations()).</p>
+<p>La librería proporciona otras funciones que te permiten imprimir diferentes aspectos del tiempo perdido por separado (ej., al usar las funciones printInclusive() o printExclusive()), o hasta imprimir las operaciones de manipulación DOM (usando la función printOperations()).</p>
 
 <p>Para más detalle ver <a href="https://reactjs.org/docs/perf.html">aquí</a></p>
 
 <h2 id="webpack-bundle-analyzer"><a href="#header-2"></a>Webpack Bundle Analyzer</h2>
 
-<p>En el contexto del <em>code splitting</em>, debemos ser conscientes de qué tan grandes son nuestros paquetes y qué hay realmente en ellos.</p>
+<p>Realmente no podemos hablar de <em>performance</em> a menos que haya algo que podamos medir. Para saber dónde mejorar, necesitamos tener algunas ideas. En el contexto del <em>code splitting</em>, debemos ser conscientes de qué tan grandes son nuestros paquetes y qué hay realmente en ellos.</p>
 
 <p><em>Webpack Bundle Analyzer</em> proporciona una representación visual de los paquetes de tu aplicación para que pueda ver qué va en cada uno.</p>
 
@@ -507,32 +453,4 @@
   <li><a href="https://medium.com/swlh/9-performance-optimization-strategies-for-reactjs-development-36f6d03a0912">9 Performance Optimization Strategies for ReactJS Development</a></li>
   <li><a href="https://www.toptal.com/react/componentes-react-eficientes-una-guia-para-optimizar-el-desempeno-de-react">Componentes React Eficientes: Una Guía para Optimizar el Desempeño de React</a></li>
 </ul>
-
-</article>
-      </section>
-    </div>
-  </div>
-
-   <footer>
-  <a href="https://github.com/EvaVillarrealGuzman">
-    <span>
-        <b>EvaVillarrealGuzman</b>
-    </span>
-    
-    <span>© 2021</span>
-  </a>
-</footer>
-
-  
-    <script type="text/javascript">
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-  ga('create', 'G-JLF4M03LEM', 'auto');
-  ga('send', 'pageview');
-</script>
-  
-</body>
-
-</html>
+:ET
