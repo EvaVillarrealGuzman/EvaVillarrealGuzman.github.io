@@ -466,9 +466,6 @@ Realmente no podemos hablar de *performance* a menos que haya algo que podamos m
 
 Para más detalle ver [aquí](https://github.com/webpack-contrib/webpack-bundle-analyzer)
 
-medir con react-addons-perf p
-
-
 # [](#header-1)Fuentes
 
 - [Lessons Learned: Code Splitting with Webpack and React](https://hackernoon.com/lessons-learned-code-splitting-with-webpack-and-react-f012a989113)
