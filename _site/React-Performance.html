@@ -15,8 +15,8 @@
 <meta property="og:title" content="Técnicas de optimización para aplicaciones React" />
 <meta name="author" content="Eva Villarreal Guzmán" />
 <meta property="og:locale" content="en_US" />
-<meta name="description" content="La performance es un factor importante en la calidad de una aplicación. Depende mucho de cómo codificamos y cómo está configurada la infraestructura. Es importante, ya que impacta en la experiencia del usuario. Por su parte React ofrece mucha optimización para diseñar aplicaciones de reacción de alto rendimiento, que para que se luzca debemos seguir algunas buenas prácticas." />
-<meta property="og:description" content="La performance es un factor importante en la calidad de una aplicación. Depende mucho de cómo codificamos y cómo está configurada la infraestructura. Es importante, ya que impacta en la experiencia del usuario. Por su parte React ofrece mucha optimización para diseñar aplicaciones de reacción de alto rendimiento, que para que se luzca debemos seguir algunas buenas prácticas." />
+<meta name="description" content="La performance es un factor importante en la calidad de una aplicación. Depende mucho de cómo codificamos y cómo está configurada la infraestructura. Es importante, ya que impacta en la experiencia del usuario." />
+<meta property="og:description" content="La performance es un factor importante en la calidad de una aplicación. Depende mucho de cómo codificamos y cómo está configurada la infraestructura. Es importante, ya que impacta en la experiencia del usuario." />
 <link rel="canonical" href="http://localhost:8001/React-Performance" />
 <meta property="og:url" content="http://localhost:8001/React-Performance" />
 <meta property="og:site_name" content="Blog" />
@@ -25,7 +25,7 @@
 <meta name="twitter:card" content="summary" />
 <meta property="twitter:title" content="Técnicas de optimización para aplicaciones React" />
 <script type="application/ld+json">
-{"mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:8001/React-Performance"},"@type":"BlogPosting","url":"http://localhost:8001/React-Performance","author":{"@type":"Person","name":"Eva Villarreal Guzmán"},"headline":"Técnicas de optimización para aplicaciones React","dateModified":"2021-11-26T00:00:00-03:00","datePublished":"2021-11-26T00:00:00-03:00","description":"La performance es un factor importante en la calidad de una aplicación. Depende mucho de cómo codificamos y cómo está configurada la infraestructura. Es importante, ya que impacta en la experiencia del usuario. Por su parte React ofrece mucha optimización para diseñar aplicaciones de reacción de alto rendimiento, que para que se luzca debemos seguir algunas buenas prácticas.","@context":"https://schema.org"}</script>
+{"mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:8001/React-Performance"},"@type":"BlogPosting","url":"http://localhost:8001/React-Performance","author":{"@type":"Person","name":"Eva Villarreal Guzmán"},"headline":"Técnicas de optimización para aplicaciones React","dateModified":"2021-11-26T00:00:00-03:00","datePublished":"2021-11-26T00:00:00-03:00","description":"La performance es un factor importante en la calidad de una aplicación. Depende mucho de cómo codificamos y cómo está configurada la infraestructura. Es importante, ya que impacta en la experiencia del usuario.","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 
 </head>
@@ -50,7 +50,9 @@
         <article>
   <h2>Técnicas de optimización para aplicaciones React</h2>
   <time datetime="2021-11-26T00:00:00-03:00" class="by-line">26 Nov 2021</time>
-  <p>La <em>performance</em> es un factor importante en la calidad de una aplicación. Depende mucho de cómo codificamos y cómo está configurada la infraestructura. Es importante, ya que impacta en la experiencia del usuario. Por su parte React ofrece mucha optimización para diseñar aplicaciones de reacción de alto rendimiento, que para que se luzca debemos seguir algunas buenas prácticas.</p>
+  <p>La <em>performance</em> es un factor importante en la calidad de una aplicación. Depende mucho de cómo codificamos y cómo está configurada la infraestructura. Es importante, ya que impacta en la experiencia del usuario.</p>
+
+<p>Por su parte React ofrece mucha optimización para diseñar aplicaciones de reacción de alto rendimiento, sin embargo al agregar una librería como React, no se mejora la <em>performance</em> de la aplicación al instante. Para ello, debe configurar correctamente el React.</p>
 
 <h1 id="reactfragment"><a href="#header-1"></a>React.Fragment</h1>
 
@@ -467,7 +469,13 @@
 
 <h1 id="herramientas-útiles"><a href="#header-1"></a>Herramientas Útiles</h1>
 
-<p>Realmente no podemos hablar de <em>performance</em> a menos que haya algo que podamos medir. Para saber dónde mejorar, necesitamos tener algunas ideas. Algunas herramientas que te pueden ayudar a medir son:</p>
+<p>Realmente no podemos hablar de <em>performance</em> a menos que haya algo que podamos medir. Para saber dónde mejorar, necesitamos tener algunas ideas. No olvide ejecutar evaluaciones comparativas antes y después de realizar cambios en su código para realizar un seguimiento de su progreso.</p>
+
+<p>Algunas herramientas que te pueden ayudar a medir son:</p>
+
+<h2 id="why-did-you-render"><a href="#header-2"></a>Why Did You Render</h2>
+
+<p>Al trabajar con React, a menudo nos encontramos con situaciones en las cuales una página se ralentiza debido a que ciertos componentes se están volviendo a renderizar cuando no deberían. <a href="https://www.npmjs.com/package/@welldone-software/why-did-you-render">Why Did You Render</a> es una libería que ayuda a detectar por qué un componente se está volviendo a renderizar; lo consigue al modificar el comportamiento del código en tiempo de ejecución mediante <em>monkey patching</em> React. Esta herramienta nos ayuda a investigar problemas de rendimiento.</p>
 
 <h2 id="react-addons-perf"><a href="#header-2"></a>react-addons-perf</h2>
 
@@ -496,6 +504,10 @@
 
 <p>Para más detalle ver <a href="https://github.com/webpack-contrib/webpack-bundle-analyzer">aquí</a></p>
 
+<h2 id="react-developer-tools"><a href="#header-2"></a>React Developer Tools</h2>
+
+<p><a href="https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi?hl=en">React Developer Tools</a> es una extensión de <em>Chrome DevTools</em> para React. Esta extensión agrega herramientas de depuración React que nos puede ayudar a inspeccionar y editar el árbol de componentes de React que construye, y para cada componente, uno puede verificar los <em>props</em>, el estado, los <em>hooks</em>, etc. y también nos ayuda a saber si en una aplicación particular React.js ha sido usado o no.</p>
+
 <h1 id="fuentes"><a href="#header-1"></a>Fuentes</h1>
 
 <ul>
@@ -506,6 +518,7 @@
   <li><a href="https://blog.bitsrc.io/improve-your-react-app-performance-by-using-throttling-and-debouncing-101afbe9055">Improve Your React App Performance by Using Throttling and Debouncing</a></li>
   <li><a href="https://medium.com/swlh/9-performance-optimization-strategies-for-reactjs-development-36f6d03a0912">9 Performance Optimization Strategies for ReactJS Development</a></li>
   <li><a href="https://www.toptal.com/react/componentes-react-eficientes-una-guia-para-optimizar-el-desempeno-de-react">Componentes React Eficientes: Una Guía para Optimizar el Desempeño de React</a></li>
+  <li><a href="https://ourcodeworld.co/articulos/leer/934/top-9-las-mejores-tecnicas-de-optimizacion-para-aplicaciones-react">Top 9: Las Mejores técnicas de optimización para aplicaciones React</a></li>
 </ul>
 
 </article>

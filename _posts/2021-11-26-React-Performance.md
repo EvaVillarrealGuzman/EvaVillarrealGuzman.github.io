@@ -3,7 +3,9 @@ title: Técnicas de optimización para aplicaciones React
 published: true
 ---
 
-La *performance* es un factor importante en la calidad de una aplicación. Depende mucho de cómo codificamos y cómo está configurada la infraestructura. Es importante, ya que impacta en la experiencia del usuario. Por su parte React ofrece mucha optimización para diseñar aplicaciones de reacción de alto rendimiento, que para que se luzca debemos seguir algunas buenas prácticas.
+La *performance* es un factor importante en la calidad de una aplicación. Depende mucho de cómo codificamos y cómo está configurada la infraestructura. Es importante, ya que impacta en la experiencia del usuario.
+
+Por su parte React ofrece mucha optimización para diseñar aplicaciones de reacción de alto rendimiento, sin embargo al agregar una librería como React, no se mejora la *performance* de la aplicación al instante. Para ello, debe configurar correctamente el React.
 
 # [](#header-1)React.Fragment
 
@@ -439,7 +441,13 @@ Verifica la documentación para tu servidor web para ver cómo activar la compre
 
 # [](#header-1)Herramientas Útiles
 
-Realmente no podemos hablar de *performance* a menos que haya algo que podamos medir. Para saber dónde mejorar, necesitamos tener algunas ideas. Algunas herramientas que te pueden ayudar a medir son:
+Realmente no podemos hablar de *performance* a menos que haya algo que podamos medir. Para saber dónde mejorar, necesitamos tener algunas ideas. No olvide ejecutar evaluaciones comparativas antes y después de realizar cambios en su código para realizar un seguimiento de su progreso. 
+
+Algunas herramientas que te pueden ayudar a medir son:
+
+## [](#header-2)Why Did You Render
+
+Al trabajar con React, a menudo nos encontramos con situaciones en las cuales una página se ralentiza debido a que ciertos componentes se están volviendo a renderizar cuando no deberían. [Why Did You Render](https://www.npmjs.com/package/@welldone-software/why-did-you-render) es una libería que ayuda a detectar por qué un componente se está volviendo a renderizar; lo consigue al modificar el comportamiento del código en tiempo de ejecución mediante *monkey patching* React. Esta herramienta nos ayuda a investigar problemas de rendimiento.
 
 ## [](#header-2)react-addons-perf
 
@@ -469,6 +477,12 @@ En el contexto del *code splitting*, debemos ser conscientes de qué tan grandes
 
 Para más detalle ver [aquí](https://github.com/webpack-contrib/webpack-bundle-analyzer)
 
+
+## [](#header-2)React Developer Tools
+
+[React Developer Tools](https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi?hl=en) es una extensión de *Chrome DevTools* para React. Esta extensión agrega herramientas de depuración React que nos puede ayudar a inspeccionar y editar el árbol de componentes de React que construye, y para cada componente, uno puede verificar los *props*, el estado, los *hooks*, etc. y también nos ayuda a saber si en una aplicación particular React.js ha sido usado o no. 
+
+
 # [](#header-1)Fuentes
 
 - [Lessons Learned: Code Splitting with Webpack and React](https://hackernoon.com/lessons-learned-code-splitting-with-webpack-and-react-f012a989113)
@@ -478,3 +492,4 @@ Para más detalle ver [aquí](https://github.com/webpack-contrib/webpack-bundle-
 - [Improve Your React App Performance by Using Throttling and Debouncing](https://blog.bitsrc.io/improve-your-react-app-performance-by-using-throttling-and-debouncing-101afbe9055)
 - [9 Performance Optimization Strategies for ReactJS Development](https://medium.com/swlh/9-performance-optimization-strategies-for-reactjs-development-36f6d03a0912)
 - [Componentes React Eficientes: Una Guía para Optimizar el Desempeño de React](https://www.toptal.com/react/componentes-react-eficientes-una-guia-para-optimizar-el-desempeno-de-react)
+- [Top 9: Las Mejores técnicas de optimización para aplicaciones React](https://ourcodeworld.co/articulos/leer/934/top-9-las-mejores-tecnicas-de-optimizacion-para-aplicaciones-react)
