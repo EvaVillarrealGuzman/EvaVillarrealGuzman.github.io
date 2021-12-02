@@ -1,19 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
-<loc>http://localhost:8001/React-Performance</loc>
+<loc>http://localhost:7000/React-Performance</loc>
 <lastmod>2021-11-26T00:00:00-03:00</lastmod>
 </url>
 <url>
-<loc>http://localhost:8001/404</loc>
+<loc>http://localhost:7000/Docker-Limit-Resources</loc>
+<lastmod>2021-12-02T00:00:00-03:00</lastmod>
 </url>
 <url>
-<loc>http://localhost:8001/about</loc>
+<loc>http://localhost:7000/404</loc>
 </url>
 <url>
-<loc>http://localhost:8001/archive</loc>
+<loc>http://localhost:7000/about</loc>
 </url>
 <url>
-<loc>http://localhost:8001/</loc>
+<loc>http://localhost:7000/archive</loc>
+</url>
+<url>
+<loc>http://localhost:7000/</loc>
 </url>
 </urlset>

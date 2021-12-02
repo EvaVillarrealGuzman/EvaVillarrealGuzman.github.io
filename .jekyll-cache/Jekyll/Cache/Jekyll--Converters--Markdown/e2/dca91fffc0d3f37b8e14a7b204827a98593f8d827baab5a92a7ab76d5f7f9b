@@ -1,0 +1,3 @@
+I"
+<p>De forma predeterminada, no hay límite en la cantidad de memoria o CPU que puede usar un contenedor. Puede usar tanto como lo permita el programador del <em>kernel</em> del <em>host</em>. Es importante que un contenedor en ejecución no consuma demasiada memoria o CPU en la computadora <em>host</em>. Cuando el <em>kernel</em> detecta que queda muy poca memoria libre, se activa una Excepción por falta de memoria y comienza a matar procesos, y esto puede llevar al cierre completo del sistema en algunos casos.</p>
+:ET

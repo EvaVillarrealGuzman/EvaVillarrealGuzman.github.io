@@ -1,0 +1,138 @@
+I"�/<p>De forma predeterminada, no hay límite en la cantidad de memoria o CPU que puede usar un contenedor. Puede usar tanto como lo permita el programador del <em>kernel</em> del <em>host</em>. Es importante que un contenedor en ejecución no consuma demasiada memoria o CPU en la computadora <em>host</em>. Cuando el <em>kernel</em> detecta que queda muy poca memoria libre, se activa una Excepción por falta de memoria y comienza a matar procesos, y esto puede llevar al cierre completo del sistema en algunos casos.</p>
+
+<p>Para evitar estas circunstancias, siempre debe ejecutar pruebas en su aplicación y determinar la cantidad de recursos necesarios, y luego limitar los contenedores para usar una cantidad razonable de recursos.</p>
+
+<p>Puede ver las estadísticas de sus contenedores Docker sobre la marcha a través del comando stats de docker:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>docker stats <span class="o">[</span>docker_image]
+</code></pre></div></div>
+
+<h1 id="habilitar-limitación-de-recursos-en-el-sistema"><a href="#header-1"></a>Habilitar limitación de recursos en el sistema</h1>
+
+<p>Antes de limitar los recursos de un <em>container</em> es importante verificar que el <em>kernel</em> permita esto. Para esto se debe ejecutar el siguiente comando:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>docker info
+</code></pre></div></div>
+
+<p>Si recibe la siguiente advertencia al final de la salida, debe realizar algunos cambios en los archivos del sistema.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>WARNING: Noswaplimitsupport
+</code></pre></div></div>
+
+<p>Para habilitar la funcionalidad en el kernel debe editar el archivo que se encuentra en <code class="language-plaintext highlighter-rouge">/etc/default/grub</code>, y luego agregar la siguiente línea:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1"
+</code></pre></div></div>
+
+<p>Guarde los cambios y actualice la configuración del GRUB ejecutando el comando:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>update-grub
+</code></pre></div></div>
+
+<p>Para que los cambios tengan efecto debe reiniciar el sistema:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>shutdown <span class="nt">-r</span>
+</code></pre></div></div>
+
+<p>Una vez reiniciado el sistema asegúrese de que los cambios se realizaron:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>docker info
+</code></pre></div></div>
+
+<p>No debería ver la advertencia <code class="language-plaintext highlighter-rouge">WARNING: Noswaplimitsupport</code>.</p>
+
+<h1 id="limitar-el-acceso-a-la-memoria-de-un-container"><a href="#header-1"></a>Limitar el acceso a la memoria de un <em>container</em></h1>
+
+<p>Existen diferentes limitaciones de la RAM que se pueden configurar en Docker. Algunas son:</p>
+
+<h2 id="configurar-la-cantidad-máxima-de-memoría-que-un-contenedor-puede-usar"><a href="#header-2"></a>Configurar la cantidad máxima de memoría que un contenedor puede usar</h2>
+
+<p>Para esto use la opción <code class="language-plaintext highlighter-rouge">--memory</code> del comando <code class="language-plaintext highlighter-rouge">docker run</code>.  Dentro del comando se debe especificar cuanta memoria le quieres dedicar a un contenedor específico.</p>
+
+<p>La sintaxis es la siguiente:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>docker run <span class="nt">-it</span> <span class="nt">--memory</span><span class="o">=</span><span class="s2">"[memory_limit]"</span> <span class="o">[</span>docker_image]
+</code></pre></div></div>
+
+<ul>
+  <li>memory_limit: debe ser un entero positivo seguido del sufijo b, k, m o g (que hacen referencia a bytes, kilobytes, megabytes o gigabytes respectivamente).</li>
+</ul>
+
+<p>Por ejemplo, para correr una isntancia de un contenedor ubuntu y configurar un límite de 1GB, el comando sería el siguiente:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>docker run <span class="nt">-it</span> <span class="nt">--memory</span><span class="o">=</span><span class="s2">"1g"</span> ubuntu
+</code></pre></div></div>
+
+<h2 id="definir-la-cantidad-de-memoria-que-un-contenedor-puede-intercambiar-en-el-disco"><a href="#header-2"></a>Definir la cantidad de memoria que un contenedor puede intercambiar en el disco</h2>
+
+<p>El uso de la opción <code class="language-plaintext highlighter-rouge">swamp</code> permite almacenar datos incluso después de que se haya agotado toda la RAM asignada al contenedor. Lo hace ignorando la limitación de memoria y escribiendo directamente en el disco. Aunque esta es una característica útil, no es una práctica recomendada ya que perjudica la <em>performance</em>.</p>
+
+<p>El ```swamp`` incluye la cantidad total de memoria no intercambiable (<em>non-swap memory</em>) más la cantidad de memoria intercambiable (<em>swap memory</em>) reservada como respaldo.</p>
+
+<p>Por ejemplo, si se configuró –memory a 1 GB, la cantidad de memoria <em>swap</em> necesita ser mayor que eso.Para correr un contenedor con un adicional de 1 GB de memoria <em>swap</em>, se debe configurar el <em>swap</em> a 2 GB.</p>
+
+<p>La sintaxis es:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>docker run <span class="nt">-it</span> <span class="nt">--memory</span><span class="o">=</span><span class="s2">"[memory_limit]"</span> <span class="nt">--memory-swap</span><span class="o">=</span><span class="s2">"[memory_limit]"</span> <span class="o">[</span>docker_image]
+</code></pre></div></div>
+
+<p>Por ejemplo, para ejecutar un contenedor desde la imagen de Ubuntu, asignando 1 GB de RAM para que el contenedor lo use y reservando 1 GB de RAM para la memoria <em>swap</em>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>docker run <span class="nt">-it</span> <span class="nt">--memory</span><span class="o">=</span><span class="s2">"1g"</span> <span class="nt">--memory-swap</span><span class="o">=</span><span class="s2">"2g"</span> ubuntu
+</code></pre></div></div>
+
+<p>En caso de no querer usar memoria <em>swap</em>, dé a <code class="language-plaintext highlighter-rouge">--memory</code> y <code class="language-plaintext highlighter-rouge">--memory-swap</code> los mismos valores.</p>
+
+<h2 id="configurar-un-límite-flexible-para-la-cantidad-de-memoria-asignada-a-un-contenedor"><a href="#header-2"></a>Configurar un límite flexible para la cantidad de memoria asignada a un contenedor</h2>
+
+<p>Limitar el uso de memoria de un contenedor con <code class="language-plaintext highlighter-rouge">--memory</code> es establecer un límite estricto que no se puede superar. Alternativamente, puede establecer un límite flexible (<code class="language-plaintext highlighter-rouge">--memory-reserve</code>) que advierte cuando el contenedor llega al final de su memoria asignada, pero no detiene ninguno de sus servicios.</p>
+
+<p>Si no se establecen las limitaciones de <code class="language-plaintext highlighter-rouge">--memory</code>, configurar el límite flexible con <code class="language-plaintext highlighter-rouge">--memory-reserve</code> no limita por completo el espacio del contenedor. Si tiene ambas funciones habilitadas, el límite flexible siempre es menor que la capacidad máxima de espacio.</p>
+
+<p>Como ejemplo, para que un contenedor de Ubuntu tenga la reserva de memoria de 750 MB y la capacidad máxima de RAM de 1 BG, el comando es:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>docker run <span class="nt">-it</span> <span class="nt">--memory</span><span class="o">=</span><span class="s2">"1g"</span> <span class="nt">--memory-reservation</span><span class="o">=</span><span class="s2">"750m"</span> ubuntu
+</code></pre></div></div>
+
+<h1 id="limitar-el-uso-de-cpu-de-un-contenedor"><a href="#header-1"></a>Limitar el uso de CPU de un contenedor</h1>
+
+<p>Al igual que el uso de RAM, los contenedores Docker no tienen limitaciones predeterminadas para la CPU del <em>host</em>. Dar a los contenedores un uso ilimitado de la CPU puede generar problemas.</p>
+
+<p>Hay varias formas de definir la cantidad de recursos de CPU de la máquina <em>host</em> que desea asignar a los contenedores.</p>
+
+<p>Por ejemplo, si tiene un <em>host</em> con 2 CPU y desea otorgar acceso a un contenedor a una de ellas, use la opción <code class="language-plaintext highlighter-rouge">--cpus = "1.0"</code>. El comando para ejecutar un contenedor de Ubuntu con acceso a 1 CPU sería:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>docker run <span class="nt">-it</span> <span class="nt">--cpus</span><span class="o">=</span><span class="s2">"1.0"</span> ubuntu
+</code></pre></div></div>
+
+<p>Además, es probable que la máquina <em>host</em> tenga más de una CPU. Si ese es el caso, puede seleccionar la CPU, o las CPU, que deben ser asignadas por el contenedor. Esto le permite separar varios contenedores en diferentes CPU o núcleos. <code class="language-plaintext highlighter-rouge">--cpuset-cpus</code> acepta valores en dos formatos diferentes. Puede especificar las CPU deseadas mediante:</p>
+
+<ul>
+  <li>una lista separada por comas. Como por ejemplo 0,2,4</li>
+  <li>un rango. Como por ejemplo 1-3</li>
+</ul>
+
+<p>Las CPUs se direccionan mediante un índice basado en cero. Esto significa que 0,2,4 le dice a Docker que asigne potencia de cálculo de la primera, tercera y quinta CPU.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Corre un contenedor y le asigna solo la segunda CPU</span>
+docker run <span class="nt">-d</span> <span class="nt">--rm</span> <span class="nt">--cpuset-cpus</span> 1 ubuntu <span class="nt">-c</span> 8 <span class="nt">-t</span> 20s
+</code></pre></div></div>
+
+<p>Debido a que el conjunto de CPU se selecciona explícitamente, el contenedor está limitado a la capacidad del conjunto.</p>
+
+<p>También puede usar la opción <code class="language-plaintext highlighter-rouge">--cpu-shares</code> para darle al contenedor una mayor o menor proporción de ciclos de CPU. De forma predeterminada, está configurado en 1024. Utilice números más bajos para definir una prioridad más baja; en cambio, los valores superiores a 1024 dan como resultado una prioridad más alta.</p>
+
+<p>Para ejecutar un contenedor con menos recursos compartidos de CPU, ejecute:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>docker run <span class="nt">-it</span> <span class="nt">--cpus-shares</span><span class="o">=</span><span class="s2">"700"</span> ubuntu
+</code></pre></div></div>
+
+<h1 id="fuentes"><a href="#header-1"></a>Fuentes</h1>
+
+<ul>
+  <li><a href="https://phoenixnap.com/kb/docker-memory-and-cpu-limit">How to Set Docker Memory and CPU Usage Limit</a></li>
+  <li><a href="https://docs.docker.com/config/containers/resource_constraints/#configure-the-default-cfs-scheduler/">Runtime options with Memory, CPUs, and GPUs</a></li>
+  <li><a href="https://www.batey.info/cgroup-cpu-shares-for-docker.html">CPU Shares for Docker containers</a></li>
+  <li><a href="https://www.thorsten-hans.com/docker-container-cpu-limits-explained">Docker Container CPU Limits Explained</a></li>
+</ul>
+:ET
