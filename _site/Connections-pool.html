@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <meta name="generator" content="Jekyll">
+
+  <title>Connection Pooling</title>
+
+  <link rel="stylesheet" href="/css/main.css">
+  
+  <link href="/atom.xml" type="application/atom+xml" rel="alternate" title="ATOM Feed" /> <!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Connection Pooling | Blog</title>
+<meta name="generator" content="Jekyll v4.2.1" />
+<meta property="og:title" content="Connection Pooling" />
+<meta name="author" content="Eva Villarreal Guzmán" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Conectarse a una base de datos es una operación costosa, ya que consta de los siguientes pasos:" />
+<meta property="og:description" content="Conectarse a una base de datos es una operación costosa, ya que consta de los siguientes pasos:" />
+<link rel="canonical" href="http://localhost:8002/Connections-pool" />
+<meta property="og:url" content="http://localhost:8002/Connections-pool" />
+<meta property="og:site_name" content="Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-12-13T00:00:00-03:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Connection Pooling" />
+<script type="application/ld+json">
+{"mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:8002/Connections-pool"},"@type":"BlogPosting","url":"http://localhost:8002/Connections-pool","author":{"@type":"Person","name":"Eva Villarreal Guzmán"},"headline":"Connection Pooling","dateModified":"2021-12-13T00:00:00-03:00","datePublished":"2021-12-13T00:00:00-03:00","description":"Conectarse a una base de datos es una operación costosa, ya que consta de los siguientes pasos:","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+
+<body>
+  <div id="wrapper">
+    <header>
+  <div>
+    <a href="/">
+    
+    <h1>Eva Villarreal Guzmán</h1>
+    </a>
+    <div class="header-links">
+      <a href="/archive"><h2 class="header-link">Archive</h2></a>
+<a href="/about"><h2 class="header-link">About</h2></a>
+<a href="/atom.xml"><h2 class="header-link">RSS</h2></a>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <section id="main_content">
+        <article>
+  <h2>Connection Pooling</h2>
+  <time datetime="2021-12-13T00:00:00-03:00" class="by-line">13 Dec 2021</time>
+  <p>Conectarse a una base de datos es una operación costosa, ya que consta de los siguientes pasos:</p>
+
+<ol>
+  <li>Abrir una conexión a la base de datos utilizando el <em>driver</em> de la base de datos.</li>
+  <li>Abrir un socket TCP</li>
+  <li>Ejecutar <em>query SQL</em> sobre el <em>socket</em>.</li>
+  <li>Cerrar la conexión.</li>
+  <li>Cerrar el <em>socket</em>.</li>
+</ol>
+
+<p>En un entorno de producción en el que esperamos miles de conexiones abiertas y cerradas simultáneas de los clientes, realizar los pasos anteriores para cada conexión puede hacer que la base de datos funcione mal. Si ese rendimiento de la base de datos se deteriora, puede provocar una mala experiencia del usuario, pérdidas de ingresos e incluso tiempo de inactividad no programado. Por lo tanto, las conexiones a la base de datos deben reducirse al mínimo en todos los casos de uso posibles.</p>
+
+<h2 id="qué-es-el-connection-pooling"><a href="#header-2"></a>¿Qué es el <em>Connection Pooling</em>?</h2>
+
+<p><em>Connection Pooling</em> es un patrón de acceso a datos, cuyo objetivo principal es reducir la sobrecarga involucrada en la realización de conexiones de base de datos y operaciones de base de datos de lectura/escritura. Es una implementación de caché de conexión de base de datos, que se puede configurar para adaptarse a requisitos específicos.</p>
+
+<p>Los <em>pools</em> de conexiones reutilizan algunas conexiones existentes. Esto evita la sobrecarga de crear una nueva conexión a la base de datos cada vez que se solicita una conexión con las mismas propiedades (es decir, nombre, base de datos, versión del protocolo). En lugar de abrir y cerrar conexiones para cada solicitud, el <em>pool</em> de conexiones utiliza un caché de conexiones de base de datos que se puede reutilizar cuando se requieran futuras solicitudes a la base de datos. Permite que su base de datos se amplíe de manera eficaz a medida que aumentan los datos almacenados allí y la cantidad de clientes que acceden a ella. El tráfico nunca es constante, por lo que el <em>pool</em> puede gestionar mejor los picos de tráfico sin provocar interrupciones.</p>
+
+<h2 id="cómo-funciona-el-connection-pooling"><a href="#header-2"></a>¿Cómo funciona el <em>Connection Pooling</em>?</h2>
+
+<p>Un <em>pool</em> contiene dos tipos de conexiones:</p>
+
+<ul>
+  <li>Conexión activa (<em>Active</em>): en uso por la aplicación.</li>
+  <li>Conexión inactiva (<em>Idle</em>): disponible para que la utilice la aplicación.</li>
+</ul>
+
+<p>El <em>pool</em> lo que hace es mantener y gestionar un número de conexiones físicas, que se irán reutilizando automáticamente para aumentar la eficiencia. De esta forma cuando creamos una nueva conexión desde nuestra aplicación, lo que obtenemos es una conexión lógica gestionada por el <em>pool</em>, y al cerrarla lo que hacemos es devolverla a dicho <em>pool</em>. A su vez el <em>pool</em> es capaz de ofrecer múltiples conexiones lógicas utilizando un reducido número de conexiones reales. El manejo de un <em>pool</em> favorece la escalabilidad y el rendimiento de una aplicación.</p>
+
+<p>Cada vez que obtienes una conexión, el <em>pool</em> crea una nueva conexión solamente si es necesario, si tiene conexiones que actualmente no están en uso (<em>idle</em>), te devuelve una de estos. Por eso el <em>pool</em> mantiene una cantidad de conexiones listo para ser usado (<em>minIdle</em>-<em>maxIdle</em>). Es importante cerrar la conexión cuando terminaste de usarla. Cuando en la aplicación se cierra una conexión, en realidad el <em>pool</em> no cierra la conexión física, sino que pasa a estar <em>idle</em> para ser reutilizado.</p>
+
+<h2 id="formas-de-integrar-un-connection-pooling"><a href="#header-2"></a>Formas de integrar un <em>Connection Pooling</em></h2>
+
+<h3 id="como-servicio-externo-o-middleware-como-pgbouncer"><a href="#header-3"></a>Como servicio externo o middleware como pgbouncer</h3>
+
+<p>Los <em>Connection poolers</em> como pgbouncer y pgpool-II se pueden utilizar para agrupar conexiones de clientes a una base de datos PostgreSQL. El <em>connection pooler</em> se encuentra entre la aplicación y el servidor de la base de datos.</p>
+
+<h3 id="librerías-del-lado-del-cliente"><a href="#header-3"></a>Librerías del lado del cliente</h3>
+
+<p>Existen librerías que amplían la funcionalidad del <em>driver</em> de la base de datos para incluir la compatibilidad con la <em>connection pooling</em>.</p>
+
+<p>Sin embargo, la mejor manera de implementar <em>connection pooling</em> para aplicaciones es hacer uso de un servicio externo o <em>middleware</em>, ya que es más fácil de configurar y administrar. Además, el <em>middleware</em> externo como pgpool2 proporciona otras características, como <em>load balancing</em>, además de <em>pooling connections</em>.</p>
+
+<h2 id="buenas-prácticas"><a href="#header-2"></a>Buenas prácticas</h2>
+
+<p>Diferentes aplicaciones pueden tener requisitos de conexión de bases de datos diferentes y puede que desee modificar el comportamiento predeterminado de la <em>connection pooling</em>. Configuraciones como el tamaño del <em>pool</em> y tiempos de espera de conexión pueden mejorar el desempeño general del <em>pool</em> de conexión, así como la disponibilidad de conexión. En muchos casos, la mejor forma de afinar un <em>pool</em> de conexiones para una aplicación específica es intentar diferentes combinaciones de las propiedades utilizando diferentes valores hasta conseguir un rendimiento óptimo.</p>
+
+<h3 id="controlar-el-tamaño-del-pool"><a href="#header-3"></a>Controlar el tamaño del Pool</h3>
+
+<p>Se permite que el número de conexiones en el <em>pool</em> sea dinámico para aumentar y disminuir a medida que aumenta la demanda y disminuye. Este comportamiento dinámico ayuda a conservar los recursos del sistema que en otro caso se pierden en el mantenimiento de las conexiones innecesarias.</p>
+
+<h4 id="ajuste-el-tamaño-del-grupo-inicial"><a href="#header-4"></a>Ajuste el tamaño del grupo inicial</h4>
+
+<p>El tamaño del <em>pool</em> inicial de la propiedad especifica el número de conexiones disponibles que se crean cuando el <em>pool</em> de conexiones es inicialmente creada o se reinicializa. Esta propiedad se utiliza normalmente para reducir el tiempo de arranque necesario para el purgado del <em>pool</em> a su tamaño óptimo.</p>
+
+<p>Un valor de cero indica que no hay conexiones creadas previamente. El valor predeterminado es cero.</p>
+
+<p>Si el tamaño del grupo inicial es mayor que el máximo tamaño del <em>pool</em>, sólo el número máximo de conexiones son inicializadas. En el caso que tamaño del grupo inicial de la propiedad es menor que el mínimo tamaño del <em>pool</em>, sólo el número inicial de las conexiones son inicializadas y se mantienen hasta que se crean conexiones suficientes para cumplir con el mínimo valor de tamaño del <em>pool</em>.</p>
+
+<h4 id="ajuste-el-tamaño-mínimo-del-pool"><a href="#header-4"></a>Ajuste el tamaño mínimo del <em>pool</em></h4>
+
+<p>El tamaño mínimo del <em>pool</em> especifica la cantidad mínima de las conexiones disponibles y prestadas que un grupo mantiene. Un grupo de conexiones siempre trata de volver al tamaño mínimo especificado a menos que la cantidad mínima aún no se ha alcanzado. Por ejemplo, si el límite mínimo se establece en diez y sólo dos conexiones se han creado y prestado, entonces el número de conexiones que mantiene el <em>pool</em> permanece en dos.</p>
+
+<p>Esta propiedad permite que el número de conexiones del pool disminuya a medida que disminuye la demanda. Al mismo tiempo, la propiedad se asegura de que los recursos del sistema no se desperdician en el mantenimiento de las conexiones que son innecesarias. El valor predeterminado es cero.</p>
+
+<h4 id="establecer-el-tamaño-máximo-de-pool"><a href="#header-4"></a>Establecer el tamaño máximo de Pool</h4>
+
+<p>El tamaño máximo especifica el número máximo de las conexiones que mantiene un <em>pool</em>. Si se toman prestadas el número máximo de conexiones, las conexiones no estarán disponibles hasta que una conexión se devuelve al <em>pool</em>.</p>
+
+<p>Esta propiedad permite que el número de conexiones en el pool aumente a medida que aumenta la demanda. Al mismo tiempo, la propiedad asegura que el <em>pool</em> no crezca hasta el punto de agotar los recursos de un sistema, que en última instancia, afecta al rendimiento de una aplicación y disponibilidad.</p>
+
+<p>Un valor de cero indica que no hay conexiones gestionada por el <em>pool</em>. Un intento de obtener un resultado de conexión en esta situación, es una excepción.</p>
+
+<h3 id="control-de-conexiones"><a href="#header-3"></a>Control de conexiones</h3>
+
+<p>Las conexiones que quedan obsoletas pueden afectar a la disponibilidad de conexión. Es necesario hacer un esfuerzo por cerrarlas, porque de otro modo se pueden desperdiciar conexiones no utilizadas por largos períodos de tiempo.</p>
+
+<p>Es una buena práctica cerrar todas las conexiones que ya no son necesarias para una aplicación. Las conexiones de cierre ayudan a minimizar el número de conexiones que quedan obsoletas pero continúan prestadas. Las principales características a configurar:</p>
+
+<ul>
+  <li>Configuración de reutilización de la conexión: Se configuran las características para poder reutilizar una conexión. Cuando supera un numero de reutilizaciones, se elimina del <em>pool</em>.</li>
+  <li>Tiempo máximo de reutilización: Permite controlar el tiempo necesario para que una conexión pueda volver a ser reutilizada. Mantiene como ocupadas, conexiones dentro del <em>pool</em> hasta que superan el tiempo estipulado.</li>
+  <li>Tiempo de espera para considerar una conexión abandonada: El tiempo de espera que se permite a los abandonados para recuperar la conexión de nuevo en el grupo de conexión después de que una conexión no ha sido utilizado por un importe específico de tiempo.</li>
+  <li>Ajuste del Tiempo de espera de conexión: El tiempo de espera que una solicitud de conexión específica espera para obtener una conexión, si ya no hay ninguna conexión en el <em>pool</em>. La solicitud recibe una excepción si se alcanza el valor de tiempo de espera. Esta característica mejora la usabilidad de tiempo de espera global de la aplicación, minimizando la cantidad de tiempo que una aplicación está bloqueada y ofrece la capacidad de implementar una recuperación.</li>
+  <li>Ajuste del tiempo de espera de conexión inactiva: Especifica el tiempo que una conexión disponible puede permanecer inactiva antes de que se cierre y se retire del <em>pool</em>. Esta propiedad de tiempo de espera sólo es aplicable a las conexiones disponibles y no afecta a las conexiones que estén prestadas.</li>
+</ul>
+
+<h1 id="fuentes"><a href="#header-1"></a>Fuentes</h1>
+
+<ul>
+  <li><a href="http://www.juntadeandalucia.es/servicios/madeja/contenido/recurso/218">Manejo del pool de conexiones</a></li>
+  <li><a href="https://es.stackoverflow.com/questions/46754/pool-de-conexiones-java">Pool de Conexiones Java</a></li>
+  <li><a href="https://es.stackoverflow.com/questions/359715/cu%C3%A1l-ser%C3%ADa-la-diferencia-entre-usar-un-pool-o-usar-una-conexion-tradicional-a-l">¿cuál sería la diferencia entre usar un pool o usar una conexion tradicional a la base de datos?</a></li>
+  <li><a href="https://www.baeldung.com/java-connection-pooling">A Simple Guide to Connection Pooling in Java</a></li>
+  <li><a href="https://stackoverflow.blog/2020/10/14/improve-database-performance-with-connection-pooling/">Improve database performance with connection pooling</a></li>
+  <li><a href="https://stackoverflow.com/questions/18496540/node-js-mysql-connection-pooling/54224377#54224377">node.js + mysql connection pooling</a></li>
+</ul>
+
+</article>
+      </section>
+    </div>
+  </div>
+
+   <footer>
+  <a href="https://github.com/EvaVillarrealGuzman">
+    <span>
+        <b>EvaVillarrealGuzman</b>
+    </span>
+    
+    <span>© 2021</span>
+  </a>
+</footer>
+
+  
+    <script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'G-JLF4M03LEM', 'auto');
+  ga('send', 'pageview');
+</script>
+  
+</body>
+
+</html>

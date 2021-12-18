@@ -17,13 +17,14 @@
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="Blog sobre desarrollo de software" />
 <meta property="og:description" content="Blog sobre desarrollo de software" />
-<link rel="canonical" href="http://localhost:7000/" />
-<meta property="og:url" content="http://localhost:7000/" />
+<link rel="canonical" href="http://localhost:8002/" />
+<meta property="og:url" content="http://localhost:8002/" />
 <meta property="og:site_name" content="Blog" />
+<link rel="next" href="http://localhost:8002/page/2/" />
 <meta name="twitter:card" content="summary" />
 <meta property="twitter:title" content="Blog" />
 <script type="application/ld+json">
-{"@type":"WebSite","url":"http://localhost:7000/","headline":"Blog","name":"Blog","author":{"@type":"Person","name":"Eva Villarreal Guzmán"},"description":"Blog sobre desarrollo de software","@context":"https://schema.org"}</script>
+{"@type":"WebSite","url":"http://localhost:8002/","name":"Blog","author":{"@type":"Person","name":"Eva Villarreal Guzmán"},"headline":"Blog","description":"Blog sobre desarrollo de software","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 
 </head>
@@ -48,15 +49,21 @@
         <ul>
     
       <li>
-          <h2><a href="/Docker-Limit-Resources">Limitación de recursos en Docker</a></h2>
-          <time datetime="2021-12-02T00:00:00-03:00">02 Dec 2021</time>
-          <p>De forma predeterminada, no hay límite en la cantidad de memoria o CPU que puede usar un contenedor. Puede usar tanto como lo permita el programador del kernel del host. Es importante que un contenedor en ejecución no consuma demasiada memoria o CPU en la computadora host. Cuando el kernel...</p>
+          <h2><a href="/Postgres-too-many-clients">PostgreSQL sorry, too many clients already</a></h2>
+          <time datetime="2021-12-13T00:00:00-03:00">13 Dec 2021</time>
+          <p>El parámetro max_connections determina el número máximo de conexiones simultáneas en el servidor de base de datos. Por defecto PostgreSQL establece el límite máximo de conexiones en 100. Si el límite establecido en la base de datos se supera, PostgreSQL lanzará la siguiente excepción: org.postgresql.util.PSQLException: FATAL: sorry, too many clients...</p>
       </li>
     
       <li>
-          <h2><a href="/React-Performance">Técnicas de optimización para aplicaciones React</a></h2>
-          <time datetime="2021-11-26T00:00:00-03:00">26 Nov 2021</time>
-          <p>La performance es un factor importante en la calidad de una aplicación. Depende mucho de cómo codificamos y cómo está configurada la infraestructura. Es importante, ya que impacta en la experiencia del usuario. Por su parte React ofrece mucha optimización para diseñar aplicaciones de reacción de alto rendimiento, sin embargo...</p>
+          <h2><a href="/Connections-pool">Connection Pooling</a></h2>
+          <time datetime="2021-12-13T00:00:00-03:00">13 Dec 2021</time>
+          <p>Conectarse a una base de datos es una operación costosa, ya que consta de los siguientes pasos: Abrir una conexión a la base de datos utilizando el driver de la base de datos. Abrir un socket TCP Ejecutar query SQL sobre el socket. Cerrar la conexión. Cerrar el socket. En...</p>
+      </li>
+    
+      <li>
+          <h2><a href="/Docker-Limit-Resources">Limitación de recursos en Docker</a></h2>
+          <time datetime="2021-12-02T00:00:00-03:00">02 Dec 2021</time>
+          <p>De forma predeterminada, no hay límite en la cantidad de memoria o CPU que puede usar un contenedor. Puede usar tanto como lo permita el programador del kernel del host. Es importante que un contenedor en ejecución no consuma demasiada memoria o CPU en la computadora host. Cuando el kernel...</p>
       </li>
     
 </ul>
@@ -65,6 +72,18 @@
     </div>
   </div>
 
+  
+  <div class="pagination">
+    
+    <span class="page-item">&laquo;</span>
+      
+    <span class="page-item">1</span>
+      
+    <a href="/page/2/" class="page-item">2</a>
+      
+    <a href="/page/2/" class="page-item">&raquo;</a>
+    
+  </div>
    <footer>
   <a href="https://github.com/EvaVillarrealGuzman">
     <span>

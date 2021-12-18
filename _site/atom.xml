@@ -3,8 +3,8 @@
   <channel>
     <title>Blog</title>
     <description>Blog sobre desarrollo de software</description>
-    <link>http://localhost:7000</link>
-    <atom:link href="http://localhost:7000/feed.xml" rel="self" type="application/rss+xml" />
+    <link>http://localhost:8002</link>
+    <atom:link href="http://localhost:8002/feed.xml" rel="self" type="application/rss+xml" />
     <author>
       <name>Eva Villarreal Guzmán</name>
       <email>villarrealguzman@gmail.com</email>
@@ -12,12 +12,224 @@
     </author>
     
       <item>
+        <title>PostgreSQL sorry, too many clients already</title>
+        <description>&lt;p&gt;El parámetro &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;max_connections&lt;/code&gt; determina el número máximo de conexiones simultáneas en el servidor de base de datos. Por defecto PostgreSQL establece el límite máximo de conexiones en 100.&lt;/p&gt;
+
+&lt;p&gt;Si el límite establecido en la base de datos se supera, PostgreSQL lanzará la siguiente excepción:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;org.postgresql.util.PSQLException: FATAL: sorry, too many clients already.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Ante este error podemos encontrar las siguientes soluciones:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Incrementar el parámetro &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;max_connections&lt;/code&gt;. Esto es sencillo de realizar pero probablemente solucione el problema temporalmente.&lt;/li&gt;
+  &lt;li&gt;Una posible causa de este error es que las aplicaciones que se conectan a la base de datos no estén implementado correctamente el cierre de la conexiones. Generando que se sigan abriendo conexiones sin cerrar otras que ya no se usan. Por lo tanto debería chequear el código donde se abre una conexión y verificar que la misma se cierre correctamente. Para ayudar a encontrar la aplicación que hace un mal uso de la conexión, puede dar diferentes nombres de usuario / contraseñas a las aplicaciones que podrían no liberar las conexiones, y luego buscar en &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pg_stat_activity&lt;/code&gt; para averiguar cuál no se está cerrando las conexiones.&lt;/li&gt;
+  &lt;li&gt;Usar un &lt;em&gt;pool&lt;/em&gt; de conexiones en las aplicaciones. Un &lt;em&gt;pool&lt;/em&gt; de conexiones mantiene un número de conexiones a la base datos abiertas. De esta manera en lugar de abrir tu mismo una nueva conexión simplemente solicitas alguna de las disponibles, mejorando de esta forma la &lt;em&gt;performance&lt;/em&gt; de tu aplicación, ya que abrir y cerrar conexiones de base de datos suponen un coste de procesador. Para más detalle ver &lt;a href=&quot;/Connections-pool&quot;&gt;aquí&lt;/a&gt;.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Particularmente nos vamos a centrar sobre el punto 1, es decir, la configuración del parámetro &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;max_connections&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Sobre este parámetro debe tener en cuenta lo siguiente:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Cada conexión PostgreSQL consume memoria RAM para administrar la conexión o el cliente que la usa. Cuantas más conexiones tenga, más memoria RAM se utilizará para este fin, en lugar de utilizarse para ejecutar la base de datos.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Por lo general, una aplicación bien codificada no necesita una gran cantidad de conexiones. Si tiene una aplicación que necesita una gran cantidad de conexiones, considere usar una herramienta como &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pg_bouncer&lt;/code&gt; que puede agrupar las conexiones por usted. Como cada conexión consume RAM, debería intentar minimizar su uso y por lo tanto es importante no abusar.&lt;/p&gt;
+
+&lt;h2 id=&quot;comandos-útiles-para-modificar-el-parámetro-max_connections&quot;&gt;&lt;a href=&quot;#header-2&quot;&gt;&lt;/a&gt;Comandos útiles para modificar el parámetro max_connections&lt;/h2&gt;
+
+&lt;h3 id=&quot;chequeé-el-valor-del-parámetro-actual&quot;&gt;&lt;a href=&quot;#header-3&quot;&gt;&lt;/a&gt;Chequeé el valor del parámetro actual&lt;/h3&gt;
+
+&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;SHOW&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;max_connections&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;ver-con-detalle-las-conexiones-actualmente-usadas&quot;&gt;&lt;a href=&quot;#header-3&quot;&gt;&lt;/a&gt;Ver con detalle las conexiones actualmente usadas&lt;/h3&gt;
+
+&lt;p&gt;Este comando permite ver quién/qué/cuándo/dónde se mantiene abiertas las conexiones:&lt;/p&gt;
+
+&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pg_stat_activity&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;liste-la-cantidad-de-conexiones-actualmente-usadas&quot;&gt;&lt;a href=&quot;#header-3&quot;&gt;&lt;/a&gt;Liste la cantidad de conexiones actualmente usadas&lt;/h3&gt;
+
+&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;count&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pg_stat_activity&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;editar-el-parámetro-max_connections&quot;&gt;&lt;a href=&quot;#header-3&quot;&gt;&lt;/a&gt;Editar el parámetro max_connections&lt;/h3&gt;
+
+&lt;p&gt;Sobre esto, es importante aclarar que incrementar solamente &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;max_connections&lt;/code&gt; es una mala idea. También debería incrementar &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;shared_buffers&lt;/code&gt; y &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kernel.shmmax&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;El parámetro &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;shared_buffers&lt;/code&gt; determina cuanta memoria usará PostgreSQL para almacenar datos en caché. Las conexiones utilizan la memoria en los &lt;em&gt;shared buffers&lt;/em&gt;.
+Tenga en cuenta las siguientes consideraciones:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Si tiene un servidor con 1 GB o más de RAM, un valor inicial razonable para &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;shared_buffers&lt;/code&gt; es 25% de la memoria de su servidor.&lt;/li&gt;
+  &lt;li&gt;Es poco probable que el uso de más del 40% de RAM funcione mejor que una cantidad menor (como el 25%)&lt;/li&gt;
+  &lt;li&gt;Si su servidor o la compilación de PostgreSQL es de 32 bits, puede que no sea práctico establecer &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;shared_buffers&lt;/code&gt; por encima de 2 ~ 2.5GB.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Aclarado esto, continuaremos con los pasos para modificar estos parámetros.&lt;/p&gt;
+
+&lt;p&gt;Busque el archivo de configuración de PostgreSQL&lt;/p&gt;
+
+&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;SHOW&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;config_file&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Edite el archivo de configuración y actualice el parámetro &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;max_connections&lt;/code&gt; y &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;shared_buffers&lt;/code&gt;. Supongamos que tenemos un server con 8GB de memoria, y en el mismo archivo &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;postgresql.conf&lt;/code&gt;, actualice el valor del parámetro &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;shared_buffers&lt;/code&gt; a 2GB (25%).&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;max_connections = 100
+shared_buffers = 2GB
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Para que los cambios tengan efecto reinicie el servicio de PostgreSQL:&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;systemctl restart postgresql
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Debería aumentar el tamaño del segmento máximo del kernel para que sea un poco más grande que &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;shared_buffers&lt;/code&gt;. En el archivo &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/sysctl.conf&lt;/code&gt;, configure el parámetro como se muestra a continuación. Entrará en vigor cuando se reinicie postgreSQL (la siguiente línea hace que el kernel tenga un máximo de 2.3GB)&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kernel.shmmax=2469606195
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;En los sistemas modernos, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kernel.shmmax&lt;/code&gt; ya es muy alto y no debe cambiarse. Para ver cual está configurado puede ejecutar el siguiente comando:&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;cat&lt;/span&gt; /proc/sys/kernel/shmmax
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;strong&gt;Nota:&lt;/strong&gt; Puede usar la página &lt;a href=&quot;https://pgtune.leopard.in.ua/&quot;&gt;PGTune&lt;/a&gt; para obtener los parámetros óptimos para su sistema.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h1 id=&quot;fuentes&quot;&gt;&lt;a href=&quot;#header-1&quot;&gt;&lt;/a&gt;Fuentes&lt;/h1&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://stackoverflow.com/questions/2757549/org-postgresql-util-psqlexception-fatal-sorry-too-many-clients-already&quot;&gt;org.postgresql.util.PSQLException: FATAL: sorry, too many clients already&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://dadruid5.com/2017/07/20/checking-and-increasing-the-max-connections-in-postgresql/&quot;&gt;Checking and Increasing the Connection Limit in PostgreSQL&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://devcoops.com/resolve-sorry-too-many-clients-postgres-issue/&quot;&gt;How to resolve PostgreSQL FATAL: sorry, too many clients already&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://stackoverflow.com/questions/30778015/how-to-increase-the-max-connections-in-postgres&quot;&gt;How to increase the max connections in postgres?&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        <pubDate>Mon, 13 Dec 2021 00:00:00 -0300</pubDate>
+        <link>http://localhost:8002//Postgres-too-many-clients</link>
+        <link href="http://localhost:8002/Postgres-too-many-clients"/>
+        <guid isPermaLink="true">http://localhost:8002/Postgres-too-many-clients</guid>
+      </item>
+    
+      <item>
+        <title>Connection Pooling</title>
+        <description>&lt;p&gt;Conectarse a una base de datos es una operación costosa, ya que consta de los siguientes pasos:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Abrir una conexión a la base de datos utilizando el &lt;em&gt;driver&lt;/em&gt; de la base de datos.&lt;/li&gt;
+  &lt;li&gt;Abrir un socket TCP&lt;/li&gt;
+  &lt;li&gt;Ejecutar &lt;em&gt;query SQL&lt;/em&gt; sobre el &lt;em&gt;socket&lt;/em&gt;.&lt;/li&gt;
+  &lt;li&gt;Cerrar la conexión.&lt;/li&gt;
+  &lt;li&gt;Cerrar el &lt;em&gt;socket&lt;/em&gt;.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;En un entorno de producción en el que esperamos miles de conexiones abiertas y cerradas simultáneas de los clientes, realizar los pasos anteriores para cada conexión puede hacer que la base de datos funcione mal. Si ese rendimiento de la base de datos se deteriora, puede provocar una mala experiencia del usuario, pérdidas de ingresos e incluso tiempo de inactividad no programado. Por lo tanto, las conexiones a la base de datos deben reducirse al mínimo en todos los casos de uso posibles.&lt;/p&gt;
+
+&lt;h2 id=&quot;qué-es-el-connection-pooling&quot;&gt;&lt;a href=&quot;#header-2&quot;&gt;&lt;/a&gt;¿Qué es el &lt;em&gt;Connection Pooling&lt;/em&gt;?&lt;/h2&gt;
+
+&lt;p&gt;&lt;em&gt;Connection Pooling&lt;/em&gt; es un patrón de acceso a datos, cuyo objetivo principal es reducir la sobrecarga involucrada en la realización de conexiones de base de datos y operaciones de base de datos de lectura/escritura. Es una implementación de caché de conexión de base de datos, que se puede configurar para adaptarse a requisitos específicos.&lt;/p&gt;
+
+&lt;p&gt;Los &lt;em&gt;pools&lt;/em&gt; de conexiones reutilizan algunas conexiones existentes. Esto evita la sobrecarga de crear una nueva conexión a la base de datos cada vez que se solicita una conexión con las mismas propiedades (es decir, nombre, base de datos, versión del protocolo). En lugar de abrir y cerrar conexiones para cada solicitud, el &lt;em&gt;pool&lt;/em&gt; de conexiones utiliza un caché de conexiones de base de datos que se puede reutilizar cuando se requieran futuras solicitudes a la base de datos. Permite que su base de datos se amplíe de manera eficaz a medida que aumentan los datos almacenados allí y la cantidad de clientes que acceden a ella. El tráfico nunca es constante, por lo que el &lt;em&gt;pool&lt;/em&gt; puede gestionar mejor los picos de tráfico sin provocar interrupciones.&lt;/p&gt;
+
+&lt;h2 id=&quot;cómo-funciona-el-connection-pooling&quot;&gt;&lt;a href=&quot;#header-2&quot;&gt;&lt;/a&gt;¿Cómo funciona el &lt;em&gt;Connection Pooling&lt;/em&gt;?&lt;/h2&gt;
+
+&lt;p&gt;Un &lt;em&gt;pool&lt;/em&gt; contiene dos tipos de conexiones:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Conexión activa (&lt;em&gt;Active&lt;/em&gt;): en uso por la aplicación.&lt;/li&gt;
+  &lt;li&gt;Conexión inactiva (&lt;em&gt;Idle&lt;/em&gt;): disponible para que la utilice la aplicación.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;El &lt;em&gt;pool&lt;/em&gt; lo que hace es mantener y gestionar un número de conexiones físicas, que se irán reutilizando automáticamente para aumentar la eficiencia. De esta forma cuando creamos una nueva conexión desde nuestra aplicación, lo que obtenemos es una conexión lógica gestionada por el &lt;em&gt;pool&lt;/em&gt;, y al cerrarla lo que hacemos es devolverla a dicho &lt;em&gt;pool&lt;/em&gt;. A su vez el &lt;em&gt;pool&lt;/em&gt; es capaz de ofrecer múltiples conexiones lógicas utilizando un reducido número de conexiones reales. El manejo de un &lt;em&gt;pool&lt;/em&gt; favorece la escalabilidad y el rendimiento de una aplicación.&lt;/p&gt;
+
+&lt;p&gt;Cada vez que obtienes una conexión, el &lt;em&gt;pool&lt;/em&gt; crea una nueva conexión solamente si es necesario, si tiene conexiones que actualmente no están en uso (&lt;em&gt;idle&lt;/em&gt;), te devuelve una de estos. Por eso el &lt;em&gt;pool&lt;/em&gt; mantiene una cantidad de conexiones listo para ser usado (&lt;em&gt;minIdle&lt;/em&gt;-&lt;em&gt;maxIdle&lt;/em&gt;). Es importante cerrar la conexión cuando terminaste de usarla. Cuando en la aplicación se cierra una conexión, en realidad el &lt;em&gt;pool&lt;/em&gt; no cierra la conexión física, sino que pasa a estar &lt;em&gt;idle&lt;/em&gt; para ser reutilizado.&lt;/p&gt;
+
+&lt;h2 id=&quot;formas-de-integrar-un-connection-pooling&quot;&gt;&lt;a href=&quot;#header-2&quot;&gt;&lt;/a&gt;Formas de integrar un &lt;em&gt;Connection Pooling&lt;/em&gt;&lt;/h2&gt;
+
+&lt;h3 id=&quot;como-servicio-externo-o-middleware-como-pgbouncer&quot;&gt;&lt;a href=&quot;#header-3&quot;&gt;&lt;/a&gt;Como servicio externo o middleware como pgbouncer&lt;/h3&gt;
+
+&lt;p&gt;Los &lt;em&gt;Connection poolers&lt;/em&gt; como pgbouncer y pgpool-II se pueden utilizar para agrupar conexiones de clientes a una base de datos PostgreSQL. El &lt;em&gt;connection pooler&lt;/em&gt; se encuentra entre la aplicación y el servidor de la base de datos.&lt;/p&gt;
+
+&lt;h3 id=&quot;librerías-del-lado-del-cliente&quot;&gt;&lt;a href=&quot;#header-3&quot;&gt;&lt;/a&gt;Librerías del lado del cliente&lt;/h3&gt;
+
+&lt;p&gt;Existen librerías que amplían la funcionalidad del &lt;em&gt;driver&lt;/em&gt; de la base de datos para incluir la compatibilidad con la &lt;em&gt;connection pooling&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;Sin embargo, la mejor manera de implementar &lt;em&gt;connection pooling&lt;/em&gt; para aplicaciones es hacer uso de un servicio externo o &lt;em&gt;middleware&lt;/em&gt;, ya que es más fácil de configurar y administrar. Además, el &lt;em&gt;middleware&lt;/em&gt; externo como pgpool2 proporciona otras características, como &lt;em&gt;load balancing&lt;/em&gt;, además de &lt;em&gt;pooling connections&lt;/em&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;buenas-prácticas&quot;&gt;&lt;a href=&quot;#header-2&quot;&gt;&lt;/a&gt;Buenas prácticas&lt;/h2&gt;
+
+&lt;p&gt;Diferentes aplicaciones pueden tener requisitos de conexión de bases de datos diferentes y puede que desee modificar el comportamiento predeterminado de la &lt;em&gt;connection pooling&lt;/em&gt;. Configuraciones como el tamaño del &lt;em&gt;pool&lt;/em&gt; y tiempos de espera de conexión pueden mejorar el desempeño general del &lt;em&gt;pool&lt;/em&gt; de conexión, así como la disponibilidad de conexión. En muchos casos, la mejor forma de afinar un &lt;em&gt;pool&lt;/em&gt; de conexiones para una aplicación específica es intentar diferentes combinaciones de las propiedades utilizando diferentes valores hasta conseguir un rendimiento óptimo.&lt;/p&gt;
+
+&lt;h3 id=&quot;controlar-el-tamaño-del-pool&quot;&gt;&lt;a href=&quot;#header-3&quot;&gt;&lt;/a&gt;Controlar el tamaño del Pool&lt;/h3&gt;
+
+&lt;p&gt;Se permite que el número de conexiones en el &lt;em&gt;pool&lt;/em&gt; sea dinámico para aumentar y disminuir a medida que aumenta la demanda y disminuye. Este comportamiento dinámico ayuda a conservar los recursos del sistema que en otro caso se pierden en el mantenimiento de las conexiones innecesarias.&lt;/p&gt;
+
+&lt;h4 id=&quot;ajuste-el-tamaño-del-grupo-inicial&quot;&gt;&lt;a href=&quot;#header-4&quot;&gt;&lt;/a&gt;Ajuste el tamaño del grupo inicial&lt;/h4&gt;
+
+&lt;p&gt;El tamaño del &lt;em&gt;pool&lt;/em&gt; inicial de la propiedad especifica el número de conexiones disponibles que se crean cuando el &lt;em&gt;pool&lt;/em&gt; de conexiones es inicialmente creada o se reinicializa. Esta propiedad se utiliza normalmente para reducir el tiempo de arranque necesario para el purgado del &lt;em&gt;pool&lt;/em&gt; a su tamaño óptimo.&lt;/p&gt;
+
+&lt;p&gt;Un valor de cero indica que no hay conexiones creadas previamente. El valor predeterminado es cero.&lt;/p&gt;
+
+&lt;p&gt;Si el tamaño del grupo inicial es mayor que el máximo tamaño del &lt;em&gt;pool&lt;/em&gt;, sólo el número máximo de conexiones son inicializadas. En el caso que tamaño del grupo inicial de la propiedad es menor que el mínimo tamaño del &lt;em&gt;pool&lt;/em&gt;, sólo el número inicial de las conexiones son inicializadas y se mantienen hasta que se crean conexiones suficientes para cumplir con el mínimo valor de tamaño del &lt;em&gt;pool&lt;/em&gt;.&lt;/p&gt;
+
+&lt;h4 id=&quot;ajuste-el-tamaño-mínimo-del-pool&quot;&gt;&lt;a href=&quot;#header-4&quot;&gt;&lt;/a&gt;Ajuste el tamaño mínimo del &lt;em&gt;pool&lt;/em&gt;&lt;/h4&gt;
+
+&lt;p&gt;El tamaño mínimo del &lt;em&gt;pool&lt;/em&gt; especifica la cantidad mínima de las conexiones disponibles y prestadas que un grupo mantiene. Un grupo de conexiones siempre trata de volver al tamaño mínimo especificado a menos que la cantidad mínima aún no se ha alcanzado. Por ejemplo, si el límite mínimo se establece en diez y sólo dos conexiones se han creado y prestado, entonces el número de conexiones que mantiene el &lt;em&gt;pool&lt;/em&gt; permanece en dos.&lt;/p&gt;
+
+&lt;p&gt;Esta propiedad permite que el número de conexiones del pool disminuya a medida que disminuye la demanda. Al mismo tiempo, la propiedad se asegura de que los recursos del sistema no se desperdician en el mantenimiento de las conexiones que son innecesarias. El valor predeterminado es cero.&lt;/p&gt;
+
+&lt;h4 id=&quot;establecer-el-tamaño-máximo-de-pool&quot;&gt;&lt;a href=&quot;#header-4&quot;&gt;&lt;/a&gt;Establecer el tamaño máximo de Pool&lt;/h4&gt;
+
+&lt;p&gt;El tamaño máximo especifica el número máximo de las conexiones que mantiene un &lt;em&gt;pool&lt;/em&gt;. Si se toman prestadas el número máximo de conexiones, las conexiones no estarán disponibles hasta que una conexión se devuelve al &lt;em&gt;pool&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;Esta propiedad permite que el número de conexiones en el pool aumente a medida que aumenta la demanda. Al mismo tiempo, la propiedad asegura que el &lt;em&gt;pool&lt;/em&gt; no crezca hasta el punto de agotar los recursos de un sistema, que en última instancia, afecta al rendimiento de una aplicación y disponibilidad.&lt;/p&gt;
+
+&lt;p&gt;Un valor de cero indica que no hay conexiones gestionada por el &lt;em&gt;pool&lt;/em&gt;. Un intento de obtener un resultado de conexión en esta situación, es una excepción.&lt;/p&gt;
+
+&lt;h3 id=&quot;control-de-conexiones&quot;&gt;&lt;a href=&quot;#header-3&quot;&gt;&lt;/a&gt;Control de conexiones&lt;/h3&gt;
+
+&lt;p&gt;Las conexiones que quedan obsoletas pueden afectar a la disponibilidad de conexión. Es necesario hacer un esfuerzo por cerrarlas, porque de otro modo se pueden desperdiciar conexiones no utilizadas por largos períodos de tiempo.&lt;/p&gt;
+
+&lt;p&gt;Es una buena práctica cerrar todas las conexiones que ya no son necesarias para una aplicación. Las conexiones de cierre ayudan a minimizar el número de conexiones que quedan obsoletas pero continúan prestadas. Las principales características a configurar:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Configuración de reutilización de la conexión: Se configuran las características para poder reutilizar una conexión. Cuando supera un numero de reutilizaciones, se elimina del &lt;em&gt;pool&lt;/em&gt;.&lt;/li&gt;
+  &lt;li&gt;Tiempo máximo de reutilización: Permite controlar el tiempo necesario para que una conexión pueda volver a ser reutilizada. Mantiene como ocupadas, conexiones dentro del &lt;em&gt;pool&lt;/em&gt; hasta que superan el tiempo estipulado.&lt;/li&gt;
+  &lt;li&gt;Tiempo de espera para considerar una conexión abandonada: El tiempo de espera que se permite a los abandonados para recuperar la conexión de nuevo en el grupo de conexión después de que una conexión no ha sido utilizado por un importe específico de tiempo.&lt;/li&gt;
+  &lt;li&gt;Ajuste del Tiempo de espera de conexión: El tiempo de espera que una solicitud de conexión específica espera para obtener una conexión, si ya no hay ninguna conexión en el &lt;em&gt;pool&lt;/em&gt;. La solicitud recibe una excepción si se alcanza el valor de tiempo de espera. Esta característica mejora la usabilidad de tiempo de espera global de la aplicación, minimizando la cantidad de tiempo que una aplicación está bloqueada y ofrece la capacidad de implementar una recuperación.&lt;/li&gt;
+  &lt;li&gt;Ajuste del tiempo de espera de conexión inactiva: Especifica el tiempo que una conexión disponible puede permanecer inactiva antes de que se cierre y se retire del &lt;em&gt;pool&lt;/em&gt;. Esta propiedad de tiempo de espera sólo es aplicable a las conexiones disponibles y no afecta a las conexiones que estén prestadas.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;fuentes&quot;&gt;&lt;a href=&quot;#header-1&quot;&gt;&lt;/a&gt;Fuentes&lt;/h1&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;http://www.juntadeandalucia.es/servicios/madeja/contenido/recurso/218&quot;&gt;Manejo del pool de conexiones&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://es.stackoverflow.com/questions/46754/pool-de-conexiones-java&quot;&gt;Pool de Conexiones Java&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://es.stackoverflow.com/questions/359715/cu%C3%A1l-ser%C3%ADa-la-diferencia-entre-usar-un-pool-o-usar-una-conexion-tradicional-a-l&quot;&gt;¿cuál sería la diferencia entre usar un pool o usar una conexion tradicional a la base de datos?&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.baeldung.com/java-connection-pooling&quot;&gt;A Simple Guide to Connection Pooling in Java&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://stackoverflow.blog/2020/10/14/improve-database-performance-with-connection-pooling/&quot;&gt;Improve database performance with connection pooling&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://stackoverflow.com/questions/18496540/node-js-mysql-connection-pooling/54224377#54224377&quot;&gt;node.js + mysql connection pooling&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        <pubDate>Mon, 13 Dec 2021 00:00:00 -0300</pubDate>
+        <link>http://localhost:8002//Connections-pool</link>
+        <link href="http://localhost:8002/Connections-pool"/>
+        <guid isPermaLink="true">http://localhost:8002/Connections-pool</guid>
+      </item>
+    
+      <item>
         <title>Limitación de recursos en Docker</title>
         <description>&lt;p&gt;De forma predeterminada, no hay límite en la cantidad de memoria o CPU que puede usar un contenedor. Puede usar tanto como lo permita el programador del &lt;em&gt;kernel&lt;/em&gt; del &lt;em&gt;host&lt;/em&gt;. Es importante que un contenedor en ejecución no consuma demasiada memoria o CPU en la computadora &lt;em&gt;host&lt;/em&gt;. Cuando el &lt;em&gt;kernel&lt;/em&gt; detecta que queda muy poca memoria libre, se activa una Excepción por falta de memoria y comienza a matar procesos, y esto puede llevar al cierre completo del sistema en algunos casos.&lt;/p&gt;
 
 &lt;p&gt;Para evitar estas circunstancias, siempre debe ejecutar pruebas en su aplicación y determinar la cantidad de recursos necesarios, y luego limitar los contenedores para usar una cantidad razonable de recursos.&lt;/p&gt;
 
-&lt;p&gt;Puede ver las estadísticas de sus contenedores Docker sobre la marcha a través del comando stats de docker:&lt;/p&gt;
+&lt;p&gt;Puede ver las estadísticas de sus contenedores docker sobre la marcha a través del comando &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;stats&lt;/code&gt; de docker:&lt;/p&gt;
 
 &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;docker stats &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;docker_image]
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
@@ -34,7 +246,7 @@
 &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;WARNING: Noswaplimitsupport
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;Para habilitar la funcionalidad en el kernel debe editar el archivo que se encuentra en &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/default/grub&lt;/code&gt;, y luego agregar la siguiente línea:&lt;/p&gt;
+&lt;p&gt;Para habilitar la funcionalidad en el &lt;em&gt;kernel&lt;/em&gt; debe editar el archivo que se encuentra en &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/default/grub&lt;/code&gt;, y luego agregar la siguiente línea:&lt;/p&gt;
 
 &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;GRUB_CMDLINE_LINUX=&quot;cgroup_enable=memory swapaccount=1&quot;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
@@ -69,11 +281,9 @@
 &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;docker run &lt;span class=&quot;nt&quot;&gt;-it&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;--memory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;[memory_limit]&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;docker_image]
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;ul&gt;
-  &lt;li&gt;memory_limit: debe ser un entero positivo seguido del sufijo b, k, m o g (que hacen referencia a bytes, kilobytes, megabytes o gigabytes respectivamente).&lt;/li&gt;
-&lt;/ul&gt;
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;memory_limit&lt;/code&gt; debe ser un entero positivo seguido del sufijo b, k, m o g (que hacen referencia a bytes, kilobytes, megabytes o gigabytes respectivamente).&lt;/p&gt;
 
-&lt;p&gt;Por ejemplo, para correr una isntancia de un contenedor ubuntu y configurar un límite de 1GB, el comando sería el siguiente:&lt;/p&gt;
+&lt;p&gt;Por ejemplo, para correr una instancia de un contenedor ubuntu y configurar un límite de 1GB, el comando sería el siguiente:&lt;/p&gt;
 
 &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;docker run &lt;span class=&quot;nt&quot;&gt;-it&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;--memory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;1g&quot;&lt;/span&gt; ubuntu
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
@@ -84,7 +294,7 @@
 
 &lt;p&gt;El ```swamp`` incluye la cantidad total de memoria no intercambiable (&lt;em&gt;non-swap memory&lt;/em&gt;) más la cantidad de memoria intercambiable (&lt;em&gt;swap memory&lt;/em&gt;) reservada como respaldo.&lt;/p&gt;
 
-&lt;p&gt;Por ejemplo, si se configuró –memory a 1 GB, la cantidad de memoria &lt;em&gt;swap&lt;/em&gt; necesita ser mayor que eso.Para correr un contenedor con un adicional de 1 GB de memoria &lt;em&gt;swap&lt;/em&gt;, se debe configurar el &lt;em&gt;swap&lt;/em&gt; a 2 GB.&lt;/p&gt;
+&lt;p&gt;Por ejemplo, si se configuró &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;--memory&lt;/code&gt; a 1 GB, la cantidad de memoria &lt;em&gt;swap&lt;/em&gt; necesita ser mayor que eso. Para correr un contenedor con un adicional de 1 GB de memoria &lt;em&gt;swap&lt;/em&gt;, se debe configurar el &lt;em&gt;swap&lt;/em&gt; a 2 GB.&lt;/p&gt;
 
 &lt;p&gt;La sintaxis es:&lt;/p&gt;
 
@@ -152,9 +362,9 @@ docker run &lt;span class=&quot;nt&quot;&gt;-d&lt;/span&gt; &lt;span class=&quot
 &lt;/ul&gt;
 </description>
         <pubDate>Thu, 02 Dec 2021 00:00:00 -0300</pubDate>
-        <link>http://localhost:7000//Docker-Limit-Resources</link>
-        <link href="http://localhost:7000/Docker-Limit-Resources"/>
-        <guid isPermaLink="true">http://localhost:7000/Docker-Limit-Resources</guid>
+        <link>http://localhost:8002//Docker-Limit-Resources</link>
+        <link href="http://localhost:8002/Docker-Limit-Resources"/>
+        <guid isPermaLink="true">http://localhost:8002/Docker-Limit-Resources</guid>
       </item>
     
       <item>
@@ -631,9 +841,9 @@ docker run &lt;span class=&quot;nt&quot;&gt;-d&lt;/span&gt; &lt;span class=&quot
 &lt;/ul&gt;
 </description>
         <pubDate>Fri, 26 Nov 2021 00:00:00 -0300</pubDate>
-        <link>http://localhost:7000//React-Performance</link>
-        <link href="http://localhost:7000/React-Performance"/>
-        <guid isPermaLink="true">http://localhost:7000/React-Performance</guid>
+        <link>http://localhost:8002//React-Performance</link>
+        <link href="http://localhost:8002/React-Performance"/>
+        <guid isPermaLink="true">http://localhost:8002/React-Performance</guid>
       </item>
     
   </channel>

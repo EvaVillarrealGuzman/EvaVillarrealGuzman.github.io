@@ -1,0 +1,98 @@
+I"�"<p>El parámetro <code class="language-plaintext highlighter-rouge">max_connections</code> determina el número máximo de conexiones simultáneas en el servidor de base de datos. Por defecto PostgreSQL establece el límite máximo de conexiones en 100.</p>
+
+<p>Si el límite establecido en la base de datos se supera, PostgreSQL lanzará la siguiente excepción:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>org.postgresql.util.PSQLException: FATAL: sorry, too many clients already.
+</code></pre></div></div>
+
+<p>Ante este error podemos encontrar las siguientes soluciones:</p>
+
+<ol>
+  <li>Incrementar el parámetro <code class="language-plaintext highlighter-rouge">max_connections</code>. Esto es sencillo de realizar pero probablemente solucione el problema temporalmente.</li>
+  <li>Una posible causa de este error es que las aplicaciones que se conectan a la base de datos no estén implementado correctamente el cierre de la conexiones. Generando que se sigan abriendo conexiones sin cerrar otras que ya no se usan. Por lo tanto debería chequear el código donde se abre una conexión y verificar que la misma se cierre correctamente. Para ayudar a encontrar la aplicación que hace un mal uso de la conexión, puede dar diferentes nombres de usuario / contraseñas a las aplicaciones que podrían no liberar las conexiones, y luego buscar en <code class="language-plaintext highlighter-rouge">pg_stat_activity</code> para averiguar cuál no se está cerrando las conexiones.</li>
+  <li>Usar un <em>pool</em> de conexiones en las aplicaciones. Un <em>pool</em> de conexiones mantiene un número de conexiones a la base datos abiertas. De esta manera en lugar de abrir tu mismo una nueva conexión simplemente solicitas alguna de las disponibles, mejorando de esta forma la <em>performance</em> de tu aplicación, ya que abrir y cerrar conexiones de base de datos suponen un coste de procesador. Para más detalle ver <a href="/Connections-pool">aquí</a>.</li>
+</ol>
+
+<p>Particularmente nos vamos a centrar sobre el punto 1, es decir, la configuración del parámetro <code class="language-plaintext highlighter-rouge">max_connections</code>.</p>
+
+<p>Sobre este parámetro debe tener en cuenta lo siguiente:</p>
+
+<blockquote>
+  <p>Cada conexión PostgreSQL consume memoria RAM para administrar la conexión o el cliente que la usa. Cuantas más conexiones tenga, más memoria RAM se utilizará para este fin, en lugar de utilizarse para ejecutar la base de datos.</p>
+</blockquote>
+
+<p>Por lo general, una aplicación bien codificada no necesita una gran cantidad de conexiones. Si tiene una aplicación que necesita una gran cantidad de conexiones, considere usar una herramienta como <code class="language-plaintext highlighter-rouge">pg_bouncer</code> que puede agrupar las conexiones por usted. Como cada conexión consume RAM, debería intentar minimizar su uso y por lo tanto es importante no abusar.</p>
+
+<h2 id="comandos-útiles-para-modificar-el-parámetro-max_connections"><a href="#header-2"></a>Comandos útiles para modificar el parámetro max_connections</h2>
+
+<h3 id="chequeé-el-valor-del-parámetro-actual"><a href="#header-3"></a>Chequeé el valor del parámetro actual</h3>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SHOW</span> <span class="n">max_connections</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h3 id="ver-con-detalle-las-conexiones-actualmente-usadas"><a href="#header-3"></a>Ver con detalle las conexiones actualmente usadas</h3>
+
+<p>Este comando permite ver quién/qué/cuándo/dónde se mantiene abiertas las conexiones:</p>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">pg_stat_activity</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h3 id="liste-la-cantidad-de-conexiones-actualmente-usadas"><a href="#header-3"></a>Liste la cantidad de conexiones actualmente usadas</h3>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span> <span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="k">FROM</span> <span class="n">pg_stat_activity</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h3 id="editar-el-parámetro-max_connections"><a href="#header-3"></a>Editar el parámetro max_connections</h3>
+
+<p>Sobre esto, es importante aclarar que incrementar solamente <code class="language-plaintext highlighter-rouge">max_connections</code> es una mala idea. También debería incrementar <code class="language-plaintext highlighter-rouge">shared_buffers</code> y <code class="language-plaintext highlighter-rouge">kernel.shmmax</code>.</p>
+
+<p>El parámetro <code class="language-plaintext highlighter-rouge">shared_buffers</code> determina cuanta memoria usará PostgreSQL para almacenar datos en caché. Las conexiones utilizan la memoria en los <em>shared buffers</em>.
+Tenga en cuenta las siguientes consideraciones:</p>
+
+<ul>
+  <li>Si tiene un servidor con 1 GB o más de RAM, un valor inicial razonable para <code class="language-plaintext highlighter-rouge">shared_buffers</code> es 25% de la memoria de su servidor.</li>
+  <li>Es poco probable que el uso de más del 40% de RAM funcione mejor que una cantidad menor (como el 25%)</li>
+  <li>Si su servidor o la compilación de PostgreSQL es de 32 bits, puede que no sea práctico establecer <code class="language-plaintext highlighter-rouge">shared_buffers</code> por encima de 2 ~ 2.5GB.</li>
+</ul>
+
+<p>Aclarado esto, continuaremos con los pasos para modificar estos parámetros.</p>
+
+<p>Busque el archivo de configuración de PostgreSQL</p>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SHOW</span> <span class="n">config_file</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>Edite el archivo de configuración y actualice el parámetro <code class="language-plaintext highlighter-rouge">max_connections</code> y <code class="language-plaintext highlighter-rouge">shared_buffers</code>. Supongamos que tenemos un server con 8GB de memoria, y en el mismo archivo <code class="language-plaintext highlighter-rouge">postgresql.conf</code>, actualice el valor del parámetro <code class="language-plaintext highlighter-rouge">shared_buffers</code> a 2GB (25%).</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>max_connections = 100
+shared_buffers = 2GB
+</code></pre></div></div>
+
+<p>Para que los cambios tengan efecto reinicie el servicio de PostgreSQL:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl restart postgresql
+</code></pre></div></div>
+
+<p>Debería aumentar el tamaño del segmento máximo del kernel para que sea un poco más grande que <code class="language-plaintext highlighter-rouge">shared_buffers</code>. En el archivo <code class="language-plaintext highlighter-rouge">/etc/sysctl.conf</code>, configure el parámetro como se muestra a continuación. Entrará en vigor cuando se reinicie postgreSQL (la siguiente línea hace que el kernel tenga un máximo de 2.3GB)</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kernel.shmmax=2469606195
+</code></pre></div></div>
+
+<p>En los sistemas modernos, <code class="language-plaintext highlighter-rouge">kernel.shmmax</code> ya es muy alto y no debe cambiarse. Para ver cual está configurado puede ejecutar el siguiente comando:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cat</span> /proc/sys/kernel/shmmax
+</code></pre></div></div>
+
+<blockquote>
+  <p><strong>Nota:</strong> Puede usar la página <a href="https://pgtune.leopard.in.ua/">PGTune</a> para obtener los parámetros óptimos para su sistema.</p>
+</blockquote>
+
+<h1 id="fuentes"><a href="#header-1"></a>Fuentes</h1>
+
+<ul>
+  <li><a href="https://stackoverflow.com/questions/2757549/org-postgresql-util-psqlexception-fatal-sorry-too-many-clients-already">org.postgresql.util.PSQLException: FATAL: sorry, too many clients already</a></li>
+  <li><a href="https://dadruid5.com/2017/07/20/checking-and-increasing-the-max-connections-in-postgresql/">Checking and Increasing the Connection Limit in PostgreSQL</a></li>
+  <li><a href="https://devcoops.com/resolve-sorry-too-many-clients-postgres-issue/">How to resolve PostgreSQL FATAL: sorry, too many clients already</a></li>
+  <li><a href="https://stackoverflow.com/questions/30778015/how-to-increase-the-max-connections-in-postgres">How to increase the max connections in postgres?</a></li>
+</ul>
+:ET

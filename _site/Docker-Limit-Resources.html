@@ -17,15 +17,15 @@
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="De forma predeterminada, no hay límite en la cantidad de memoria o CPU que puede usar un contenedor. Puede usar tanto como lo permita el programador del kernel del host. Es importante que un contenedor en ejecución no consuma demasiada memoria o CPU en la computadora host. Cuando el kernel detecta que queda muy poca memoria libre, se activa una Excepción por falta de memoria y comienza a matar procesos, y esto puede llevar al cierre completo del sistema en algunos casos." />
 <meta property="og:description" content="De forma predeterminada, no hay límite en la cantidad de memoria o CPU que puede usar un contenedor. Puede usar tanto como lo permita el programador del kernel del host. Es importante que un contenedor en ejecución no consuma demasiada memoria o CPU en la computadora host. Cuando el kernel detecta que queda muy poca memoria libre, se activa una Excepción por falta de memoria y comienza a matar procesos, y esto puede llevar al cierre completo del sistema en algunos casos." />
-<link rel="canonical" href="http://localhost:7000/Docker-Limit-Resources" />
-<meta property="og:url" content="http://localhost:7000/Docker-Limit-Resources" />
+<link rel="canonical" href="http://localhost:8002/Docker-Limit-Resources" />
+<meta property="og:url" content="http://localhost:8002/Docker-Limit-Resources" />
 <meta property="og:site_name" content="Blog" />
 <meta property="og:type" content="article" />
 <meta property="article:published_time" content="2021-12-02T00:00:00-03:00" />
 <meta name="twitter:card" content="summary" />
 <meta property="twitter:title" content="Limitación de recursos en Docker" />
 <script type="application/ld+json">
-{"@type":"BlogPosting","url":"http://localhost:7000/Docker-Limit-Resources","headline":"Limitación de recursos en Docker","dateModified":"2021-12-02T00:00:00-03:00","datePublished":"2021-12-02T00:00:00-03:00","author":{"@type":"Person","name":"Eva Villarreal Guzmán"},"mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:7000/Docker-Limit-Resources"},"description":"De forma predeterminada, no hay límite en la cantidad de memoria o CPU que puede usar un contenedor. Puede usar tanto como lo permita el programador del kernel del host. Es importante que un contenedor en ejecución no consuma demasiada memoria o CPU en la computadora host. Cuando el kernel detecta que queda muy poca memoria libre, se activa una Excepción por falta de memoria y comienza a matar procesos, y esto puede llevar al cierre completo del sistema en algunos casos.","@context":"https://schema.org"}</script>
+{"mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:8002/Docker-Limit-Resources"},"@type":"BlogPosting","url":"http://localhost:8002/Docker-Limit-Resources","author":{"@type":"Person","name":"Eva Villarreal Guzmán"},"headline":"Limitación de recursos en Docker","dateModified":"2021-12-02T00:00:00-03:00","datePublished":"2021-12-02T00:00:00-03:00","description":"De forma predeterminada, no hay límite en la cantidad de memoria o CPU que puede usar un contenedor. Puede usar tanto como lo permita el programador del kernel del host. Es importante que un contenedor en ejecución no consuma demasiada memoria o CPU en la computadora host. Cuando el kernel detecta que queda muy poca memoria libre, se activa una Excepción por falta de memoria y comienza a matar procesos, y esto puede llevar al cierre completo del sistema en algunos casos.","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 
 </head>
@@ -54,7 +54,7 @@
 
 <p>Para evitar estas circunstancias, siempre debe ejecutar pruebas en su aplicación y determinar la cantidad de recursos necesarios, y luego limitar los contenedores para usar una cantidad razonable de recursos.</p>
 
-<p>Puede ver las estadísticas de sus contenedores Docker sobre la marcha a través del comando stats de docker:</p>
+<p>Puede ver las estadísticas de sus contenedores docker sobre la marcha a través del comando <code class="language-plaintext highlighter-rouge">stats</code> de docker:</p>
 
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>docker stats <span class="o">[</span>docker_image]
 </code></pre></div></div>
@@ -71,7 +71,7 @@
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>WARNING: Noswaplimitsupport
 </code></pre></div></div>
 
-<p>Para habilitar la funcionalidad en el kernel debe editar el archivo que se encuentra en <code class="language-plaintext highlighter-rouge">/etc/default/grub</code>, y luego agregar la siguiente línea:</p>
+<p>Para habilitar la funcionalidad en el <em>kernel</em> debe editar el archivo que se encuentra en <code class="language-plaintext highlighter-rouge">/etc/default/grub</code>, y luego agregar la siguiente línea:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1"
 </code></pre></div></div>
@@ -106,11 +106,9 @@
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>docker run <span class="nt">-it</span> <span class="nt">--memory</span><span class="o">=</span><span class="s2">"[memory_limit]"</span> <span class="o">[</span>docker_image]
 </code></pre></div></div>
 
-<ul>
-  <li>memory_limit: debe ser un entero positivo seguido del sufijo b, k, m o g (que hacen referencia a bytes, kilobytes, megabytes o gigabytes respectivamente).</li>
-</ul>
+<p><code class="language-plaintext highlighter-rouge">memory_limit</code> debe ser un entero positivo seguido del sufijo b, k, m o g (que hacen referencia a bytes, kilobytes, megabytes o gigabytes respectivamente).</p>
 
-<p>Por ejemplo, para correr una isntancia de un contenedor ubuntu y configurar un límite de 1GB, el comando sería el siguiente:</p>
+<p>Por ejemplo, para correr una instancia de un contenedor ubuntu y configurar un límite de 1GB, el comando sería el siguiente:</p>
 
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>docker run <span class="nt">-it</span> <span class="nt">--memory</span><span class="o">=</span><span class="s2">"1g"</span> ubuntu
 </code></pre></div></div>
@@ -121,7 +119,7 @@
 
 <p>El ```swamp`` incluye la cantidad total de memoria no intercambiable (<em>non-swap memory</em>) más la cantidad de memoria intercambiable (<em>swap memory</em>) reservada como respaldo.</p>
 
-<p>Por ejemplo, si se configuró –memory a 1 GB, la cantidad de memoria <em>swap</em> necesita ser mayor que eso.Para correr un contenedor con un adicional de 1 GB de memoria <em>swap</em>, se debe configurar el <em>swap</em> a 2 GB.</p>
+<p>Por ejemplo, si se configuró <code class="language-plaintext highlighter-rouge">--memory</code> a 1 GB, la cantidad de memoria <em>swap</em> necesita ser mayor que eso. Para correr un contenedor con un adicional de 1 GB de memoria <em>swap</em>, se debe configurar el <em>swap</em> a 2 GB.</p>
 
 <p>La sintaxis es:</p>
 
