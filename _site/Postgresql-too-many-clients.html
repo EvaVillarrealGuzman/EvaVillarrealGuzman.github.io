@@ -1,4 +1,56 @@
-I"�#<p>El parámetro <code class="language-plaintext highlighter-rouge">max_connections</code> determina el número máximo de conexiones simultáneas en el servidor de base de datos. Por defecto PostgreSQL establece el límite máximo de conexiones en 100.</p>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <meta name="generator" content="Jekyll">
+
+  <title>PostgreSQL sorry, too many clients already</title>
+
+  <link rel="stylesheet" href="/css/main.css">
+  
+  <link href="/atom.xml" type="application/atom+xml" rel="alternate" title="ATOM Feed" /> <!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>PostgreSQL sorry, too many clients already | Blog</title>
+<meta name="generator" content="Jekyll v4.2.1" />
+<meta property="og:title" content="PostgreSQL sorry, too many clients already" />
+<meta name="author" content="Eva Villarreal Guzmán" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="El parámetro max_connections determina el número máximo de conexiones simultáneas en el servidor de base de datos. Por defecto PostgreSQL establece el límite máximo de conexiones en 100." />
+<meta property="og:description" content="El parámetro max_connections determina el número máximo de conexiones simultáneas en el servidor de base de datos. Por defecto PostgreSQL establece el límite máximo de conexiones en 100." />
+<link rel="canonical" href="http://localhost:8005/Postgresql-too-many-clients" />
+<meta property="og:url" content="http://localhost:8005/Postgresql-too-many-clients" />
+<meta property="og:site_name" content="Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-12-18T00:00:00-03:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="PostgreSQL sorry, too many clients already" />
+<script type="application/ld+json">
+{"mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:8005/Postgresql-too-many-clients"},"@type":"BlogPosting","url":"http://localhost:8005/Postgresql-too-many-clients","author":{"@type":"Person","name":"Eva Villarreal Guzmán"},"headline":"PostgreSQL sorry, too many clients already","dateModified":"2021-12-18T00:00:00-03:00","datePublished":"2021-12-18T00:00:00-03:00","description":"El parámetro max_connections determina el número máximo de conexiones simultáneas en el servidor de base de datos. Por defecto PostgreSQL establece el límite máximo de conexiones en 100.","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+
+<body>
+  <div id="wrapper">
+    <header>
+  <div>
+    <a href="/">
+    
+    <h1>Eva Villarreal Guzmán</h1>
+    </a>
+    <div class="header-links">
+      <a href="/archive"><h2 class="header-link">Archive</h2></a>
+<a href="/about"><h2 class="header-link">About</h2></a>
+<a href="/atom.xml"><h2 class="header-link">RSS</h2></a>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <section id="main_content">
+        <article>
+  <h2>PostgreSQL sorry, too many clients already</h2>
+  <time datetime="2021-12-18T00:00:00-03:00" class="by-line">18 Dec 2021</time>
+  <p>El parámetro <code class="language-plaintext highlighter-rouge">max_connections</code> determina el número máximo de conexiones simultáneas en el servidor de base de datos. Por defecto PostgreSQL establece el límite máximo de conexiones en 100.</p>
 
 <p>Si el límite establecido en la base de datos se supera, PostgreSQL lanzará la siguiente excepción:</p>
 
@@ -8,12 +60,12 @@
 <p>Ante este error podemos encontrar las siguientes soluciones:</p>
 
 <ol>
-  <li>Incrementar el parámetro max_connections. Esto es sencillo de realizar pero probablemente solucione el problema temporalmente.</li>
-  <li>Una posible causa de este error es que las aplicaciones que se conectan a la base de datos no estén implementado correctamente el cierre de la conexiones. Generando que se sigan abriendo conexiones sin cerrar otras que ya no se usan. Por lo tanto debería chequear el código donde se abre una conexión y verificar que la misma se cierre correctamente. Para ayudar a encontrar la aplicación que hace un mal uso de la conexión, puede dar diferentes nombres de usuario / contraseñas a las aplicaciones que podrían no liberar las conexiones, y luego buscar en pg_stat_activity para averiguar cuál no se está cerrando las conexiones.</li>
+  <li>Incrementar el parámetro <code class="language-plaintext highlighter-rouge">max_connections</code>. Esto es sencillo de realizar pero probablemente solucione el problema temporalmente.</li>
+  <li>Una posible causa de este error es que las aplicaciones que se conectan a la base de datos no estén implementado correctamente el cierre de la conexiones. Generando que se sigan abriendo conexiones sin cerrar otras que ya no se usan. Por lo tanto debería chequear el código donde se abre una conexión y verificar que la misma se cierre correctamente. Para ayudar a encontrar la aplicación que hace un mal uso de la conexión, puede dar diferentes nombres de usuario / contraseñas a las aplicaciones que podrían no liberar las conexiones, y luego buscar en <code class="language-plaintext highlighter-rouge">pg_stat_activity</code> para averiguar cuál no se está cerrando las conexiones.</li>
   <li>Usar un <em>pool</em> de conexiones en las aplicaciones. Un <em>pool</em> de conexiones mantiene un número de conexiones a la base datos abiertas. De esta manera en lugar de abrir tu mismo una nueva conexión simplemente solicitas alguna de las disponibles, mejorando de esta forma la <em>performance</em> de tu aplicación, ya que abrir y cerrar conexiones de base de datos suponen un coste de procesador. Para más detalle ver <a href="/Connections-pool">aquí</a>.</li>
 </ol>
 
-<p>Particularmente nos vamos a centrar sobre el punto 1, es decir, la configuración del parámetro max_connections.</p>
+<p>Particularmente nos vamos a centrar sobre el punto 1, es decir, la configuración del parámetro <code class="language-plaintext highlighter-rouge">max_connections</code>.</p>
 
 <p>Sobre este parámetro debe tener en cuenta lo siguiente:</p>
 
@@ -21,7 +73,7 @@
   <p>Cada conexión PostgreSQL consume memoria RAM para administrar la conexión o el cliente que la usa. Cuantas más conexiones tenga, más memoria RAM se utilizará para este fin, en lugar de utilizarse para ejecutar la base de datos.</p>
 </blockquote>
 
-<p>Por lo general, una aplicación bien codificada no necesita una gran cantidad de conexiones. Si tiene una aplicación que necesita una gran cantidad de conexiones, considere usar una herramienta como pg_bouncer que puede agrupar las conexiones por usted. Como cada conexión consume RAM, debería intentar minimizar su uso y por lo tanto es importante no abusar.</p>
+<p>Por lo general, una aplicación bien codificada no necesita una gran cantidad de conexiones. Si tiene una aplicación que necesita una gran cantidad de conexiones, considere usar una herramienta como <code class="language-plaintext highlighter-rouge">pg_bouncer</code> que puede agrupar las conexiones por usted. Como cada conexión consume RAM, debería intentar minimizar su uso y por lo tanto es importante no abusar.</p>
 
 <h2 id="comandos-útiles-para-modificar-el-parámetro-max_connections"><a href="#header-2"></a>Comandos útiles para modificar el parámetro max_connections</h2>
 
@@ -30,21 +82,16 @@
 <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SHOW</span> <span class="n">max_connections</span><span class="p">;</span>
 </code></pre></div></div>
 
-<h3 id="liste-la-cantidad-de-conexiones-actualmente-usadas"><a href="#header-3"></a>Liste la cantidad de conexiones actualmente usadas</h3>
+<h3 id="ver-con-detalle-las-conexiones-actualmente-usadas"><a href="#header-3"></a>Ver con detalle las conexiones actualmente usadas</h3>
 
 <p>Este comando permite ver quién/qué/cuándo/dónde se mantiene abiertas las conexiones:</p>
 
 <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">pg_stat_activity</span><span class="p">;</span>
 </code></pre></div></div>
 
-<h3 id="liste-la-cantidad-de-conexiones-actualmente-usadas-1"><a href="#header-3"></a>Liste la cantidad de conexiones actualmente usadas</h3>
+<h3 id="liste-la-cantidad-de-conexiones-actualmente-usadas"><a href="#header-3"></a>Liste la cantidad de conexiones actualmente usadas</h3>
 
 <div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span> <span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="k">FROM</span> <span class="n">pg_stat_activity</span><span class="p">;</span>
-</code></pre></div></div>
-
-<h3 id="ver-con-detalle-las-conexiones-actuales"><a href="#header-3"></a>Ver con detalle las conexiones actuales</h3>
-
-<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">pg_stat_activity</span><span class="p">;</span>
 </code></pre></div></div>
 
 <h3 id="editar-el-parámetro-max_connections"><a href="#header-3"></a>Editar el parámetro max_connections</h3>
@@ -100,4 +147,32 @@ shared_buffers = 2GB
   <li><a href="https://devcoops.com/resolve-sorry-too-many-clients-postgres-issue/">How to resolve PostgreSQL FATAL: sorry, too many clients already</a></li>
   <li><a href="https://stackoverflow.com/questions/30778015/how-to-increase-the-max-connections-in-postgres">How to increase the max connections in postgres?</a></li>
 </ul>
-:ET
+
+</article>
+      </section>
+    </div>
+  </div>
+
+   <footer>
+  <a href="https://github.com/EvaVillarrealGuzman">
+    <span>
+        <b>EvaVillarrealGuzman</b>
+    </span>
+    
+    <span>© 2021</span>
+  </a>
+</footer>
+
+  
+    <script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'G-JLF4M03LEM', 'auto');
+  ga('send', 'pageview');
+</script>
+  
+</body>
+
+</html>

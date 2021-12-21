@@ -1,4 +1,4 @@
-I"~<section>
+I"€<section>
   
 
     
@@ -11,8 +11,8 @@
       
         <ul>
       
-        <li><time>13 Dec - </time>
-          <a href="/Postgres-too-many-clients">
+        <li><time>18 Dec - </time>
+          <a href="/Postgresql-too-many-clients">
             PostgreSQL sorry, too many clients already
           </a>
         </li>
