@@ -134,7 +134,7 @@ Levante el sitio:
 docker-compose up -d
 ```
 
-Asegurese de tener instaladas las librerías con compose:
+Asegúrese de tener instaladas las librerías con compose:
 
 ```
 docker-compose exec php composer install
