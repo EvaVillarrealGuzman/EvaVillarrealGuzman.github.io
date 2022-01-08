@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="cb3abba3-a314-4a75-b870-29bb104a919a" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.jekyll-cache/Jekyll/Cache/Jekyll--Cache/b7/9606fb3afea5bd1609ed40b622142f1c98125abcfe89a76a661b0e8e343910" beforeDir="false" afterPath="$PROJECT_DIR$/.jekyll-cache/Jekyll/Cache/Jekyll--Cache/b7/9606fb3afea5bd1609ed40b622142f1c98125abcfe89a76a661b0e8e343910" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.jekyll-cache/Jekyll/Cache/Jekyll--Converters--Markdown/07/6295187b093514c9fa66339984ac05be099a07d73c93c0a84ffd379b9cd3ce" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.jekyll-cache/Jekyll/Cache/Jekyll--Converters--Markdown/12/7061afdd8efe8b98a58e7273f96bce998436b9112937af8a888f66ecb3db4b" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.jekyll-cache/Jekyll/Cache/Jekyll--Converters--Markdown/47/54b77e0f80c3bedc738a2ef18e852bc3c5e034bf1803cfa638932e775488eb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.jekyll-cache/Jekyll/Cache/Jekyll--Converters--Markdown/48/d34dfbe59deee8a2e44e5e4aea7c839c059b4cad7328c47f397d6cf81115e4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.jekyll-cache/Jekyll/Cache/Jekyll--Converters--Markdown/4f/3042f8b40ceefee74303882ecd80f69a05fd9acdf2f939dfaab56af6486caa" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.jekyll-cache/Jekyll/Cache/Jekyll--Converters--Markdown/78/f62067d77486ccbbbd1a6adeaf68ab82e40aa124f65d62592e9b4efcf129b0" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.jekyll-cache/Jekyll/Cache/Jekyll--Converters--Markdown/8d/56d5804c16515db6091154d6adf9d98995729ee395dc52e8823aea217db3b0" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.jekyll-cache/Jekyll/Cache/Jekyll--Converters--Markdown/c3/48461d0f1ade07d8980e35b171525bf5e03f6dd3e8ab2ddc2cf1e2b28da8ce" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.jekyll-cache/Jekyll/Cache/Jekyll--Converters--Markdown/e9/b20dbc6113f539c35f23793773e8de119b40e52c1e60b3b3b6e09d039e2d9a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.jekyll-cache/Jekyll/Cache/Jekyll--Converters--Markdown/fb/a988fee5d92dbbd51c2ede8349db52867c9aff7aef3a52d84a0f58a5d6bc6b" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_site/404.html" beforeDir="false" afterPath="$PROJECT_DIR$/_site/404.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_site/Connections-pool.html" beforeDir="false" afterPath="$PROJECT_DIR$/_site/Connections-pool.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_site/Docker-Limit-Resources.html" beforeDir="false" afterPath="$PROJECT_DIR$/_site/Docker-Limit-Resources.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_site/Postgresql-too-many-clients.html" beforeDir="false" afterPath="$PROJECT_DIR$/_site/Postgresql-too-many-clients.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_site/React-Performance.html" beforeDir="false" afterPath="$PROJECT_DIR$/_site/React-Performance.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_site/about.html" beforeDir="false" afterPath="$PROJECT_DIR$/_site/about.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_site/archive.html" beforeDir="false" afterPath="$PROJECT_DIR$/_site/archive.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_site/atom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/_site/atom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_site/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/_site/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_site/page/2/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/_site/page/2/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_site/sitemap.xml" beforeDir="false" afterPath="$PROJECT_DIR$/_site/sitemap.xml" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ComposerSettings">
+    <execution />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="23QYIprmQJUzyDTPcxaMASrjl7M" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="vue.rearranger.settings.migration" value="true" />
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="cb3abba3-a314-4a75-b870-29bb104a919a" name="Changes" comment="" />
+      <created>1641667700699</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1641667700699</updated>
+      <workItem from="1641667701870" duration="927000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

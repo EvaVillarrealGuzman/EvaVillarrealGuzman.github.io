@@ -3,13 +3,603 @@
   <channel>
     <title>Blog</title>
     <description>Blog sobre desarrollo de software</description>
-    <link>http://localhost:8005</link>
-    <atom:link href="http://localhost:8005/feed.xml" rel="self" type="application/rss+xml" />
+    <link>http://localhost:8002</link>
+    <atom:link href="http://localhost:8002/feed.xml" rel="self" type="application/rss+xml" />
     <author>
       <name>Eva Villarreal Guzmán</name>
       <email>villarrealguzman@gmail.com</email>
       <uri>https://evavillarrealguzman.github.io/</uri>
     </author>
+    
+      <item>
+        <title>HTTPS con docker compose y apache</title>
+        <description>&lt;p&gt;Veremos como configurar Docker Compose con Apache para que funcione con el protocolo HTTPS.&lt;/p&gt;
+
+&lt;p&gt;Como ejemplo de sitio usaremos una demo realizada por el &lt;em&gt;framework&lt;/em&gt; Yii.&lt;/p&gt;
+
+&lt;h2 id=&quot;1--editar-el-archivo-hosts-en-el-sistema-operativo&quot;&gt;&lt;a href=&quot;#header-2&quot;&gt;&lt;/a&gt;1- Editar el archivo hosts en el sistema operativo&lt;/h2&gt;
+
+&lt;p&gt;Antes que nada, mientras estamos trabajando en el entorno de desarrollo, tendremos que configurar un dominio para poder probar el HTTPS. De esta manera, cuando hagamos la prueba del sitio web, en lugar de entrar a localhost en el navegador, entraremos el dominio que hayamos seleccionado. Supongamos que el dominio que elegimos es &lt;strong&gt;test.com.ar&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;Debemos editar el archivo &lt;strong&gt;hosts&lt;/strong&gt;. Su ubicación depende del sistema operativo, en Linux lo encontramos en &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/hosts&lt;/code&gt; y en Windows en &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;C:\Windows\System32\drivers\etc\hosts&lt;/code&gt;. Este archivo lo usa el sistema operativo para mapear una dirección IP a un nombre de &lt;em&gt;host&lt;/em&gt; o nombre de dominio.&lt;/p&gt;
+
+&lt;p&gt;En el archivo agregaremos la siguiente línea:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;127.0.0.1       test.com.ar
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;2--clonar-o-crear-el-proyecto&quot;&gt;&lt;a href=&quot;#header-2&quot;&gt;&lt;/a&gt;2- Clonar o crear el proyecto&lt;/h2&gt;
+
+&lt;p&gt;Para explicar este artículo usaremos un proyecto ya listo que se encuentra en github. El proyecto es una &lt;a href=&quot;https://github.com/yiisoft/demo&quot;&gt;demo provista por el framework Yii&lt;/a&gt;. Lo que hice fue un &lt;em&gt;fork&lt;/em&gt; del repositorio a mi cuenta. En el momento de hacer este artículo el &lt;em&gt;fork&lt;/em&gt; lo hice a partir del &lt;em&gt;commit&lt;/em&gt; f19cc5898911d365310df664415c83e4ef8a8c85. La demo en mi cuenta la puedes encontrar &lt;a href=&quot;https://github.com/EvaVillarrealGuzman/demo&quot;&gt;aquí&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;3--obtener-certificados&quot;&gt;&lt;a href=&quot;#header-2&quot;&gt;&lt;/a&gt;3- Obtener certificados&lt;/h2&gt;
+
+&lt;p&gt;Para que nuestra web funcione bajo el protocolo HTTPS es necesario tener instalado un certificado SSL, que será el encargado de cifrar las conexiones entre nuestro navegador y el servidor donde está alojada la web que queremos visitar para que toda la información intercambiada entre ambos no esté accesible de ningún modo.&lt;/p&gt;
+
+&lt;p&gt;No profundizaremos sobre este tema pero puede obtener certificados gratuitos a través de Let’s Encrypt o StartSSL.&lt;/p&gt;
+
+&lt;p&gt;Supongamos que el certificado tiene el nombre &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;fullchain.pem&lt;/code&gt; y su clave primaria es &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;privkey.pem&lt;/code&gt;. Agregaremos estos archivos en una carpeta llamada &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ssl&lt;/code&gt; creada en la ruta del proyecto y añadiremos dicha carpeta en el &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.gitignore&lt;/code&gt;, ya que es información sensible:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;img/https-con-docker-y-apache/ssl-folder.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;4--crear-los-archivos-de-configuración-de-sitio-de-apache&quot;&gt;&lt;a href=&quot;#header-2&quot;&gt;&lt;/a&gt;4- Crear los archivos de configuración de sitio de apache&lt;/h2&gt;
+
+&lt;p&gt;Para esto creamos una carpeta llamada &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sites-available&lt;/code&gt; en la ruta del proyecto y agregamos los archivos &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;000-default.conf&lt;/code&gt; y &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;default-ssl.conf&lt;/code&gt;, donde sus contenidos correspondientes serán los siguientes:&lt;/p&gt;
+
+&lt;p&gt;000-default.conf&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&amp;lt;Directory /app/public/&amp;gt;
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+&amp;lt;/Directory&amp;gt;
+
+&amp;lt;VirtualHost *:80&amp;gt;
+        ServerAdmin webmaster@localhost
+        DocumentRoot /app/public
+
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+&amp;lt;/VirtualHost&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;default-ssl.conf&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&amp;lt;IfModule mod_ssl.c&amp;gt;
+	&amp;lt;VirtualHost _default_:443&amp;gt;
+		ServerAdmin webmaster@localhost
+
+		DocumentRoot /app/public
+
+		ErrorLog ${APACHE_LOG_DIR}/error.log
+		CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+		SSLEngine on
+
+        SSLCertificateFile /var/imported/ssl/fullchain.pem
+		SSLCertificateKeyFile /var/imported/ssl/privkey.pem
+
+		&amp;lt;FilesMatch &quot;\.(cgi|shtml|phtml|php)$&quot;&amp;gt;
+				SSLOptions +StdEnvVars
+		&amp;lt;/FilesMatch&amp;gt;
+		&amp;lt;Directory /usr/lib/cgi-bin&amp;gt;
+				SSLOptions +StdEnvVars
+		&amp;lt;/Directory&amp;gt;
+	&amp;lt;/VirtualHost&amp;gt;
+&amp;lt;/IfModule&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;5--configurar-docker&quot;&gt;&lt;a href=&quot;#header-2&quot;&gt;&lt;/a&gt;5- Configurar docker&lt;/h2&gt;
+
+&lt;p&gt;Crearemos un archivo &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Dockerfile&lt;/code&gt;, que definirá nuestra imagen con el siguiente contenido:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;FROM yiisoftware/yii-php:8.0-apache
+
+RUN a2enmod rewrite
+RUN a2enmod ssl
+
+RUN a2ensite default-ssl
+
+EXPOSE 80
+EXPOSE 443
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Como se puede ver, partimos de la misma imagen que el proyecto original, solo que habilitamos el SSL.&lt;/p&gt;
+
+&lt;p&gt;También modificamos el &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker-compose.yml&lt;/code&gt;:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;version: '3'
+
+services:
+    php:
+        build:
+          context: .
+          dockerfile: Dockerfile
+        working_dir: /app
+        volumes:
+            - ./:/app
+            # host-volume for composer cache
+            - ~/.composer-docker/cache:/root/.composer/cache:delegated
+            - ./ssl:/var/imported/ssl
+            - ./sites-available:/etc/apache2/sites-available
+        ports:
+            - '80:80'
+            - '443:443'
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Le modificamos la imagen a partir de la cuál se construye y pasamos los archivos SSL y de configuración de sitio que vimos anteriormente.&lt;/p&gt;
+
+&lt;h2 id=&quot;6--correr-la-aplicación&quot;&gt;&lt;a href=&quot;#header-2&quot;&gt;&lt;/a&gt;6- Correr la aplicación&lt;/h2&gt;
+
+&lt;p&gt;Levante el sitio:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;docker-compose up -d
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Asegurese de tener instaladas las librerías con compose:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;docker-compose exec php composer install
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Pruebe en el navegador entrando al sitio tanto con HTTP como con HTTPS:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;img/https-con-docker-y-apache/http.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;img/https-con-docker-y-apache/https.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+</description>
+        <pubDate>Sat, 08 Jan 2022 00:00:00 -0300</pubDate>
+        <link>http://localhost:8002//HTTPS-con-docker-y-apache</link>
+        <link href="http://localhost:8002/HTTPS-con-docker-y-apache"/>
+        <guid isPermaLink="true">http://localhost:8002/HTTPS-con-docker-y-apache</guid>
+      </item>
+    
+      <item>
+        <title>Caché en Yii2</title>
+        <description>&lt;p&gt;Para entender porque necesitamos implementar caché en nuestras web, entendamos primero que pasa cuando interactuamos con un servidor web.&lt;/p&gt;
+
+&lt;p&gt;Cada vez que se realiza una &lt;em&gt;request&lt;/em&gt; a una aplicación web suceden un conjunto de cosas en tu servidor, por ejemplo:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Probablemente se conectará a una o varias bases de datos.&lt;/li&gt;
+  &lt;li&gt;También puede que se accedan a archivos locales o se realicen cálculos matemáticos, generando una carga en la CPU.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Es decir, cada &lt;em&gt;request&lt;/em&gt; tiene una cierta cantidad de demanda de CPU y disco de red y, en algunas aplicaciones especializadas, incluso puede haber otras cosas involucradas.&lt;/p&gt;
+
+&lt;p&gt;Todas esas cosas son las que afectan el tiempo que pasa entre que las &lt;em&gt;requests&lt;/em&gt; llegan al servidor web y éste pueda generar la respuesta y ser enviada al usuario. Por lo tanto cuanto más disco o CPU se use y cuanto más se acceda a una base de datos, más lenta será la respuesta de su servidor.&lt;/p&gt;
+
+&lt;p&gt;Si se realiza otra &lt;em&gt;request&lt;/em&gt; para ese mismo contenido, en la mayoría de los casos ocurrirá exactamente lo mismo y su servidor tendrá que manejar ese acceso al disco en esa red y esa sobrecarga de CPU requerida para la &lt;em&gt;request&lt;/em&gt; por segunda o tercera vez o varias veces. ¿Qué ocurre cuando algunos de estos recursos comienza a acercarse a su límite? Se empezará a ralentizar o provocará un error. Por lo tanto, si la CPU alcanza los límites de su servidor, si el acceso al disco es tan lento que las cosas comienzan a agotarse o si la carga de su base de datos es tan pesada que nuevamente obtiene un error de &lt;em&gt;time out&lt;/em&gt; o incluso el servidor web podría agotar el &lt;em&gt;time out&lt;/em&gt; esperando la base de datos responder.&lt;/p&gt;
+
+&lt;p&gt;La forma más fácil de reducir el uso de estos recursos es almacenar en caché los datos cuando se generan en la memoria. De esta manera el objetivo es que se pueden atender la mayor cantidad de &lt;em&gt;requests&lt;/em&gt; posibles directamente desde la memoria, minimizando el uso de CPU o disco de red y el acceso a la base de datos.&lt;/p&gt;
+
+&lt;p&gt;Esto tendrá algunos costos:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Su código será un poco más complejo, no demasiado, pero tendrá que escribir un código adicional.&lt;/li&gt;
+  &lt;li&gt;Requerirá memoria adicional y eso podría tener un efecto en el tipo de servidor que puede usar para su servidor. Dependiendo de qué es exactamente lo que vas a almacenar en caché, es posible que no requieras mucha memoria.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Si está diseñando un servicio web para que miles de usuarios seguramente la caché será uno de los mecanismo que utilice. Ya que cuantas más &lt;em&gt;requests&lt;/em&gt; pueda manejar con los mismos recursos, menos servidores necesitará, lo cual es más barato y también podría significar que puede usar una sola base de datos para su aplicación en lugar de múltiples bases de datos.&lt;/p&gt;
+
+&lt;p&gt;Ahora yendo particularmente a Yii2, el &lt;em&gt;caching&lt;/em&gt; es una de las características que el &lt;em&gt;framework&lt;/em&gt; provee. Veamos los diferentes mecanismos de almacenamiento en caché y como configurarlos.&lt;/p&gt;
+
+&lt;h2 id=&quot;claves-de-caché&quot;&gt;&lt;a href=&quot;#header-2&quot;&gt;&lt;/a&gt;Claves de Caché&lt;/h2&gt;
+
+&lt;p&gt;Es importante tener en cuenta que cada elemento de datos almacenado en caché se identifica por una &lt;strong&gt;clave&lt;/strong&gt;. Cuando se almacena un elemento de datos en la memoria caché, se debe especificar una clave. Más tarde, cuando se recupera el elemento de datos de la memoria caché, se debe proporcionar la clave correspondiente.&lt;/p&gt;
+
+&lt;p&gt;Puedes utilizar una cadena o un valor arbitrario como una clave de caché. Cuando una clave no es una cadena de texto, ésta será automáticamente serializada en una cadena.&lt;/p&gt;
+
+&lt;p&gt;Una estrategia común para definir una clave de caché es incluir en ella todos los factores determinantes en términos de un array. Por ejemplo, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;yii\db\Schema&lt;/code&gt; utiliza la siguiente clave para almacenar en caché la información del esquema de una tabla de base de datos:&lt;/p&gt;
+
+&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;__CLASS__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;              &lt;span class=&quot;c1&quot;&gt;// nombre de la clase del esquema&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;db&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dsn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;         &lt;span class=&quot;c1&quot;&gt;// nombre del origen de datos de la conexión BD&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;db&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;username&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;    &lt;span class=&quot;c1&quot;&gt;// usuario para la conexión BD&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;                  &lt;span class=&quot;c1&quot;&gt;// nombre de la tabla&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Como puedes ver, la clave incluye toda la información necesaria para especificar de una forma exclusiva una tabla de base de datos.&lt;/p&gt;
+
+&lt;p&gt;Cuando en un mismo almacenamiento en caché es utilizado por diferentes aplicaciones, se debería especificar un prefijo único para las claves de la caché por cada una de las aplicaciones para así evitar conflictos.Por ejemplo, en la configuración de la aplicación podrías escribir el siguiente código:&lt;/p&gt;
+
+&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s1&quot;&gt;'components'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;
+    &lt;span class=&quot;s1&quot;&gt;'cache'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;
+        &lt;span class=&quot;s1&quot;&gt;'class'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'yii\caching\ApcCache'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;s1&quot;&gt;'keyPrefix'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'myapp'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;       &lt;span class=&quot;c1&quot;&gt;// un prefijo de clave de caché único&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;formas-de-invalidar-un-elemento-de-caché&quot;&gt;&lt;a href=&quot;#header-2&quot;&gt;&lt;/a&gt;Formas de invalidar un elemento de caché&lt;/h2&gt;
+
+&lt;p&gt;Un elemento de datos almacenado en la memoria caché permanecerá en ella para siempre, a menos que sea removida de alguna manera debido a alguna directiva de caché (ej. el espacio de almacenamiento en caché está lleno y los datos más antiguos se eliminan). Para cambiar este comportamiento Yii provee diferentes mecanismos que se envían por parámetro al guardar el elemento de dato para invalidar un elemento de caché:&lt;/p&gt;
+
+&lt;h3 id=&quot;caducidad-de-caché&quot;&gt;&lt;a href=&quot;#header-3&quot;&gt;&lt;/a&gt;Caducidad de Caché&lt;/h3&gt;
+
+&lt;p&gt;El parámetro nos indica por cuántos segundos el elemento se mantendrá válido en memoria caché. Cuando llames get() para recuperar el elemento, si el tiempo de caducidad ha pasado, el método devolverá &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;false&lt;/code&gt;, indicando que el elemento de datos no ha sido encontrado en la memoria caché.&lt;/p&gt;
+
+&lt;h3 id=&quot;dependencias&quot;&gt;&lt;a href=&quot;#header-3&quot;&gt;&lt;/a&gt;Dependencias&lt;/h3&gt;
+
+&lt;p&gt;Los datos almacenados en caché pueden también ser invalidados conforme a algunos cambios en la caché de dependencias, donde las disponibles son:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;yii\caching\ChainedDependency: la dependencia cambia si cualquiera de las dependencias en la cadena cambia.&lt;/li&gt;
+  &lt;li&gt;yii\caching\DbDependency: la dependencia cambia si el resultado de la consulta de la sentencia SQL especificada cambia.&lt;/li&gt;
+  &lt;li&gt;yii\caching\ExpressionDependency: la dependencia cambia si el resultado de la expresión de PHP especificada cambia.&lt;/li&gt;
+  &lt;li&gt;yii\caching\FileDependency: la dependencia cambia si se modifica la última fecha de modificación del archivo.&lt;/li&gt;
+  &lt;li&gt;yii\caching\TagDependency: marca un elemento de datos en caché con uno o más &lt;em&gt;tags&lt;/em&gt;. Cada &lt;em&gt;tag&lt;/em&gt; puede ser invalidado llamando a yii\caching\TagDependency::invalidate(), de manera que invalidaría a todos los elementos de datos que contienen dicho &lt;em&gt;tag&lt;/em&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;mecanismos-de-caché&quot;&gt;&lt;a href=&quot;#header-2&quot;&gt;&lt;/a&gt;Mecanismos de caché&lt;/h2&gt;
+
+&lt;h3 id=&quot;caché-de-datos&quot;&gt;&lt;a href=&quot;#header-3&quot;&gt;&lt;/a&gt;Caché de datos&lt;/h3&gt;
+
+&lt;p&gt;Es el mecanismo más básico y suele ser la base de los demás mecanismos. Trata del almacenamiento de alguna variable PHP en caché y recuperarla más tarde.&lt;/p&gt;
+
+&lt;p&gt;El siguiente código muestra el patrón típico de uso para el almacenamiento en caché:&lt;/p&gt;
+
+&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// intenta recuperar $data de la caché&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$cache&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;===&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// $data no ha sido encontrada en la caché, calcularla desde cero&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Products&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;findOne&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// guardar $data en caché para así recuperarla la próxima vez&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$cache&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;set&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// $data está disponible aquí&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;El siguiente código se puede escribir también como:&lt;/p&gt;
+
+&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$cache&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;getOrSet&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;use&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Products&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;findOne&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;caché-de-consultas&quot;&gt;&lt;a href=&quot;#header-3&quot;&gt;&lt;/a&gt;Caché de consultas&lt;/h3&gt;
+
+&lt;p&gt;La caché de consultas es una característica especial de caché construido sobre el almacenamiento de caché de datos. Se proporciona para almacenar en caché el resultado de consultas a la base de datos.&lt;/p&gt;
+
+&lt;p&gt;Las consultas en caché requieren una &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;DB connection&lt;/code&gt; y un componente de aplicación caché válido. Las implementaciones de caché de consultas podemos verlos en los siguientes códigos para los diferentes casos:&lt;/p&gt;
+
+&lt;h4 id=&quot;caché-de-raw-query&quot;&gt;&lt;a href=&quot;#header-4&quot;&gt;&lt;/a&gt;Caché de &lt;em&gt;raw query&lt;/em&gt;&lt;/h4&gt;
+
+&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$db&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Client&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;getDb&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$db&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;cache&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$db&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;use&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$query&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Yii\db\Query&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$query&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;select&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;client.*&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;from&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'client'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;where&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'client.id'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;one&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$command&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$query&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;createCommand&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$result&lt;/span&gt;  &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$command&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;queryAll&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$result&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;caché-de-activerecord&quot;&gt;&lt;a href=&quot;#header-4&quot;&gt;&lt;/a&gt;Caché de ActiveRecord&lt;/h4&gt;
+
+&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; 
+&lt;span class=&quot;nv&quot;&gt;$db&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Yii&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$app&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;db&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;// or Category::getDb()&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$dep&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;DbDependency&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$dep&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sql&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'SELECT count(*) FROM category'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$db&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;cache&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$db&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;use&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Category&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;find&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;where&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'id'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;all&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;CACHE_TIMEOUT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$dep&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h5 id=&quot;caché-en-activequery--all-y--one&quot;&gt;&lt;a href=&quot;#header-5&quot;&gt;&lt;/a&gt;Caché en ActiveQuery -&amp;gt;all() y -&amp;gt;one()&lt;/h5&gt;
+
+&lt;p&gt;Puede habilitar fácilmente el almacenamiento en caché de todas las consultas para una tabla determinada siguiendo el ejemplo siguiente. Digamos que tenemos una tabla de &lt;strong&gt;clientes&lt;/strong&gt; y deseamos almacenar en caché los datos del cliente durante 10 minutos (600 segundos). Primero agregue un archivo &lt;strong&gt;ClientQuery.php&lt;/strong&gt; en el mismo directorio que su modelo &lt;strong&gt;Client.php&lt;/strong&gt; y configure &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;$queryCacheDuration&lt;/code&gt; en segundos:&lt;/p&gt;
+
+&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;&amp;lt;?php&lt;/span&gt;
+
+&lt;span class=&quot;kn&quot;&gt;namespace&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;app\models\application&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;cd&quot;&gt;/**
+ * This is the ActiveQuery class for [[Client]].
+ *
+ * @see Client
+ */&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ClientQuery&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Yii\db\ActiveQuery&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$queryCacheDuration&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;600&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Luego agrega un método find() en tu modelo para que haga referencia a &lt;strong&gt;ClientQuery&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cd&quot;&gt;/**
+ * @inheritdoc
+ * @return ClientQuery the active query used by this AR class.
+ */&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;find&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ClientQuery&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;get_called_class&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;());&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Alternativamente, puede anular las rutinas all () y one () y configurar el uso de la caché allí (nuevamente, en su archivo &lt;strong&gt;ClientQuery.php&lt;/strong&gt;):&lt;/p&gt;
+
+&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;&amp;lt;?php&lt;/span&gt;
+
+&lt;span class=&quot;kn&quot;&gt;namespace&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;app\models\application&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;cd&quot;&gt;/**
+ * This is the ActiveQuery class for [[Client]].
+ *
+ * @see Client
+ */&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ClientQuery&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Yii\db\ActiveQuery&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;all&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$db&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nv&quot;&gt;$this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;cache&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;60&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;parent&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;all&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$db&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;one&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$db&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nv&quot;&gt;$this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;cache&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;60&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;parent&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;one&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$db&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h5 id=&quot;caché-de-una-consulta-basada-en-relaciones&quot;&gt;&lt;a href=&quot;#header-5&quot;&gt;&lt;/a&gt;Caché de una consulta basada en relaciones&lt;/h5&gt;
+
+&lt;p&gt;La acción en el controlador (sin caché) es:&lt;/p&gt;
+
+&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$model&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;findModel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$issues&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$model&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;getCurrentIssues&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;orderBy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'ID DESC'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;all&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$retVal&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;renderAjax&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'issues/issues'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;
+    &lt;span class=&quot;s1&quot;&gt;'model'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$model&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;s1&quot;&gt;'issues'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$issues&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Donde $model-&amp;gt;getCurrentIssues() es una relación en el modelo:&lt;/p&gt;
+
+&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;getCurrentIssues&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;hasMany&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;Issue&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'SiteID'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'ID'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+            &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;onCondition&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'Deleted'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+            &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;andOnCondition&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'in'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'IssueStatusID'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Yii\db\Query&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;select&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'ID'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;from&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'issue_status'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;where&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'Code'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'REOPENED'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'CONFIRMED'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'NEW'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]])]);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Para optimizar la acción en el controlador con caché se debería cambiar de la siguiente forma:&lt;/p&gt;
+
+&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$db&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Yii&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$app&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;db&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$model&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;findModel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$issues&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Issue&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;getDb&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;cache&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$db&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$model&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$model&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;getPastIssues&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;orderBy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'ID DESC'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;all&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;60&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Acá es importante resaltar que configurar la relación del modelo de la siguiente forma no funciona:&lt;/p&gt;
+
+&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;getCurrentIssues&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Yii&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$app&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;db&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;cache&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$db&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+         &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;hasMany&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;Issue&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'SiteID'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'ID'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+            &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;onCondition&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'Deleted'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+            &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;andOnCondition&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'in'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'IssueStatusID'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Yii\db\Query&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;select&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'ID'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;from&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'issue_status'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;where&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'Code'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'REOPENED'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'CONFIRMED'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'NEW'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]])]);&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Ya que el método cache () es activar y desactivar la caché de consultas cuando se llama el &lt;em&gt;callback&lt;/em&gt;. Tenga en cuenta que hasMany() o hasOne() no realizan ninguna consulta a la base de datos, por lo que la caché de esta manera no tiene ningún efecto.&lt;/p&gt;
+
+&lt;h4 id=&quot;caché-de-search-model&quot;&gt;&lt;a href=&quot;#header-4&quot;&gt;&lt;/a&gt;Caché de Search Model&lt;/h4&gt;
+
+&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$db&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;cache&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;use&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$dataProvider&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$dataProvider&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;prepare&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;// lanzar consulta a base de datos&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// o si desea realizar consultas de base de datos AR, puede hacer lo siguiente:&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// $customers = Customer::find()-&amp;gt;all();&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$dataProvider&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Nota: Algunas bases de datos, como por ejemplo MySQL, soporta el almacenamiento en caché desde el mismo servidor de la base de datos. Puedes optar por utilizar cualquiera de los mecanismos de memoria caché. El almacenamiento en caché de consultas previamente descrito tiene la ventaja que de que se puede especificar dependencias de caché de una forma flexible y son potencialmente mucho más eficientes.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;caché-de-fragmentos&quot;&gt;&lt;a href=&quot;#header-2&quot;&gt;&lt;/a&gt;Caché de Fragmentos&lt;/h2&gt;
+
+&lt;p&gt;La Caché de Fragmentos se refiere al almacenamiento en caché de una sección de una página Web.&lt;/p&gt;
+
+&lt;p&gt;Para usar la caché de fragmentos, utiliza el siguiente código en tu vista:&lt;/p&gt;
+
+&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;beginCache&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// ... generar contenido aquí ...&lt;/span&gt;
+
+    &lt;span class=&quot;nv&quot;&gt;$this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;endCache&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Es decir, encierra la lógica de la generación del contenido entre las llamadas beginCache() y endCache(). Si el contenido se encuentra en la memoria caché, beginCache() mostrará el contenido y devolverá &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;false&lt;/code&gt;, saltandose así la lógica de generación del contenido. De lo contrario, el código de generación se ejecutaría y al alcanzar la llamada endCache(), el contenido generado será capturado y almacenado en la memoria caché.&lt;/p&gt;
+
+&lt;h3 id=&quot;opciones-de-caché&quot;&gt;&lt;a href=&quot;#header-3&quot;&gt;&lt;/a&gt;Opciones de Caché&lt;/h3&gt;
+
+&lt;h4 id=&quot;caducidad&quot;&gt;&lt;a href=&quot;#header-4&quot;&gt;&lt;/a&gt;Caducidad&lt;/h4&gt;
+
+&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;beginCache&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'duration'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3600&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]))&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// ... generar contenido aquí ...&lt;/span&gt;
+
+    &lt;span class=&quot;nv&quot;&gt;$this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;endCache&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;dependencias-1&quot;&gt;&lt;a href=&quot;#header-4&quot;&gt;&lt;/a&gt;Dependencias&lt;/h4&gt;
+
+&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$dependency&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;
+    &lt;span class=&quot;s1&quot;&gt;'class'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'yii\caching\DbDependency'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;s1&quot;&gt;'sql'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'SELECT MAX(updated_at) FROM post'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;beginCache&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'dependency'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$dependency&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]))&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// ... generar contenido aquí ...&lt;/span&gt;
+
+    &lt;span class=&quot;nv&quot;&gt;$this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;endCache&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;variaciones&quot;&gt;&lt;a href=&quot;#header-4&quot;&gt;&lt;/a&gt;Variaciones&lt;/h4&gt;
+
+&lt;p&gt;El contenido almacenado en caché puede variar de acuerdo a ciertos parámetros. Por ejemplo, para una aplicación Web que soporte multiples idiomas, la misma pieza del código de la vista puede generar el contenido almacenado en caché en diferentes idiomas. Por lo tanto, es posible que desees hacer variaciones del mismo contenido almacenado en caché de acuerdo con la actual selección del idioma en la aplicación.&lt;/p&gt;
+
+&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;beginCache&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'variations'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;Yii&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$app&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;language&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]]))&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// ... generar código aquí ...&lt;/span&gt;
+
+    &lt;span class=&quot;nv&quot;&gt;$this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;endCache&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;alternando-el-almacenamiento-en-caché&quot;&gt;&lt;a href=&quot;#header-3&quot;&gt;&lt;/a&gt;Alternando el Almacenamiento en Caché&lt;/h3&gt;
+
+&lt;p&gt;Puede que a veces quieras habilitar la caché de fragmentos únicamente cuando ciertas condiciones se cumplan. Por ejemplo, para una página que muestra un formulario, tal vez quieras guardarlo en la caché cuando es inicialmente solicitado (a través de una petición &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;GET&lt;/code&gt;). Cualquier muestra posterior (a través de una petición &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;POST&lt;/code&gt;) del formulario no debería ser almacenada en caché ya que el formulario puede que contenga entradas del usuario. Para hacerlo, podrías configurar la opción de activado (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;enabled&lt;/code&gt;), de la siguiente manera:&lt;/p&gt;
+
+&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;beginCache&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'enabled'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Yii&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$app&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;request&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;isGet&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]))&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// ... generar contenido aquí ...&lt;/span&gt;
+
+    &lt;span class=&quot;nv&quot;&gt;$this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;endCache&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;caché-de-páginas&quot;&gt;&lt;a href=&quot;#header-2&quot;&gt;&lt;/a&gt;Caché de páginas&lt;/h2&gt;
+
+&lt;p&gt;La caché de páginas se refiere a guardar el contenido de toda una página en el almacenamiento de caché del servidor. Posteriormente, cuando la misma página sea requerida de nuevo, su contenido será devuelto desde la caché en vez de volver a generarlo desde cero.&lt;/p&gt;
+
+&lt;p&gt;El almacenamiento en caché de páginas está soportado por &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;yii\filters\PageCache&lt;/code&gt;, un filtro de acción. Puede ser utilizado de la siguiente forma en un controlador:&lt;/p&gt;
+
+&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;behaviors&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;
+            &lt;span class=&quot;s1&quot;&gt;'class'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'yii\filters\PageCache'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;s1&quot;&gt;'only'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'index'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
+            &lt;span class=&quot;s1&quot;&gt;'duration'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;60&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;s1&quot;&gt;'variations'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;
+                &lt;span class=&quot;nc&quot;&gt;Yii&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$app&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;language&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
+            &lt;span class=&quot;s1&quot;&gt;'dependency'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;
+                &lt;span class=&quot;s1&quot;&gt;'class'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'yii\caching\DbDependency'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;s1&quot;&gt;'sql'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'SELECT COUNT(*) FROM post'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;El código anterior establece que el almacenamiento de páginas en caché debe ser utilizado sólo en la acción index; el contenido de la página debería almacenarse durante un máximo de 60 segundos y ser variado por el idioma actual de la aplicación; además, el almacenamiento de la página en caché debería ser invalidado si el número total de artículos ha cambiado.&lt;/p&gt;
+
+&lt;p&gt;Como puedes ver, la caché de páginas es muy similar a la caché de fragmentos. Ambos soportan opciones tales como &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;duration&lt;/code&gt;, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dependencies&lt;/code&gt;, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;variations&lt;/code&gt;, y &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;enabled&lt;/code&gt;. Su principal diferencia es que la caché de páginas está implementado como un filtro de acción mientras que la caché de fragmentos se hace en un &lt;em&gt;widget&lt;/em&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;caché-http&quot;&gt;&lt;a href=&quot;#header-2&quot;&gt;&lt;/a&gt;Caché HTTP&lt;/h2&gt;
+
+&lt;p&gt;Las aplicaciones Web pueden hacer uso de la caché en el lado del cliente para así ahorrar tiempo y recursos para generar y transmitir el mismo contenido una y otra vez.&lt;/p&gt;
+
+&lt;p&gt;Para usar la caché del lado del cliente, puedes configurar &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;yii\filters\HttpCache&lt;/code&gt; como un filtro en el controlador para aquellas acciones cuyo resultado deba estar almacenado en la caché en el lado del cliente. &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;HttpCache&lt;/code&gt; solo funciona en peticiones &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;GET&lt;/code&gt; y &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;HEAD&lt;/code&gt;. Puede manejar tres tipos de cabeceras (headers) HTTP relacionadas en este tipo de consultas:&lt;/p&gt;
+
+&lt;h3 id=&quot;la-cabecera-last-modified&quot;&gt;&lt;a href=&quot;#header-3&quot;&gt;&lt;/a&gt;La Cabecera Last-Modified&lt;/h3&gt;
+
+&lt;p&gt;La cabecera Last-Modified usa un sello de tiempo para indicar si la página ha sido modificada desde que el cliente la almacena en la caché.&lt;/p&gt;
+
+&lt;p&gt;El siguiente es un ejemplo haciendo uso de la cabecera Last-Modified:&lt;/p&gt;
+
+&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;behaviors&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;
+            &lt;span class=&quot;s1&quot;&gt;'class'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'yii\filters\HttpCache'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;s1&quot;&gt;'only'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'index'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
+            &lt;span class=&quot;s1&quot;&gt;'lastModified'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$action&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$params&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;nv&quot;&gt;$q&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Yii\db\Query&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+                &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$q&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;from&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'post'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;max&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'updated_at'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;El código anterior establece que la memoria caché HTTP debe ser habilitada únicamente por la acción index. Se debe generar una cabecera HTTP Last-Modified basado en el último tiempo de actualización de los artículos. Cuando un navegador visita la página index la primera vez, la página será generada en el servidor y enviada al navegador; Si el navegador visita la misma página de nuevo y no ningún artículo modificado durante el período, el servidor no volverá a regenerar la página, y el navegador usará la versión caché del lado del cliente. Como resultado, la representación del lado del servidor y la transmisión del contenido de la página son ambos omitidos.&lt;/p&gt;
+
+&lt;h3 id=&quot;la-cabecera-etag&quot;&gt;&lt;a href=&quot;#header-3&quot;&gt;&lt;/a&gt;La Cabecera ETag&lt;/h3&gt;
+
+&lt;p&gt;La cabecera &lt;strong&gt;Entity Tag&lt;/strong&gt; (o para abreviar ETag) usa un &lt;em&gt;hash&lt;/em&gt; para representar el contenido de una página. Si la página ha sido cambiada, el &lt;em&gt;hash&lt;/em&gt; también cambiará. Al comparar el &lt;em&gt;hash&lt;/em&gt; guardado en el lado del cliente con el hash generado en el servidor, la caché puede determinar si la página ha cambiado y deber ser retransmitida.&lt;/p&gt;
+
+&lt;p&gt;El siguiente es un ejemplo de cómo usar la cabecera ETag:&lt;/p&gt;
+
+&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;behaviors&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;
+            &lt;span class=&quot;s1&quot;&gt;'class'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'yii\filters\HttpCache'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;s1&quot;&gt;'only'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'view'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
+            &lt;span class=&quot;s1&quot;&gt;'etagSeed'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$action&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$params&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;nv&quot;&gt;$post&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;findModel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;Yii&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$app&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;request&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'id'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+                &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;serialize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$post&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;title&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$post&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;content&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]);&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;El código anterior establece que la caché HTTP debe ser activada únicamente para la acción &lt;em&gt;view&lt;/em&gt;. Debería generar una cabecera HTTP ETag basándose en el título y contenido del artículo consultado. Cuando un navegador visita la página view por primera vez, la página se generará en el servidor y será enviada al navegador; Si el navegador visita la misma página de nuevo y no ha ocurrido un cambio en el título o contenido del artículo, el servidor no volverá a generar la página, y el navegador usará la versión guardada en la caché del lado del cliente. Como resultado, la representación del lado del servidor y la transmisión del contenido de la página son ambos omitidos.&lt;/p&gt;
+
+&lt;p&gt;ETags permiten estrategias de almacenamiento de caché más complejas y/o mucho más precisas que las cabeceras Last-Modified. Por ejemplo, un ETag puede ser invalidado si el sitio Web ha cambiado de tema (theme).&lt;/p&gt;
+
+&lt;p&gt;La generación de un ETag que requiera muchos recursos puede echar por tierra el propósito de estar usando HttpCache e introducir una sobrecarga innecesaria, ya que debe ser re-evaluada en cada solicitud (request). Trata de encontrar una expresión sencilla para invalidar la caché si la página ha sido modificada.&lt;/p&gt;
+
+&lt;h3 id=&quot;la-cabecera-cache-control&quot;&gt;&lt;a href=&quot;#header-3&quot;&gt;&lt;/a&gt;La Cabecera Cache-Control&lt;/h3&gt;
+
+&lt;p&gt;La cabecera Cache-Control especifica la directiva general de la caché para páginas. Puedes enviarla configurando la propiedad &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;yii\filters\HttpCache::$cacheControlHeader&lt;/code&gt; con el valor de la cabecera. Por defecto, la siguiente cabecera será enviada:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Cache-Control: public, max-age=3600
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Cuando una página utiliza la sesión, PHP enviará automáticamente cabeceras HTTP relacionadas con la caché tal y como se especifican en session.cache_limiter de la configuración INI de PHP. Estas cabeceras pueden interferir o deshabilitar el almacenamiento de caché que desees de &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;HttpCache&lt;/code&gt;. Para evitar este problema, por defecto &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;HttpCache&lt;/code&gt; deshabilitará automáticamente el envío de estas cabeceras. Si deseas modificar este comportamiento, tienes que configurar la propiedad &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;yii\filters\HttpCache::$sessionCacheLimiter&lt;/code&gt;. La propiedad puede tomar un valor de cadena, incluyendo &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;public&lt;/code&gt;, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;private&lt;/code&gt;, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;private_no_expire&lt;/code&gt;, and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;nocache&lt;/code&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Los robots de motores de búsqueda tienden a respetar las cabeceras de caché. Dado que algunos &lt;em&gt;crawlers&lt;/em&gt; tienen limitado el número de páginas que pueden rastrear por dominios dentro de un cierto período de tiempo, la introducción de cabeceras de caché pueden ayudar a la indexación del sitio Web y reducir el número de páginas que deben ser procesadas.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3 id=&quot;limitaciones&quot;&gt;&lt;a href=&quot;#header-3&quot;&gt;&lt;/a&gt;Limitaciones&lt;/h3&gt;
+
+&lt;p&gt;El almacenamiento en caché de consultas no funciona con los resultados de consulta que contienen controladores de recursos. Por ejemplo, cuando se utiliza el tipo de columna BLOB en algunos DBMS, el resultado de la consulta devolverá un recurso para manejar los datos de la columna.&lt;/p&gt;
+
+&lt;p&gt;Algunos sistemas de almacenamiento caché tienen limitación de tamaño. Por ejemplo, memcache limita el tamaño máximo de cada entrada a 1MB. Por lo tanto, si el tamaño de un resultado de la consulta excede ese límite, el almacenamiento en caché fallará.&lt;/p&gt;
+
+&lt;h1 id=&quot;fuentes&quot;&gt;&lt;a href=&quot;#header-1&quot;&gt;&lt;/a&gt;Fuentes&lt;/h1&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.yiiframework.com/doc/guide/2.0/es/caching-data&quot;&gt;Almacenamiento de Datos en Caché?&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=aRh2m_1nZF8/&quot;&gt;Yii 2.0 Part 17 - Caching&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.itworkman.com/169213.html/&quot;&gt;What are yii2’s cache dependencies? How do I use cache dependencies?&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://kb.zensoft.hu/yii2-caching-and-activerecord/#caching-in-a-search-model/&quot;&gt;Yii2 Optimization &amp;amp; Caching and ActiveRecord&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;habilitar log 
+configurar base de datos&lt;/p&gt;
+</description>
+        <pubDate>Wed, 05 Jan 2022 00:00:00 -0300</pubDate>
+        <link>http://localhost:8002//YII2-Caching</link>
+        <link href="http://localhost:8002/YII2-Caching"/>
+        <guid isPermaLink="true">http://localhost:8002/YII2-Caching</guid>
+      </item>
     
       <item>
         <title>PostgreSQL sorry, too many clients already</title>
@@ -112,9 +702,9 @@ shared_buffers = 2GB
 &lt;/ul&gt;
 </description>
         <pubDate>Sat, 18 Dec 2021 00:00:00 -0300</pubDate>
-        <link>http://localhost:8005//Postgresql-too-many-clients</link>
-        <link href="http://localhost:8005/Postgresql-too-many-clients"/>
-        <guid isPermaLink="true">http://localhost:8005/Postgresql-too-many-clients</guid>
+        <link>http://localhost:8002//Postgresql-too-many-clients</link>
+        <link href="http://localhost:8002/Postgresql-too-many-clients"/>
+        <guid isPermaLink="true">http://localhost:8002/Postgresql-too-many-clients</guid>
       </item>
     
       <item>
@@ -218,9 +808,9 @@ shared_buffers = 2GB
 &lt;/ul&gt;
 </description>
         <pubDate>Mon, 13 Dec 2021 00:00:00 -0300</pubDate>
-        <link>http://localhost:8005//Connections-pool</link>
-        <link href="http://localhost:8005/Connections-pool"/>
-        <guid isPermaLink="true">http://localhost:8005/Connections-pool</guid>
+        <link>http://localhost:8002//Connections-pool</link>
+        <link href="http://localhost:8002/Connections-pool"/>
+        <guid isPermaLink="true">http://localhost:8002/Connections-pool</guid>
       </item>
     
       <item>
@@ -362,9 +952,9 @@ docker run &lt;span class=&quot;nt&quot;&gt;-d&lt;/span&gt; &lt;span class=&quot
 &lt;/ul&gt;
 </description>
         <pubDate>Thu, 02 Dec 2021 00:00:00 -0300</pubDate>
-        <link>http://localhost:8005//Docker-Limit-Resources</link>
-        <link href="http://localhost:8005/Docker-Limit-Resources"/>
-        <guid isPermaLink="true">http://localhost:8005/Docker-Limit-Resources</guid>
+        <link>http://localhost:8002//Docker-Limit-Resources</link>
+        <link href="http://localhost:8002/Docker-Limit-Resources"/>
+        <guid isPermaLink="true">http://localhost:8002/Docker-Limit-Resources</guid>
       </item>
     
       <item>
@@ -841,9 +1431,9 @@ docker run &lt;span class=&quot;nt&quot;&gt;-d&lt;/span&gt; &lt;span class=&quot
 &lt;/ul&gt;
 </description>
         <pubDate>Fri, 26 Nov 2021 00:00:00 -0300</pubDate>
-        <link>http://localhost:8005//React-Performance</link>
-        <link href="http://localhost:8005/React-Performance"/>
-        <guid isPermaLink="true">http://localhost:8005/React-Performance</guid>
+        <link>http://localhost:8002//React-Performance</link>
+        <link href="http://localhost:8002/React-Performance"/>
+        <guid isPermaLink="true">http://localhost:8002/React-Performance</guid>
       </item>
     
   </channel>

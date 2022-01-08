@@ -17,14 +17,14 @@
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="Blog sobre desarrollo de software" />
 <meta property="og:description" content="Blog sobre desarrollo de software" />
-<link rel="canonical" href="http://localhost:8005/" />
-<meta property="og:url" content="http://localhost:8005/" />
+<link rel="canonical" href="http://localhost:8002/" />
+<meta property="og:url" content="http://localhost:8002/" />
 <meta property="og:site_name" content="Blog" />
-<link rel="next" href="http://localhost:8005/page/2/" />
+<link rel="next" href="http://localhost:8002/page/2/" />
 <meta name="twitter:card" content="summary" />
 <meta property="twitter:title" content="Blog" />
 <script type="application/ld+json">
-{"@type":"WebSite","url":"http://localhost:8005/","name":"Blog","author":{"@type":"Person","name":"Eva Villarreal Guzmán"},"headline":"Blog","description":"Blog sobre desarrollo de software","@context":"https://schema.org"}</script>
+{"@type":"WebSite","url":"http://localhost:8002/","name":"Blog","author":{"@type":"Person","name":"Eva Villarreal Guzmán"},"headline":"Blog","description":"Blog sobre desarrollo de software","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 
 </head>
@@ -49,21 +49,21 @@
         <ul>
     
       <li>
+          <h2><a href="/HTTPS-con-docker-y-apache">HTTPS con docker compose y apache</a></h2>
+          <time datetime="2022-01-08T00:00:00-03:00">08 Jan 2022</time>
+          <p>Veremos como configurar Docker Compose con Apache para que funcione con el protocolo HTTPS. Como ejemplo de sitio usaremos una demo realizada por el framework Yii. 1- Editar el archivo hosts en el sistema operativo Antes que nada, mientras estamos trabajando en el entorno de desarrollo, tendremos que configurar un...</p>
+      </li>
+    
+      <li>
+          <h2><a href="/YII2-Caching">Caché en Yii2</a></h2>
+          <time datetime="2022-01-05T00:00:00-03:00">05 Jan 2022</time>
+          <p>Para entender porque necesitamos implementar caché en nuestras web, entendamos primero que pasa cuando interactuamos con un servidor web. Cada vez que se realiza una request a una aplicación web suceden un conjunto de cosas en tu servidor, por ejemplo: Probablemente se conectará a una o varias bases de datos....</p>
+      </li>
+    
+      <li>
           <h2><a href="/Postgresql-too-many-clients">PostgreSQL sorry, too many clients already</a></h2>
           <time datetime="2021-12-18T00:00:00-03:00">18 Dec 2021</time>
           <p>El parámetro max_connections determina el número máximo de conexiones simultáneas en el servidor de base de datos. Por defecto PostgreSQL establece el límite máximo de conexiones en 100. Si el límite establecido en la base de datos se supera, PostgreSQL lanzará la siguiente excepción: org.postgresql.util.PSQLException: FATAL: sorry, too many clients...</p>
-      </li>
-    
-      <li>
-          <h2><a href="/Connections-pool">Connection Pooling</a></h2>
-          <time datetime="2021-12-13T00:00:00-03:00">13 Dec 2021</time>
-          <p>Conectarse a una base de datos es una operación costosa, ya que consta de los siguientes pasos: Abrir una conexión a la base de datos utilizando el driver de la base de datos. Abrir un socket TCP Ejecutar query SQL sobre el socket. Cerrar la conexión. Cerrar el socket. En...</p>
-      </li>
-    
-      <li>
-          <h2><a href="/Docker-Limit-Resources">Limitación de recursos en Docker</a></h2>
-          <time datetime="2021-12-02T00:00:00-03:00">02 Dec 2021</time>
-          <p>De forma predeterminada, no hay límite en la cantidad de memoria o CPU que puede usar un contenedor. Puede usar tanto como lo permita el programador del kernel del host. Es importante que un contenedor en ejecución no consuma demasiada memoria o CPU en la computadora host. Cuando el kernel...</p>
       </li>
     
 </ul>
@@ -90,7 +90,7 @@
         <b>EvaVillarrealGuzman</b>
     </span>
     
-    <span>© 2021</span>
+    <span>© 2022</span>
   </a>
 </footer>
 

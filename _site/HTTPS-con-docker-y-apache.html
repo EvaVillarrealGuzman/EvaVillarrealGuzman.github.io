@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <meta name="generator" content="Jekyll">
+
+  <title>HTTPS con docker compose y apache</title>
+
+  <link rel="stylesheet" href="/css/main.css">
+  
+  <link href="/atom.xml" type="application/atom+xml" rel="alternate" title="ATOM Feed" /> <!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>HTTPS con docker compose y apache | Blog</title>
+<meta name="generator" content="Jekyll v4.2.1" />
+<meta property="og:title" content="HTTPS con docker compose y apache" />
+<meta name="author" content="Eva Villarreal Guzmán" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Veremos como configurar Docker Compose con Apache para que funcione con el protocolo HTTPS." />
+<meta property="og:description" content="Veremos como configurar Docker Compose con Apache para que funcione con el protocolo HTTPS." />
+<link rel="canonical" href="http://localhost:8002/HTTPS-con-docker-y-apache" />
+<meta property="og:url" content="http://localhost:8002/HTTPS-con-docker-y-apache" />
+<meta property="og:site_name" content="Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2022-01-08T00:00:00-03:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="HTTPS con docker compose y apache" />
+<script type="application/ld+json">
+{"mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:8002/HTTPS-con-docker-y-apache"},"@type":"BlogPosting","url":"http://localhost:8002/HTTPS-con-docker-y-apache","author":{"@type":"Person","name":"Eva Villarreal Guzmán"},"headline":"HTTPS con docker compose y apache","dateModified":"2022-01-08T00:00:00-03:00","datePublished":"2022-01-08T00:00:00-03:00","description":"Veremos como configurar Docker Compose con Apache para que funcione con el protocolo HTTPS.","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+
+<body>
+  <div id="wrapper">
+    <header>
+  <div>
+    <a href="/">
+    
+    <h1>Eva Villarreal Guzmán</h1>
+    </a>
+    <div class="header-links">
+      <a href="/archive"><h2 class="header-link">Archive</h2></a>
+<a href="/about"><h2 class="header-link">About</h2></a>
+<a href="/atom.xml"><h2 class="header-link">RSS</h2></a>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <section id="main_content">
+        <article>
+  <h2>HTTPS con docker compose y apache</h2>
+  <time datetime="2022-01-08T00:00:00-03:00" class="by-line">08 Jan 2022</time>
+  <p>Veremos como configurar Docker Compose con Apache para que funcione con el protocolo HTTPS.</p>
+
+<p>Como ejemplo de sitio usaremos una demo realizada por el <em>framework</em> Yii.</p>
+
+<h2 id="1--editar-el-archivo-hosts-en-el-sistema-operativo"><a href="#header-2"></a>1- Editar el archivo hosts en el sistema operativo</h2>
+
+<p>Antes que nada, mientras estamos trabajando en el entorno de desarrollo, tendremos que configurar un dominio para poder probar el HTTPS. De esta manera, cuando hagamos la prueba del sitio web, en lugar de entrar a localhost en el navegador, entraremos el dominio que hayamos seleccionado. Supongamos que el dominio que elegimos es <strong>test.com.ar</strong>.</p>
+
+<p>Debemos editar el archivo <strong>hosts</strong>. Su ubicación depende del sistema operativo, en Linux lo encontramos en <code class="language-plaintext highlighter-rouge">/etc/hosts</code> y en Windows en <code class="language-plaintext highlighter-rouge">C:\Windows\System32\drivers\etc\hosts</code>. Este archivo lo usa el sistema operativo para mapear una dirección IP a un nombre de <em>host</em> o nombre de dominio.</p>
+
+<p>En el archivo agregaremos la siguiente línea:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>127.0.0.1       test.com.ar
+</code></pre></div></div>
+
+<h2 id="2--clonar-o-crear-el-proyecto"><a href="#header-2"></a>2- Clonar o crear el proyecto</h2>
+
+<p>Para explicar este artículo usaremos un proyecto ya listo que se encuentra en github. El proyecto es una <a href="https://github.com/yiisoft/demo">demo provista por el framework Yii</a>. Lo que hice fue un <em>fork</em> del repositorio a mi cuenta. En el momento de hacer este artículo el <em>fork</em> lo hice a partir del <em>commit</em> f19cc5898911d365310df664415c83e4ef8a8c85. La demo en mi cuenta la puedes encontrar <a href="https://github.com/EvaVillarrealGuzman/demo">aquí</a>.</p>
+
+<h2 id="3--obtener-certificados"><a href="#header-2"></a>3- Obtener certificados</h2>
+
+<p>Para que nuestra web funcione bajo el protocolo HTTPS es necesario tener instalado un certificado SSL, que será el encargado de cifrar las conexiones entre nuestro navegador y el servidor donde está alojada la web que queremos visitar para que toda la información intercambiada entre ambos no esté accesible de ningún modo.</p>
+
+<p>No profundizaremos sobre este tema pero puede obtener certificados gratuitos a través de Let’s Encrypt o StartSSL.</p>
+
+<p>Supongamos que el certificado tiene el nombre <code class="language-plaintext highlighter-rouge">fullchain.pem</code> y su clave primaria es <code class="language-plaintext highlighter-rouge">privkey.pem</code>. Agregaremos estos archivos en una carpeta llamada <code class="language-plaintext highlighter-rouge">ssl</code> creada en la ruta del proyecto y añadiremos dicha carpeta en el <code class="language-plaintext highlighter-rouge">.gitignore</code>, ya que es información sensible:</p>
+
+<p><img src="img/https-con-docker-y-apache/ssl-folder.png" alt="" /></p>
+
+<h2 id="4--crear-los-archivos-de-configuración-de-sitio-de-apache"><a href="#header-2"></a>4- Crear los archivos de configuración de sitio de apache</h2>
+
+<p>Para esto creamos una carpeta llamada <code class="language-plaintext highlighter-rouge">sites-available</code> en la ruta del proyecto y agregamos los archivos <code class="language-plaintext highlighter-rouge">000-default.conf</code> y <code class="language-plaintext highlighter-rouge">default-ssl.conf</code>, donde sus contenidos correspondientes serán los siguientes:</p>
+
+<p>000-default.conf</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;Directory /app/public/&gt;
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+&lt;/Directory&gt;
+
+&lt;VirtualHost *:80&gt;
+        ServerAdmin webmaster@localhost
+        DocumentRoot /app/public
+
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+&lt;/VirtualHost&gt;
+</code></pre></div></div>
+
+<p>default-ssl.conf</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;IfModule mod_ssl.c&gt;
+	&lt;VirtualHost _default_:443&gt;
+		ServerAdmin webmaster@localhost
+
+		DocumentRoot /app/public
+
+		ErrorLog ${APACHE_LOG_DIR}/error.log
+		CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+		SSLEngine on
+
+        SSLCertificateFile /var/imported/ssl/fullchain.pem
+		SSLCertificateKeyFile /var/imported/ssl/privkey.pem
+
+		&lt;FilesMatch "\.(cgi|shtml|phtml|php)$"&gt;
+				SSLOptions +StdEnvVars
+		&lt;/FilesMatch&gt;
+		&lt;Directory /usr/lib/cgi-bin&gt;
+				SSLOptions +StdEnvVars
+		&lt;/Directory&gt;
+	&lt;/VirtualHost&gt;
+&lt;/IfModule&gt;
+</code></pre></div></div>
+
+<h2 id="5--configurar-docker"><a href="#header-2"></a>5- Configurar docker</h2>
+
+<p>Crearemos un archivo <code class="language-plaintext highlighter-rouge">Dockerfile</code>, que definirá nuestra imagen con el siguiente contenido:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>FROM yiisoftware/yii-php:8.0-apache
+
+RUN a2enmod rewrite
+RUN a2enmod ssl
+
+RUN a2ensite default-ssl
+
+EXPOSE 80
+EXPOSE 443
+</code></pre></div></div>
+
+<p>Como se puede ver, partimos de la misma imagen que el proyecto original, solo que habilitamos el SSL.</p>
+
+<p>También modificamos el <code class="language-plaintext highlighter-rouge">docker-compose.yml</code>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>version: '3'
+
+services:
+    php:
+        build:
+          context: .
+          dockerfile: Dockerfile
+        working_dir: /app
+        volumes:
+            - ./:/app
+            # host-volume for composer cache
+            - ~/.composer-docker/cache:/root/.composer/cache:delegated
+            - ./ssl:/var/imported/ssl
+            - ./sites-available:/etc/apache2/sites-available
+        ports:
+            - '80:80'
+            - '443:443'
+</code></pre></div></div>
+
+<p>Le modificamos la imagen a partir de la cuál se construye y pasamos los archivos SSL y de configuración de sitio que vimos anteriormente.</p>
+
+<h2 id="6--correr-la-aplicación"><a href="#header-2"></a>6- Correr la aplicación</h2>
+
+<p>Levante el sitio:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker-compose up -d
+</code></pre></div></div>
+
+<p>Asegurese de tener instaladas las librerías con compose:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker-compose exec php composer install
+</code></pre></div></div>
+
+<p>Pruebe en el navegador entrando al sitio tanto con HTTP como con HTTPS:</p>
+
+<p><img src="img/https-con-docker-y-apache/http.png" alt="" /></p>
+
+<p><img src="img/https-con-docker-y-apache/https.png" alt="" /></p>
+
+</article>
+      </section>
+    </div>
+  </div>
+
+   <footer>
+  <a href="https://github.com/EvaVillarrealGuzman">
+    <span>
+        <b>EvaVillarrealGuzman</b>
+    </span>
+    
+    <span>© 2022</span>
+  </a>
+</footer>
+
+  
+    <script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'G-JLF4M03LEM', 'auto');
+  ga('send', 'pageview');
+</script>
+  
+</body>
+
+</html>
