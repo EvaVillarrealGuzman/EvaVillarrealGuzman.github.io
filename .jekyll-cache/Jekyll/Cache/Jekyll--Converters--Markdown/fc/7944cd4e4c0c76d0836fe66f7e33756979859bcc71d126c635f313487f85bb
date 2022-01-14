@@ -1,56 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-  <meta name="generator" content="Jekyll">
-
-  <title>Caché en Yii2</title>
-
-  <link rel="stylesheet" href="/css/main.css">
-  
-  <link href="/atom.xml" type="application/atom+xml" rel="alternate" title="ATOM Feed" /> <!-- Begin Jekyll SEO tag v2.7.1 -->
-<title>Caché en Yii2 | Blog</title>
-<meta name="generator" content="Jekyll v4.2.1" />
-<meta property="og:title" content="Caché en Yii2" />
-<meta name="author" content="Eva Villarreal Guzmán" />
-<meta property="og:locale" content="en_US" />
-<meta name="description" content="Para entender porque necesitamos implementar caché en nuestras web, entendamos primero que pasa cuando interactuamos con un servidor web." />
-<meta property="og:description" content="Para entender porque necesitamos implementar caché en nuestras web, entendamos primero que pasa cuando interactuamos con un servidor web." />
-<link rel="canonical" href="http://localhost:8005/YII2-Caching" />
-<meta property="og:url" content="http://localhost:8005/YII2-Caching" />
-<meta property="og:site_name" content="Blog" />
-<meta property="og:type" content="article" />
-<meta property="article:published_time" content="2022-01-14T00:00:00-03:00" />
-<meta name="twitter:card" content="summary" />
-<meta property="twitter:title" content="Caché en Yii2" />
-<script type="application/ld+json">
-{"mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:8005/YII2-Caching"},"@type":"BlogPosting","url":"http://localhost:8005/YII2-Caching","author":{"@type":"Person","name":"Eva Villarreal Guzmán"},"headline":"Caché en Yii2","dateModified":"2022-01-14T00:00:00-03:00","datePublished":"2022-01-14T00:00:00-03:00","description":"Para entender porque necesitamos implementar caché en nuestras web, entendamos primero que pasa cuando interactuamos con un servidor web.","@context":"https://schema.org"}</script>
-<!-- End Jekyll SEO tag -->
-
-</head>
-
-<body>
-  <div id="wrapper">
-    <header>
-  <div>
-    <a href="/">
-    
-    <h1>Eva Villarreal Guzmán</h1>
-    </a>
-    <div class="header-links">
-      <a href="/archive"><h2 class="header-link">Archive</h2></a>
-<a href="/about"><h2 class="header-link">About</h2></a>
-<a href="/atom.xml"><h2 class="header-link">RSS</h2></a>
-    </div>
-  </div>
-</header>
-    <div class="container">
-      <section id="main_content">
-        <article>
-  <h2>Caché en Yii2</h2>
-  <time datetime="2022-01-14T00:00:00-03:00" class="by-line">14 Jan 2022</time>
-  <p>Para entender porque necesitamos implementar caché en nuestras web, entendamos primero que pasa cuando interactuamos con un servidor web.</p>
+I"��<p>Para entender porque necesitamos implementar caché en nuestras web, entendamos primero que pasa cuando interactuamos con un servidor web.</p>
 
 <p>Cada vez que se realiza una <em>request</em> a una aplicación web suceden un conjunto de cosas en tu servidor, por ejemplo:</p>
 
@@ -63,7 +11,7 @@
 
 <p>Todas esas cosas son las que afectan el tiempo que pasa entre que las <em>requests</em> llegan al servidor web y éste pueda generar la respuesta y ser enviada al usuario. Por lo tanto, cuanto más disco o CPU se use y cuanto más se acceda a una base de datos, más lenta será la respuesta de su servidor.</p>
 
-<p>Si se realiza otra <em>request</em> para ese mismo contenido, en la mayoría de los casos ocurrirá exactamente lo mismo y su servidor tendrá que manejar ese acceso al disco en esa red y esa sobrecarga de CPU requerida para la <em>request</em> por segunda o tercera vez o varias veces. ¿Qué ocurre cuando algunos de estos recursos comienzan a acercarse a su límite? Se empezará a ralentizar o provocará un error. Por ejemplo esto sucede si la CPU alcanza los límites de su servidor, si el acceso al disco es tan lento que las cosas comienzan a agotarse o si la carga de su base de datos es tan pesada que nuevamente obtiene un error de <em>time out</em> o incluso el servidor web podría agotar el <em>time out</em> esperando la base de datos responder.</p>
+<p>Si se realiza otra <em>request</em> para ese mismo contenido, en la mayoría de los casos ocurrirá exactamente lo mismo y su servidor tendrá que manejar ese acceso al disco en esa red y esa sobrecarga de CPU requerida para la <em>request</em> por segunda o tercera vez o varias veces. ¿Qué ocurre cuando algunos de estos recursos n a acercarse a su límite? Se empezará a ralentizar o provocará un error. Por ejemplo esto sucede si la CPU alcanza los límites de su servidor, si el acceso al disco es tan lento que las cosas comienzan a agotarse o si la carga de su base de datos es tan pesada que nuevamente obtiene un error de <em>time out</em> o incluso el servidor web podría agotar el <em>time out</em> esperando la base de datos responder.</p>
 
 <p>La forma más fácil de reducir el uso de estos recursos es almacenar en caché los datos cuando se generan. De esta manera el objetivo es que se pueden atender la mayor cantidad de <em>requests</em> posibles directamente desde la memoria, minimizando el uso de CPU o disco de red y el acceso a la base de datos.</p>
 
@@ -73,7 +21,7 @@
   <li>Requerirá memoria adicional y eso podría tener un efecto en el tipo de servidor que puede usar para su servidor. Dependiendo de qué es exactamente lo que vas a almacenar en caché, es posible que no requieras mucha memoria.</li>
 </ul>
 
-<p>Si está diseñando un servicio web para miles de usuarios seguramente la caché será uno de los mecanismo que utilice. Ya que cuantas más <em>requests</em> pueda manejar con los mismos recursos, menos servidores necesitará, lo cual es más barato y también podría significar que puede usar una sola base de datos para su aplicación en lugar de múltiples bases de datos.</p>
+<p>Si está diseñando un servicio web para que miles de usuarios seguramente la caché será uno de los mecanismo que utilice. Ya que cuantas más <em>requests</em> pueda manejar con los mismos recursos, menos servidores necesitará, lo cual es más barato y también podría significar que puede usar una sola base de datos para su aplicación en lugar de múltiples bases de datos.</p>
 
 <p>Ahora yendo particularmente a Yii2, el <em>caching</em> es una de las características que el <em>framework</em> provee y a continuación profundizamos.</p>
 
@@ -121,7 +69,7 @@
   <li>yii\caching\DbDependency: la dependencia cambia si el resultado de la consulta de la sentencia SQL especificada cambia.</li>
   <li>yii\caching\ExpressionDependency: la dependencia cambia si el resultado de la expresión de PHP especificada cambia.</li>
   <li>yii\caching\FileDependency: la dependencia cambia si se modifica la última fecha de modificación del archivo.</li>
-  <li>yii\caching\TagDependency: marca un elemento de datos en caché con uno o más <em>tags</em>. Cada <em>tag</em> puede ser invalidado llamando a yii\caching\TagDependency::invalidate(), de manera que invalidará a todos los elementos de datos que contienen dicho <em>tag</em>.</li>
+  <li>yii\caching\TagDependency: marca un elemento de datos en caché con uno o más <em>tags</em>. Cada <em>tag</em> puede ser invalidado llamando a yii\caching\TagDependency::invalidate(), de manera que invalidaría a todos los elementos de datos que contienen dicho <em>tag</em>.</li>
 </ul>
 
 <h2 id="mecanismos-de-caché"><a href="#header-2"></a>Mecanismos de caché</h2>
@@ -302,7 +250,7 @@
 </code></pre></div></div>
 
 <blockquote>
-  <p>Nota: Algunas bases de datos, como por ejemplo MySQL, soporta el almacenamiento en caché desde el mismo servidor de la base de datos. Puedes optar por utilizar cualquiera de los mecanismos de memoria caché. El almacenamiento en caché de consultas previamente descrito tiene la ventaja de que se puede especificar dependencias de caché de una forma flexible y son potencialmente mucho más eficientes.</p>
+  <p>Nota: Algunas bases de datos, como por ejemplo MySQL, soporta el almacenamiento en caché desde el mismo servidor de la base de datos. Puedes optar por utilizar cualquiera de los mecanismos de memoria caché. El almacenamiento en caché de consultas previamente descrito tiene la ventaja que de que se puede especificar dependencias de caché de una forma flexible y son potencialmente mucho más eficientes.</p>
 </blockquote>
 
 <h2 id="caché-de-fragmentos"><a href="#header-2"></a>Caché de Fragmentos</h2>
@@ -319,7 +267,7 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>Es decir, encierra la lógica de la generación del contenido entre las llamadas beginCache() y endCache(). Si el contenido se encuentra en la memoria caché, beginCache() mostrará el contenido y devolverá <code class="language-plaintext highlighter-rouge">false</code>, saltándose así la lógica de generación del contenido. De lo contrario, el código de generación se ejecutaría y al alcanzar la llamada endCache(), el contenido generado será capturado y almacenado en la memoria caché.</p>
+<p>Es decir, encierra la lógica de la generación del contenido entre las llamadas beginCache() y endCache(). Si el contenido se encuentra en la memoria caché, beginCache() mostrará el contenido y devolverá <code class="language-plaintext highlighter-rouge">false</code>, saltandose así la lógica de generación del contenido. De lo contrario, el código de generación se ejecutaría y al alcanzar la llamada endCache(), el contenido generado será capturado y almacenado en la memoria caché.</p>
 
 <h3 id="opciones-de-caché"><a href="#header-3"></a>Opciones de Caché</h3>
 
@@ -350,7 +298,7 @@
 
 <h4 id="variaciones"><a href="#header-4"></a>Variaciones</h4>
 
-<p>El contenido almacenado en caché puede variar de acuerdo a ciertos parámetros. Por ejemplo, para una aplicación Web que soporte múltiples idiomas, la misma pieza del código de la vista puede generar el contenido almacenado en caché en diferentes idiomas. Por lo tanto, es posible que desees hacer variaciones del mismo contenido almacenado en caché de acuerdo con la actual selección del idioma en la aplicación.</p>
+<p>El contenido almacenado en caché puede variar de acuerdo a ciertos parámetros. Por ejemplo, para una aplicación Web que soporte multiples idiomas, la misma pieza del código de la vista puede generar el contenido almacenado en caché en diferentes idiomas. Por lo tanto, es posible que desees hacer variaciones del mismo contenido almacenado en caché de acuerdo con la actual selección del idioma en la aplicación.</p>
 
 <div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="nf">beginCache</span><span class="p">(</span><span class="nv">$id</span><span class="p">,</span> <span class="p">[</span><span class="s1">'variations'</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="nc">Yii</span><span class="o">::</span><span class="nv">$app</span><span class="o">-&gt;</span><span class="n">language</span><span class="p">]]))</span> <span class="p">{</span>
 
@@ -405,7 +353,7 @@
 
 <p>Las aplicaciones Web pueden hacer uso de la caché en el lado del cliente para así ahorrar tiempo y recursos para generar y transmitir el mismo contenido una y otra vez.</p>
 
-<p>Para usar la caché del lado del cliente, puedes configurar <code class="language-plaintext highlighter-rouge">yii\filters\HttpCache</code> como un filtro en el controlador para aquellas acciones cuyo resultado debe estar almacenado en la caché en el lado del cliente. <code class="language-plaintext highlighter-rouge">HttpCache</code> solo funciona en peticiones <code class="language-plaintext highlighter-rouge">GET</code> y <code class="language-plaintext highlighter-rouge">HEAD</code>. Puede manejar tres tipos de cabeceras (headers) HTTP relacionadas en este tipo de consultas:</p>
+<p>Para usar la caché del lado del cliente, puedes configurar <code class="language-plaintext highlighter-rouge">yii\filters\HttpCache</code> como un filtro en el controlador para aquellas acciones cuyo resultado deba estar almacenado en la caché en el lado del cliente. <code class="language-plaintext highlighter-rouge">HttpCache</code> solo funciona en peticiones <code class="language-plaintext highlighter-rouge">GET</code> y <code class="language-plaintext highlighter-rouge">HEAD</code>. Puede manejar tres tipos de cabeceras (headers) HTTP relacionadas en este tipo de consultas:</p>
 
 <h3 id="la-cabecera-last-modified"><a href="#header-3"></a>La Cabecera Last-Modified</h3>
 
@@ -482,7 +430,7 @@
 
 <p>Si se habilita los logs a nivel info en Yii2 se podrán observar las consultas que se estén realizando a la base de datos.</p>
 
-<p>Esto puede ser útil al <em>debuggear</em> y ver por ejemplo si se está realizando una consulta a la base de datos u obteniendo de caché.</p>
+<p>Esto puede ser útil al <em>debuggear</em> y ver por ejemplo si se esta realizando una consulta a la base de datos u obteniendo de caché.</p>
 
 <p>Para habilitar este log debe agregar el siguiente <em>array</em> en el archivo <code class="language-plaintext highlighter-rouge">web.php</code>:</p>
 
@@ -508,32 +456,4 @@
   <li><a href="https://www.itworkman.com/169213.html/">What are yii2’s cache dependencies? How do I use cache dependencies?</a></li>
   <li><a href="https://kb.zensoft.hu/yii2-caching-and-activerecord/#caching-in-a-search-model/">Yii2 Optimization &amp; Caching and ActiveRecord</a></li>
 </ul>
-
-</article>
-      </section>
-    </div>
-  </div>
-
-   <footer>
-  <a href="https://github.com/EvaVillarrealGuzman">
-    <span>
-        <b>EvaVillarrealGuzman</b>
-    </span>
-    
-    <span>© 2022</span>
-  </a>
-</footer>
-
-  
-    <script type="text/javascript">
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-  ga('create', 'G-JLF4M03LEM', 'auto');
-  ga('send', 'pageview');
-</script>
-  
-</body>
-
-</html>
+:ET

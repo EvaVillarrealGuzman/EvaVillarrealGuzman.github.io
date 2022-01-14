@@ -1,4 +1,4 @@
-I"��<p>Para entender porque necesitamos implementar caché en nuestras web, entendamos primero que pasa cuando interactuamos con un servidor web.</p>
+I"��<p>Para entender porque necesitamos implementar caché en nuestras web, entendamos primero que pasa cuando interactuamos con un servidor web.</p>
 
 <p>Cada vez que se realiza una <em>request</em> a una aplicación web suceden un conjunto de cosas en tu servidor, por ejemplo:</p>
 
@@ -11,9 +11,9 @@
 
 <p>Todas esas cosas son las que afectan el tiempo que pasa entre que las <em>requests</em> llegan al servidor web y éste pueda generar la respuesta y ser enviada al usuario. Por lo tanto cuanto más disco o CPU se use y cuanto más se acceda a una base de datos, más lenta será la respuesta de su servidor.</p>
 
-<p>Si se realiza otra <em>request</em> para ese mismo contenido, en la mayoría de los casos ocurrirá exactamente lo mismo y su servidor tendrá que manejar ese acceso al disco en esa red y esa sobrecarga de CPU requerida para la <em>request</em> por segunda o tercera vez o varias veces. ¿Qué ocurre cuando algunos de estos recursos comienza a acercarse a su límite? Se empezará a ralentizar o provocará un error. Por lo tanto, si la CPU alcanza los límites de su servidor, si el acceso al disco es tan lento que las cosas comienzan a agotarse o si la carga de su base de datos es tan pesada que nuevamente obtiene un error de <em>time out</em> o incluso el servidor web podría agotar el <em>time out</em> esperando la base de datos responder.</p>
+<p>Si se realiza otra <em>request</em> para ese mismo contenido, en la mayoría de los casos ocurrirá exactamente lo mismo y su servidor tendrá que manejar ese acceso al disco en esa red y esa sobrecarga de CPU requerida para la <em>request</em> por segunda o tercera vez o varias veces. ¿Qué ocurre cuando algunos de estos recursos comienza a acercarse a su límite? Se empezará a ralentizar o provocará un error. Por ejemplo esto sucede si la CPU alcanza los límites de su servidor, si el acceso al disco es tan lento que las cosas comienzan a agotarse o si la carga de su base de datos es tan pesada que nuevamente obtiene un error de <em>time out</em> o incluso el servidor web podría agotar el <em>time out</em> esperando la base de datos responder.</p>
 
-<p>La forma más fácil de reducir el uso de estos recursos es almacenar en caché los datos cuando se generan en la memoria. De esta manera el objetivo es que se pueden atender la mayor cantidad de <em>requests</em> posibles directamente desde la memoria, minimizando el uso de CPU o disco de red y el acceso a la base de datos.</p>
+<p>La forma más fácil de reducir el uso de estos recursos es almacenar en caché los datos cuando se generan. De esta manera el objetivo es que se pueden atender la mayor cantidad de <em>requests</em> posibles directamente desde la memoria, minimizando el uso de CPU o disco de red y el acceso a la base de datos.</p>
 
 <p>Esto tendrá algunos costos:</p>
 <ul>

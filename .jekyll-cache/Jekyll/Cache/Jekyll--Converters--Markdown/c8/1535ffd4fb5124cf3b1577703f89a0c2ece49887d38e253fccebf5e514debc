@@ -1,4 +1,4 @@
-I"M<p>Veremos como configurar Docker Compose con Apache para que funcione con el protocolo HTTPS.</p>
+I"N<p>Veremos como configurar Docker Compose con Apache para que funcione con el protocolo HTTPS.</p>
 
 <p>Como ejemplo de sitio usaremos una demo realizada por el <em>framework</em> Yii.</p>
 
@@ -121,7 +121,7 @@ services:
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker-compose up -d
 </code></pre></div></div>
 
-<p>Asegurese de tener instaladas las librerías con compose:</p>
+<p>Asegúrese de tener instaladas las librerías con compose:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker-compose exec php composer install
 </code></pre></div></div>
