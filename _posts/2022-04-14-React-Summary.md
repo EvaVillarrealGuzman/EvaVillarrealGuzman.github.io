@@ -63,7 +63,7 @@ toogleButton.addEventListener('click', () => {
 
 It is imperative because of all the instructions needed to change the classes. In contrast, the declarative approach using React would be as follows:
 
-```react
+```jsx
 // To turn on the Toggle
 <Toggle on />
 
@@ -270,7 +270,7 @@ The component-based approach drastically changes the way we write web applicatio
 
 Rendering of a React component looks like this:
 
-```react
+```jsx
 return ( 
   <button style={{ color: 'red' }} onClick={this.handleClick}> 
     Click me! 
@@ -284,7 +284,7 @@ There is another concept that is pretty controversial and hard to accept, and th
 
 Here is an example of a style object taken from the React documentation:
 
-```react
+```jsx
 const divStyle = { 
   color: 'white', 
   backgroundImage: `url(${imgUrl})`, 
@@ -492,7 +492,7 @@ We must always keep in mind that JSX is not a standard language and that it gets
 
 For example, instead of class, we have to use className, and instead of for, we have to use htmlFor, as follows:
 
-```react
+```jsx
 <label className="awesome-label" htmlFor="name" />
 ```
 
@@ -502,13 +502,13 @@ The reason for this is that class and for are reserved words in JavaScript.
 
 A pretty significant difference is the way the style attribute works. The style attribute does not accept a CSS string as the HTML parallel does, but it expects a JavaScript object where the style names are camelCased:
 
-```react
+```jsx
 <div style={{ backgroundColor: 'red' }} />
 ```
 
 As you can see, you can pass an object to the style prop, meaning you can even have your styles in a separate variable if you want:
 
-```react
+```jsx
 const styles = {
   backgroundColor: 'red'
 } 
@@ -524,7 +524,7 @@ One important difference with HTML worth mentioning is that since JSX elements g
 
 Let's look at a simple example:
 
-```react
+```jsx
 <div />
 <div />
 ```
@@ -537,7 +537,7 @@ Adjacent JSX elements must be wrapped in an enclosing tag.
 
 On the other hand, the following works:
 
-```react
+```jsx
 <div> 
   <div /> 
   <div /> 
@@ -546,7 +546,7 @@ On the other hand, the following works:
 
 Before, React forced you to return an element wrapped with an <div> element or any other tag; since React 16.2.0, it is possible to return an array directly as follows:
 
-```react
+```jsx
 return [
   <li key="1">First item</li>, 
   <li key="2">Second item</li>, 
@@ -556,13 +556,13 @@ return [
 
 Or you can even return a string directly, as shown in the following code block:
 
-```react
+```jsx
 return 'Hello World!'
 ```
 
 Also, React now has a new feature called **Fragment** that also works as a special wrapper for elements. It can be specified with React.Fragment:
 
-```react
+```jsx
 import { Fragment } from 'react'
 
 return ( 
@@ -578,7 +578,7 @@ return (
 
 Or you can use empty tags (<></>):
 
-```react
+```jsx
 return ( 
   <>
     <ComponentA />
@@ -596,7 +596,7 @@ There's one thing that could be a little bit tricky in the beginning and, again,
 
 Consider the following snippet:
 
-```react
+```jsx
 <div> 
   <span>My</span> 
   name is 
@@ -608,7 +608,7 @@ In a browser that interprets HTML, this code would give you My name is Carlos, w
 
 In JSX, the same code would be rendered as MynameisCarlos, which is because the three nested lines get transpiled as individual children of the div element, without taking the spaces into account. A common solution to get the same output is putting a space explicitly between the elements, as follows:
 
-```react
+```jsx
 <div> 
   <span>My</span> 
   {' '}
@@ -626,14 +626,14 @@ A couple more things are worth mentioning before really starting regarding the w
 
 This means that if we want to set an attribute to false, we have to declare it explicitly as false:
 
-```react
+```jsx
 <button disabled /> 
 React.createElement("button", { disabled: true })
 ```
 
 The following is another example of the Boolean attribute:
 
-```react
+```jsx
 <button disabled={false} /> 
 React.createElement("button", { disabled: false })
 ```
@@ -648,7 +648,7 @@ A common practice that leads to fewer bugs is not to pass entire JavaScript obje
 
 Let's see how it works:
 
-```react
+```jsx
 const attrs = { 
   id: 'myId',
   className: 'myClass'
@@ -659,7 +659,7 @@ return <div {...attrs} />
 
 The preceding code gets transpiled into the following:
 
-```react
+```jsx
 var attrs = { 
   id: 'myId',
   className: 'myClass'
@@ -674,7 +674,7 @@ Templates literals are string literals allowing embedded expressions. You can us
 
 Template literals are enclosed by the backtick (` `) character instead of double or single quotes. Also, template literals can contain placeholders. You can add them using the dollar sign and curly braces (${expression}):
 
-```react
+```jsx
 const name = `Carlos`
 const multilineHtml = `<p>
  This is a multiline string
@@ -758,7 +758,7 @@ Each time you call the ```useState``` hook, React creates an entirely new state 
 
 #### [](#header-4) Syntax
 
-```react
+```jsx
 const [state, setState] = useState(INITIAL_STATE);
 ```
 
@@ -789,7 +789,7 @@ Some common scenarios to use the ```useEffect``` hook with are mentioned below:
 1- It accepts the first argument as a callback function. By default, this function will run after every render but this depends upon the value of the second argument.
 2- The second argument is an optional **dependencies array**. ```useEffect``` hook checks this array to compare the previous and current value for those dependencies and then it runs the callback function but only if one of the dependencies has changed.
 
-```react
+```jsx
  useEffect(() => {
     // some code
   }, [someProp, someState]);
@@ -799,7 +799,7 @@ Some common scenarios to use the ```useEffect``` hook with are mentioned below:
 
 When adding an empty array as the dependency array argument, the effect will run once and only after the first render. Because an empty array never changes, useEffect will skip running it on subsequent renders. In short, a componentDidMount method is created by using the ```useEffect``` hook:
 
-```react
+```jsx
 useEffect(() => {
   loadMessage();
 }, []);
@@ -813,7 +813,7 @@ A lot of people are moving away from Redux in order to use the new Context API. 
 
 Assume you have an application with different theme colors depending upon the brand definition.
 
-```react
+```jsx
 import React, { createContext, useContext } from 'react';
 const ThemeContext = createContext('green');
 
@@ -845,7 +845,7 @@ The ```useContext``` hook is used to retrieve the value of a given context.
 
 The output of ```useContext``` is the current value of the provided context.
 
-```react
+```jsx
 const value = useContext(MyThemeContext);
 ```
 
@@ -877,7 +877,7 @@ The ```useReducer``` hook accepts three arguments:
 - **Initial State**: Supply the value of the initial state here.
 - **Init Callback**: This parameter is optional. You should only supply it when looking to initialize a state which is based on a custom value or prop at - later stage. When provided, React will call this function as ```initCb(initialState)``` to obtain the initial state for the ```useReducer``` hook.
 
-```react
+```jsx
 const [state, dispatch] = useReducer(reducer, initialState, initCb);
 ```
 
@@ -918,7 +918,7 @@ For simple cases, it is not required to use memoization because the overhead may
 
 ```useCallback``` hook accepts two arguments: An inline callback function and an array of dependencies. ```useCallback``` returns a memoized reference to the callback function when the dependencies do not change.
 
-```react
+```jsx
 const memoizedCallback = useCallback(
   () => {
     calculateFn(input);
@@ -929,7 +929,7 @@ const memoizedCallback = useCallback(
 
 Similarly, ```useMemo``` hook accepts two arguments: A callback that returns the result of an expensive compute function and an array of dependencies. ```useMemo``` returns the last cached result if the dependencies do not change.
 
-```react
+```jsx
 const memoizedValue = useMemo(() => getExpensiveCalculationResult(input), [input]);
 ```
 
@@ -1009,7 +1009,7 @@ To attach an event listener to a node and get the event object when the event is
 
  We are going to implement a simple button, and we start, as usual, by creating a component:
 
-```react
+```jsx
 const Button = () => {
 
 }
@@ -1019,7 +1019,7 @@ export default Button
 
 Then we define the event handler:
 
-```react
+```jsx
 const handleClick = (syntheticEvent) => { 
   console.log(syntheticEvent instanceof MouseEvent)
   console.log(syntheticEvent.nativeEvent instanceof MouseEvent)
@@ -1030,7 +1030,7 @@ As you can see here, we are doing a very simple thing: we just check the type of
 
 **You should never need to access the original native event, but it is good to know you can do it if you need to.** Finally, we define the button with the onClick attribute to which we attach our event listener:
 
-```react
+```jsx
 return ( 
   <button onClick={handleClick}>Click me!</button> 
 )
@@ -1038,7 +1038,7 @@ return (
 
 Now, suppose we want to attach a second handler to the button that listens to the double-click event. One solution would be to create a new separate handler and attach it to the button using the onDoubleClick attribute, as follows:
 
-```react
+```jsx
 <button 
   onClick={handleClick} 
   onDoubleClick={handleDoubleClick} 
@@ -1051,7 +1051,7 @@ Remember that we always aim to write less boilerplate and avoid duplicating code
 
 Let's implement the generic event handler:
 
-```react
+```jsx
 const handleEvent = (event) => { 
   switch (event.type) { 
     case 'click': 
@@ -1072,7 +1072,7 @@ The generic event handler receives the event object and switches on the event ty
 
 Finally, we attach the new event listener to the onClick and onDoubleClick attributes:
 
-```react
+```jsx
 return ( 
   <button 
     onClick={handleEvent} 
