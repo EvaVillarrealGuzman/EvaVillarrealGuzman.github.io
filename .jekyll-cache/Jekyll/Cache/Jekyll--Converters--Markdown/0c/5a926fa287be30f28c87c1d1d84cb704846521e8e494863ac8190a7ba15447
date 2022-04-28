@@ -1,0 +1,2 @@
+I"ñ<p>The <code class="language-plaintext highlighter-rouge">max_connections</code> parameter determines the maximun number of simultaneous connections that the database server can handle. By default, PostgreSQL sets this parameter to 100.</p>
+:ET

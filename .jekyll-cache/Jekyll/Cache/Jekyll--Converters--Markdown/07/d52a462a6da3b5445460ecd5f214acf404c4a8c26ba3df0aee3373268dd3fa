@@ -1,0 +1,234 @@
+I"�`<p>Performance has an impact on the quality of the application and the user experience. There are different decisions that impact the overall performance of an application, from how we code to how the application infrastructure is configured. In this post we will focus on how to write our React applications to optimize them. Internally, React uses several techniques to minimize the number of costly DOM operations required to update the UI. This will lead to a fast user interface without doing much work to specifically optimize for performance. Nevertheless, there are several ways you can speed up your React application.</p>
+
+<h2 id="reactfragment">React.Fragment</h2>
+
+<p>React requires that you always group a set of elements into a parent element. It is common for React developers that not know <code class="language-plaintext highlighter-rouge">Fragment</code> to wrap with the <code class="language-plaintext highlighter-rouge">div</code> element, as shown in the following example:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>Title<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Content<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</code></pre></div></div>
+
+<p>As this element <code class="language-plaintext highlighter-rouge">div</code> has no functionality other than grouping elements, this can cause performance issues as it adds an extra node to DOM. React provides Fragments for this, which doesn’t any extra node. There’re two syntaxes for Fragments, one is using <code class="language-plaintext highlighter-rouge">&lt;React.Fragment&gt;&lt;/React.Fragment&gt;</code> or with the short syntax <code class="language-plaintext highlighter-rouge">&lt;&gt;&lt;/&gt;</code>. The above example can be written with Fragment in the following ways:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">&lt;</span><span class="nc">React</span><span class="p">.</span><span class="nc">Fragment</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>Title<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Content<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nc">React</span><span class="p">.</span><span class="nc">Fragment</span><span class="p">&gt;</span>
+</code></pre></div></div>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">&lt;&gt;</span>
+    <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>Title<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Content<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+<span class="p">&lt;/&gt;</span>
+</code></pre></div></div>
+
+<h2 id="use-packaging-in-production-mode">Use packaging in Production mode</h2>
+
+<p>When you’re developing a React application, helpful warnings and error messages are presented. These help you to identity bugs and problems during the development, but they also come at a performance cost.</p>
+
+<p>If you look at the React source code, you’ll see a lots of code with <code class="language-plaintext highlighter-rouge">if (process.env.NODE_ENV != 'production')</code>. This snippets of code that React is executing in your development environment is not something that the user needs. For production environments this code is unnecessary. You can achieve this in different ways depending on how you built your app:</p>
+
+<ul>
+  <li>If you built your project with create-react-app, so you can run <code class="language-plaintext highlighter-rouge">npm run build</code> to build the production code.</li>
+  <li>If you used webpack, so you can run <code class="language-plaintext highlighter-rouge">webpack -p</code> which is the same as <code class="language-plaintext highlighter-rouge">webpack --optimize-minimize --define process.env.NODE_ENV="'production'"</code></li>
+</ul>
+
+<h2 id="use-memoization">Use memoization</h2>
+
+<p>Memoization is an optimization technique to increase the performance of the application by storing the results and returning the cached result when the inputs are the sames.</p>
+
+<p>React provides React.memo and useMemo for memoization which store the cached components.</p>
+
+<p>When functional components is rendered using React.memo or useMemo then its results are saved in memory and next time that the component getting called with the same props, the result is a cache component without any execution.</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">UserDisplay</span> <span class="o">=</span> <span class="p">(</span><span class="nx">userDetails</span><span class="p">)</span> <span class="o">=&gt;</span><span class="p">{</span>
+    <span class="kd">const</span> <span class="p">{</span><span class="nx">name</span><span class="p">,</span> <span class="nx">age</span><span class="p">,</span> <span class="nx">address</span><span class="p">}</span> <span class="o">=</span> <span class="nx">userDetails</span><span class="p">;</span>
+
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="p">&lt;&gt;</span>
+            <span class="p">&lt;</span><span class="nt">h4</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">name</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">h4</span><span class="p">&gt;</span>
+            <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">age</span><span class="si">}</span> , <span class="si">{</span><span class="nx">address</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+        <span class="p">&lt;/&gt;</span>
+    <span class="p">)</span>
+<span class="p">}</span>
+<span class="k">export</span> <span class="k">default</span> <span class="nx">React</span><span class="p">.</span><span class="nx">memo</span><span class="p">(</span><span class="nx">UserDisplay</span><span class="p">);</span>
+<span class="c1">// 1 - UserDisplay component gets called and executed, and then rendered</span>
+<span class="p">&lt;</span><span class="nc">UserDisplay</span>
+  <span class="na">name</span><span class="p">=</span><span class="s">"Test"</span>
+  <span class="na">age</span><span class="p">=</span><span class="s">"30"</span>
+  <span class="na">address</span><span class="p">=</span><span class="s">"Test address"</span>
+<span class="p">/&gt;</span>
+<span class="c1">// 2 - The cached result will render without any execution</span>
+<span class="p">&lt;</span><span class="nc">UserDisplay</span>
+  <span class="na">name</span><span class="p">=</span><span class="s">"Test"</span>
+  <span class="na">age</span><span class="p">=</span><span class="s">"30"</span>
+  <span class="na">address</span><span class="p">=</span><span class="s">"Test address"</span>
+<span class="p">/&gt;</span>
+<span class="c1">// Third - UserDisplay component gets called and executed, and then rendered</span>
+<span class="c1">// because the *name* value is different</span>
+<span class="p">&lt;</span><span class="nc">UserDisplay</span>
+  <span class="na">name</span><span class="p">=</span><span class="s">"New Test"</span>
+  <span class="na">age</span><span class="p">=</span><span class="s">"30"</span>
+  <span class="na">address</span><span class="p">=</span><span class="s">"Test address"</span>
+<span class="p">/&gt;</span>
+</code></pre></div></div>
+
+<h2 id="code-splitting">Code Splitting</h2>
+
+<p>Before explaining <em>code splitting</em> it’s important to undertand the concept of <em>Lazy loading</em>. This means that the resources (images, script, etc.) should be loaded when they are really needed. So instead of loadind the whole page and rendering in the browser, only the critical components are loaded first and then the rest only when they needed. In this way, time and memory are not wasted with processes that do not benefit the user experience.</p>
+
+<p>Now, <em>code splitting</em> es a technique that allow us to achieve the <em>lazy loading</em> concept by splitting the application into different files instead of delivering one file. There are different criteria to split the file. Some of the most common and that can be combined are:</p>
+
+<p><strong>1- Split by routes:</strong></p>
+
+<p>This will leaves with different file for each top level route. In the next example, you will have three files: one for the DynamicPage component, one for the NoMatch component and one for the main application.</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nx">React</span><span class="p">,</span> <span class="p">{</span><span class="nx">Suspense</span><span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react</span><span class="dl">'</span>
+<span class="k">import</span> <span class="p">{</span><span class="nx">Switch</span><span class="p">,</span> <span class="nx">BrowserRouter</span> <span class="k">as</span> <span class="nx">Router</span><span class="p">,</span> <span class="nx">Route</span><span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react-router-dom</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">importedComponent</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react-imported-component</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="k">import</span> <span class="nx">Home</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./Home</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">Loading</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./Loading</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="kd">const</span> <span class="nx">AsyncDynamicPAge</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">lazy</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="k">import</span><span class="p">(</span><span class="cm">/* webpackChunkName:'DynamicPage' */</span> <span class="dl">'</span><span class="s1">./DynamicPage</span><span class="dl">'</span><span class="p">));</span>
+<span class="kd">const</span> <span class="nx">AsyncNoMatch</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">lazy</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="k">import</span><span class="p">(</span><span class="cm">/* webpackChunkName:'NoMatch' */</span> <span class="dl">'</span><span class="s1">./NoMatch</span><span class="dl">'</span><span class="p">));</span>
+
+<span class="kd">const</span> <span class="nx">App</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="p">&lt;</span><span class="nc">Router</span><span class="p">&gt;</span>
+            <span class="p">&lt;</span><span class="nc">Suspense</span> <span class="na">fallback</span><span class="p">=</span><span class="si">{</span><span class="nx">Loading</span><span class="si">}</span><span class="p">&gt;</span>
+                <span class="p">&lt;</span><span class="nc">Switch</span><span class="p">&gt;</span>
+                    <span class="p">&lt;</span><span class="nc">Route</span> <span class="na">exact</span> <span class="na">path</span><span class="p">=</span><span class="s">"/"</span> <span class="na">component</span><span class="p">=</span><span class="si">{</span><span class="nx">Home</span><span class="si">}</span><span class="p">/&gt;</span>
+                    <span class="p">&lt;</span><span class="nc">Route</span> <span class="na">exact</span> <span class="na">path</span><span class="p">=</span><span class="s">"/dynamic"</span> <span class="na">component</span><span class="p">=</span><span class="si">{</span><span class="nx">AsyncDynamicPAge</span><span class="si">}</span><span class="p">/&gt;</span>
+                    <span class="p">&lt;</span><span class="nc">Route</span> <span class="na">component</span><span class="p">=</span><span class="si">{</span><span class="nx">AsyncNoMatch</span><span class="si">}</span><span class="p">/&gt;</span>
+                <span class="p">&lt;/</span><span class="nc">Switch</span><span class="p">&gt;</span>
+            <span class="p">&lt;/</span><span class="nc">Suspense</span><span class="p">&gt;</span>
+        <span class="p">&lt;/</span><span class="nc">Router</span><span class="p">&gt;</span>
+    <span class="p">)</span>
+        <span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="nx">App</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>The way to indicate webpack that we want to split the code into different files is through <em>dynamic imports</em> with the keyword <em>import</em>.</p>
+
+<p><code class="language-plaintext highlighter-rouge">React.lazy()</code> is a function that allow you to implement the <em>dynamic imports</em> for components in React. <code class="language-plaintext highlighter-rouge">React.Suspense</code> has a <em>fallback</em> property that receive a React element that you want to render while the component is loading with <code class="language-plaintext highlighter-rouge">React.lazy()</code>.</p>
+
+<p>Also, you will have to configure the webpack file as follows:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">...</span><span class="w">
+</span><span class="err">module.exports</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="err">...</span><span class="w">
+  </span><span class="err">output:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="err">filename:</span><span class="w"> </span><span class="err">'</span><span class="p">[</span><span class="err">name</span><span class="p">]</span><span class="err">.</span><span class="p">[</span><span class="err">hash</span><span class="p">]</span><span class="err">.js'</span><span class="p">,</span><span class="w">
+    </span><span class="err">...</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p><strong>2- Split by vendor:</strong></p>
+
+<p>This approach will help you in two ways: it helps the browser to store those resources that change with less frequency; and it help the browser to take advantage of parallel downloading to potencially reduce load time.</p>
+
+<p>An example of a webpack configuration is as follows:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">...</span>
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">entry</span><span class="p">:</span> <span class="p">{</span>
+    <span class="na">vendor</span><span class="p">:</span> <span class="p">[</span><span class="dl">'</span><span class="s1">semantic-ui-react</span><span class="dl">'</span><span class="p">],</span>
+    <span class="na">app</span><span class="p">:</span> <span class="dl">'</span><span class="s1">./src/index.js</span><span class="dl">'</span>
+  <span class="p">},</span>
+  <span class="p">...</span>
+  <span class="na">optimization</span><span class="p">:</span> <span class="p">{</span>
+    <span class="na">splitChunks</span><span class="p">:</span> <span class="p">{</span>
+      <span class="na">cacheGroups</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">styles</span><span class="p">:</span> <span class="p">{</span>
+          <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">styles</span><span class="dl">'</span><span class="p">,</span>
+          <span class="na">test</span><span class="p">:</span> <span class="sr">/</span><span class="se">\.</span><span class="sr">css$/</span><span class="p">,</span>
+          <span class="na">chunks</span><span class="p">:</span> <span class="dl">'</span><span class="s1">all</span><span class="dl">'</span><span class="p">,</span>
+          <span class="na">enforce</span><span class="p">:</span> <span class="kc">true</span>
+        <span class="p">},</span>
+        <span class="na">vendor</span><span class="p">:</span> <span class="p">{</span>
+          <span class="na">chunks</span><span class="p">:</span> <span class="dl">'</span><span class="s1">initial</span><span class="dl">'</span><span class="p">,</span>
+          <span class="na">test</span><span class="p">:</span> <span class="dl">'</span><span class="s1">vendor</span><span class="dl">'</span><span class="p">,</span>
+          <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">vendor</span><span class="dl">'</span><span class="p">,</span>
+          <span class="na">enforce</span><span class="p">:</span> <span class="kc">true</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">},</span>
+  <span class="p">...</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">entry.vendor: [‘semantic-ui-react’]</code>  specifies which vendor we want to extract from our main application. The <code class="language-plaintext highlighter-rouge">optimization</code> will help you to reduce file size.</p>
+
+<p><strong>3- Extract css styles:</strong></p>
+
+<p>You can use ExtractTextWebpackPlugin in webpack to extract all css code into a separate css file. This will also help the browser to cache this file and do parallel downloading on page load.</p>
+
+<h2 id="virtualizing-the-long-lists">Virtualizing the long lists</h2>
+
+<p>If your application renders long lists of data, it’s recommend that you use the <em>windowing</em> technique. This only renders a subset at any time and render the remaining data whenever scrolled, and reduce the re-rendering time, as well as the number of nodes created in the DOM.</p>
+
+<p><a href="https://react-window.vercel.app/#/examples/list/fixed-size">react-window</a> and <a href="https://bvaughn.github.io/react-virtualized/#/components/List">react-virtualized</a> are popular libraries of <em>windowing</em> in React.</p>
+
+<h2 id="implement-throttling-and-debouncing-to-avoid-multiple-api-calls">Implement Throttling and Debouncing to avoid multiple API calls</h2>
+
+<p>Debouncing and Throttling are widely-used techniques that help us in limiting the rate at which a function fires off. These two techniques give us a layer of control between the event and the execution of the functions attached to them. API servers often implement either of these two techniques to prevent the application from being overloaded.</p>
+
+<p>Both these techniques are almost identical and help us reduce the number of function calls being made but they have one small, but significant difference among them.</p>
+
+<p>Debouncing is a technique in which no matter how many times a user fires an event, the call will be made only after a specific amount of time has passed after the user stops firing the event.For example, let’s say a user is typing something in a search box. This search box makes API calls and has a debounce function attached to it with a specified time duration of 400ms. So now, unless 400ms have passed after the user stopped typing, the API call wouldn’t be made.</p>
+
+<p>Throttling is a technique that makes the next function call strictly after a certain period of time. No matter how many times the user fires an event, the function attached will be executed only once in the given time period.</p>
+
+<p>Debouncing can be used when the result of the most recent event occurrence is what is important. For example, a search query on an e-commerce website.</p>
+
+<p>Throttling can be used when the input provided to the function call doesn’t matter or is the same each time. For example, infinite scrolling on a webpage. Here, we need to check how far the user is from the bottom of the page. If they’re too close, we request more data and append it to the page. Here debouncing wouldn’t work as it would only trigger the event when the user has stopped scrolling but we need to start fetching the content before the user reaches the bottom.</p>
+
+<h2 id="enable-gzip-on-your-web-server">Enable Gzip on your web server</h2>
+
+<p>All modern browser support and automatically negotiate Gzip compression for the HTTP requests. Enabling Gzip compression will help reduce the size of responses, which will impact resource download time.</p>
+
+<p>Check your web server documentation to enable compression:</p>
+
+<ul>
+  <li>Apache: Use <a href="http://httpd.apache.org/docs/current/mod/mod_deflate.html">mod_deflate</a></li>
+  <li>Nginx: Use   <a href="https://nginx.org/en/docs/http/ngx_http_gzip_module.html">ngx_http_gzip_module</a></li>
+</ul>
+
+<h2 id="useful-tools">Useful tools</h2>
+
+<p>We can’t talk about performance if we don’t measure it. We need to perform comparisons before and after making changes to your code to track your progress.</p>
+
+<p>Here some tools that can help you with this:</p>
+
+<h3 id="why-did-you-render">Why Did You Render</h3>
+
+<p><a href="https://www.npmjs.com/package/@welldone-software/why-did-you-render">Why Did You Render</a> is a library that helps detect why a component is re-rendering. It does this by modifying the behavior of the code at runtime using <em>monkey patching</em> React.</p>
+
+<h3 id="react-profiler">React Profiler</h3>
+
+<p><a href="https://reactjs.org/blog/2018/09/10/introducing-the-react-profiler.html">React Profiler</a> is a DevTools that you can install in your browser and collect timing information about each component that’s rendered.</p>
+
+<h3 id="webpack-bundle-analyzer">Webpack Bundle Analyzer</h3>
+
+<p><a href="https://github.com/webpack-contrib/webpack-bundle-analyzer">Webpack Bundle Analyzer</a> provide you a visual representation about the sizes of your files.</p>
+
+<h2 id="sources">Sources</h2>
+
+<ul>
+  <li><a href="https://hackernoon.com/lessons-learned-code-splitting-with-webpack-and-react-f012a989113">Lessons Learned: Code Splitting with Webpack and React</a></li>
+  <li><a href="https://www.freecodecamp.org/news/learn-webpack-for-react-a36d4cac5060/">How to use Webpack with React: an in-depth tutorial</a></li>
+  <li><a href="https://es.reactjs.org/docs/optimizing-performance.html">Optimizando el Rendimiento</a></li>
+  <li><a href="https://www.c-sharpcorner.com/article/performance-optimization-techniques-for-react-applications/">Performance Optimization Techniques For React Applications</a></li>
+  <li><a href="https://blog.bitsrc.io/improve-your-react-app-performance-by-using-throttling-and-debouncing-101afbe9055">Improve Your React App Performance by Using Throttling and Debouncing</a></li>
+  <li><a href="https://medium.com/swlh/9-performance-optimization-strategies-for-reactjs-development-36f6d03a0912">9 Performance Optimization Strategies for ReactJS Development</a></li>
+  <li><a href="https://www.toptal.com/react/componentes-react-eficientes-una-guia-para-optimizar-el-desempeno-de-react">Componentes React Eficientes: Una Guía para Optimizar el Desempeño de React</a></li>
+  <li><a href="https://ourcodeworld.co/articulos/leer/934/top-9-las-mejores-tecnicas-de-optimizacion-para-aplicaciones-react">Top 9: Las Mejores técnicas de optimización para aplicaciones React</a></li>
+</ul>
+:ET

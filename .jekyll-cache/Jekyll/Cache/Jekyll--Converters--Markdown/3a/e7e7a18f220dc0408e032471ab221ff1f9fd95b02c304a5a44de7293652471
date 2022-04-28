@@ -1,0 +1,2 @@
+I"�<p>By default, Docker don’t limit the amount of memory and CPU that a container can use. The container can use as much of a given resources as the host’s kernel scheduler allows.</p>
+:ET

@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-translate-customization" content="108d9124921d80c3-80e20d618ff053c8-g4f02ec6f3dba68b7-c">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Optimizing Performance in React | Eva Villarreal Guzmán</title>
+<meta name="generator" content="Jekyll v4.2.2">
+<meta property="og:title" content="Optimizing Performance in React">
+<meta name="author" content="Eva Villarreal Guzmán">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="Performance has an impact on the quality of the application and the user experience. There are different decisions that impact the overall performance of an application, from how we code to how the application infrastructure is configured. In this post we will focus on how to write our React applications to optimize them. Internally, React uses several techniques to minimize the number of costly DOM operations required to update the UI. This will lead to a fast user interface without doing much work to specifically optimize for performance. Nevertheless, there are several ways you can speed up your React application.">
+<meta property="og:description" content="Performance has an impact on the quality of the application and the user experience. There are different decisions that impact the overall performance of an application, from how we code to how the application infrastructure is configured. In this post we will focus on how to write our React applications to optimize them. Internally, React uses several techniques to minimize the number of costly DOM operations required to update the UI. This will lead to a fast user interface without doing much work to specifically optimize for performance. Nevertheless, there are several ways you can speed up your React application.">
+<link rel="canonical" href="http://localhost:4000/react/2021/11/26/react-performance.html">
+<meta property="og:url" content="http://localhost:4000/react/2021/11/26/react-performance.html">
+<meta property="og:site_name" content="Eva Villarreal Guzmán">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2021-11-26T00:00:00-03:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="Optimizing Performance in React">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Eva Villarreal Guzmán"},"dateModified":"2021-11-26T00:00:00-03:00","datePublished":"2021-11-26T00:00:00-03:00","description":"Performance has an impact on the quality of the application and the user experience. There are different decisions that impact the overall performance of an application, from how we code to how the application infrastructure is configured. In this post we will focus on how to write our React applications to optimize them. Internally, React uses several techniques to minimize the number of costly DOM operations required to update the UI. This will lead to a fast user interface without doing much work to specifically optimize for performance. Nevertheless, there are several ways you can speed up your React application.","headline":"Optimizing Performance in React","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/react/2021/11/26/react-performance.html"},"url":"http://localhost:4000/react/2021/11/26/react-performance.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="shortcut icon" href="">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-noto-sans@0.0.72/index.min.css">
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <script src="/assets/js/main.js"></script><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Eva Villarreal Guzmán">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/default.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js"></script>
+<!-- and it's easy to individually load additional languages -->
+<script charset="UTF-8" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/languages/go.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+// Init highlight js
+document.addEventListener('DOMContentLoaded', function(event) {
+  var els = document.querySelectorAll('pre code')
+
+  function addLangData(block) {
+    var outer = block.parentElement.parentElement.parentElement;
+    var lang = block.getAttribute('data-lang');
+    for (var i = 0; i < outer.classList.length; i++) {
+      var cls = outer.classList[i];
+      if (cls.startsWith('language-')) {
+        lang = cls;
+        break;
+      }
+    }
+    if (!lang) {
+      cls = block.getAttribute('class');
+      lang = cls ? cls.replace('hljs ', '') : '';
+    }
+    if (lang.startsWith('language-')) {
+      lang = lang.substr(9);
+    }
+    block.setAttribute('class', 'hljs ' + lang);
+    block.parentNode.setAttribute('data-lang', lang);
+  }
+
+  function addBadge(block) {
+    var enabled = ('true' || 'true').toLowerCase();
+    if (enabled == 'true') {
+      var pre = block.parentElement;
+      pre.classList.add('badge');
+    }
+  }
+
+  function handle(block) {
+    addLangData(block);
+    addBadge(block)
+    hljs.highlightBlock(block);
+  }
+
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i];
+    handle(el);
+  }
+});
+</script>
+
+<style>
+  /* code language badge */
+  pre.badge::before {
+    content: attr(data-lang);
+    color: #fff;
+    background-color: #ff4e00;
+    padding: 0 .5em;
+    border-radius: 0 2px;
+    text-transform: uppercase;
+    text-align: center;
+    min-width: 32px;
+    display: inline-block;
+    position: absolute;
+    right: 0;
+  }
+
+  /* fix wrong badge display for firefox browser */
+  code > table pre::before {
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<header class="site-header " role="banner">
+
+  <div class="wrapper">
+    <div class="site-header-inner">
+<span class="site-brand"><a class="site-brand-inner" rel="author" href="/">
+  <img class="site-favicon" title="Eva Villarreal Guzmán" src="" onerror="this.style.display='none'">
+  Eva Villarreal Guzmán
+</a>
+</span><nav class="site-nav">
+          <input type="checkbox" id="nav-trigger" class="nav-trigger">
+          <label for="nav-trigger">
+            <span class="menu-icon">
+              <svg viewbox="0 0 18 15" width="18px" height="15px">
+                <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+              </svg>
+            </span>
+          </label>
+
+          <div class="trigger">
+<a class="page-link" href="/about.html">ABOUT</a><a class="page-link" href="/archives.html">ARCHIVES</a><a class="page-link" href="/categories.html">CATEGORIES</a><a class="page-link" href="/">HOME</a><a class="page-link" href="/tags.html">TAGS</a>
+
+
+
+
+
+
+
+
+
+<span class="page-link">
+
+
+
+<div id="google_translate_element" style="display: none;">
+</div>
+
+<span class="ct-language">
+  <ul class="list-unstyled ct-language-dropdown">
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="en">
+          
+          <img src="https://cdn.countryflags.com/thumbs/united-states-of-america/flag-400.png" title="English">
+          
+        </a>
+      </li>
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="es">
+          
+          <img src="https://cdn.countryflags.com/thumbs/spain/flag-400.png" title="Spanish">
+          
+        </a>
+      </li>
+    
+  </ul>
+</span>
+
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'en',
+    autoDisplay: false,
+    layout: google.translate.TranslateElement.InlineLayout.VERTICAL
+  }, 'google_translate_element');
+
+  // Links to cross-origin destinations are unsafe
+  var gll = document.getElementsByClassName('goog-logo-link')[0];
+  if (gll) {
+    gll.setAttribute('rel', 'noopener');
+  }
+
+  function restoreLang() {
+    var iframe = document.getElementsByClassName('goog-te-banner-frame')[0];
+    if (!iframe) return;
+
+    var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
+    var restore_el = innerDoc.getElementsByTagName("button");
+
+    for (var i = 0; i < restore_el.length; i++) {
+      if (restore_el[i].id.indexOf("restore") >= 0) {
+        restore_el[i].click();
+        var close_el = innerDoc.getElementsByClassName("goog-close-link");
+        close_el[0].click();
+        return;
+      }
+    }
+  }
+
+  function triggerHtmlEvent(element, eventName) {
+    var event;
+    if (document.createEvent) {
+      event = document.createEvent('HTMLEvents');
+      event.initEvent(eventName, true, true);
+      element.dispatchEvent(event);
+    } else {
+      event = document.createEventObject();
+      event.eventType = eventName;
+      element.fireEvent('on' + event.eventType, event);
+    }
+  }
+
+  var googleCombo = document.querySelector("select.goog-te-combo");
+  var langSelect = document.querySelector('.ct-language');
+  langSelect.addEventListener('click', function(event) {
+    if (!event.target) {
+      return;
+    }
+
+    var selected = document.querySelector('.ct-language .ct-language-selected');
+    if (selected) {
+      selected.classList.remove('ct-language-selected');
+    }
+
+    var target = event.target;
+    while (target && target !== langSelect ) {
+      if (target.matches('.lang-select')) {
+        break;
+      }
+      target = target.parentElement;
+    }
+
+    if (target && target.matches('.lang-select')) {
+      var lang = target.getAttribute('data-lang');
+      if (googleCombo.value == lang) {
+        restoreLang();
+      } else {
+        target.parentElement.classList.add('ct-language-selected');
+        googleCombo.value = lang;
+        triggerHtmlEvent(googleCombo, 'change');
+      }
+    }
+
+    event.preventDefault();
+  });
+}
+</script>
+
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+</span>
+</div>
+        </nav>
+</div>
+  </div>
+</header>
+
+<script>
+  function initHeader() {
+    var lastScrollY = getScrollPos().y;
+    var documentElement = document.documentElement;
+
+    function storeScrollData() {
+      var y = getScrollPos().y;var scrollStatus = "";
+
+      if (y <= 0) {
+        scrollStatus = "top";
+      } else if ((window.innerHeight + y) >= document.body.offsetHeight) {
+        scrollStatus = "bottom";
+      } else {
+        var isScrollDown = (y - lastScrollY > 0) ? true : false;
+        scrollStatus = isScrollDown ? "down" : "up";
+      }
+
+      lastScrollY = y;
+      documentElement.setAttribute("data-scroll-status", scrollStatus);
+    }
+
+    window.addEventListener('scroll', function(e) {
+      storeScrollData();
+    });
+
+    storeScrollData();
+  }
+  document.addEventListener('DOMContentLoaded', initHeader);
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+  function hashLocate(hashValue) {
+    hashValue = hashValue.replace(/^.*#h-/, '');
+    hashValue = decodeURIComponent(hashValue);
+    var element = document.getElementById(hashValue);
+
+    if (!element) {
+      return;
+    }
+
+    var header = document.querySelector('header.site-header');
+    var headerRect = header.getBoundingClientRect();
+    var headerTop = Math.floor(headerRect.top);
+    var headerHeight = Math.floor(headerRect.height);
+    var scrollPos = getScrollPos();
+    var offsetY = element.offsetTop - (headerTop + headerHeight + 20);
+
+    if (offsetY == scrollPos.y) {
+      return;
+    }
+
+    if (headerTop == 0  && offsetY > scrollPos.y) {
+      offsetY += headerHeight + 2;
+    } else if (headerTop < 0  && offsetY < scrollPos.y) {
+      offsetY -= headerHeight - 2;
+    }
+
+    smoothScrollTo(offsetY);
+  }
+
+  // The first event occurred
+  window.addEventListener('load', function(event) {
+    if (window.location.hash) {
+      hashLocate(window.location.hash);
+    }
+  });
+
+  // The first event occurred
+  window.addEventListener('click', function(event) {
+    if (event.target.tagName.toLowerCase() == 'a') {
+      hashLocate(event.target.getAttribute('href'));
+    }
+  });
+</script>
+<div class="theme-toggle">
+  <input type="checkbox" id="theme-switch">
+  <label for="theme-switch">
+    <div class="toggle"></div>
+    <div class="names">
+      <p class="light">Light</p>
+      <p class="dark">Dark</p>
+    </div>
+  </label>
+</div>
+
+
+
+
+<script>
+  (function() {
+    var sw = document.getElementById('theme-switch');
+    var html = document.getElementsByTagName('html')[0];
+    var nightModeOption = ('auto' || 'auto').toLowerCase();
+    var storage = nightModeOption === 'manual'
+        ? localStorage
+        : sessionStorage;
+    var themeData = loadThemeData();
+
+    function saveThemeData(data) {
+      storage.setItem('theme', JSON.stringify(data));
+    }
+
+    function loadThemeData() {
+      var data = storage.getItem('theme');
+      try {
+        data = JSON.parse(data ? data : '');
+      } catch(e) {
+        data = { nightShift: undefined, autoToggleAt: 0 };
+        saveThemeData(data);
+      }
+      return data;
+    }
+
+    function handleThemeToggle(nightShift) {
+      themeData.nightShift = nightShift;
+      saveThemeData(themeData);
+      html.dataset.theme = nightShift ? 'dark' : 'light';
+      setTimeout(function() {
+        sw.checked = nightShift ? true : false;
+      }, 50);
+    }
+
+    function autoThemeToggle() {
+      // Next time point of theme toggle
+      var now = new Date();
+      var toggleAt = new Date();
+      var hours = now.getHours();
+      var nightShift = hours >= 19 || hours <=7;
+
+      if (nightShift) {
+        if (hours > 7) {
+          toggleAt.setDate(toggleAt.getDate() + 1);
+        }
+        toggleAt.setHours(7);
+      } else {
+        toggleAt.setHours(19);
+      }
+
+      toggleAt.setMinutes(0);
+      toggleAt.setSeconds(0);
+      toggleAt.setMilliseconds(0)
+
+      var delay = toggleAt.getTime() - now.getTime();
+
+      // auto toggle theme mode
+      setTimeout(function() {
+        handleThemeToggle(!nightShift);
+      }, delay);
+
+      return {
+        nightShift: nightShift,
+        toggleAt: toggleAt.getTime()
+      };
+    }
+
+    // Listen the theme toggle event
+    sw.addEventListener('change', function(event) {
+      handleThemeToggle(event.target.checked);
+    });
+
+    if (nightModeOption == 'auto') {
+      var data = autoThemeToggle();
+
+      // Toggle theme by local setting
+      if (data.toggleAt > themeData.autoToggleAt) {
+        themeData.autoToggleAt = data.toggleAt;
+        handleThemeToggle(data.nightShift);
+      } else {
+        handleThemeToggle(themeData.nightShift);
+      }
+    } else if (nightModeOption == 'manual') {
+      handleThemeToggle(themeData.nightShift);
+    } else {
+      var nightShift = themeData.nightShift;
+      if (nightShift === undefined) {
+        nightShift = nightModeOption === 'on';
+      }
+      handleThemeToggle(nightShift);
+    }
+  })();
+</script>
+<div id="click-to-top" class="click-to-top">
+  <i class="fa fa-arrow-up"></i>
+</div>
+<script>
+  (function () {
+    const clickToTop = document.getElementById('click-to-top');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 100) {
+        clickToTop.classList.add('show')
+      }else {
+        clickToTop.classList.remove('show')
+      }
+    });
+    clickToTop.addEventListener('click', () => {
+      window.smoothScrollTo(0);
+    });
+  })();
+</script>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <div class="framework">
+  <section class="main">
+
+     <div class="post">
+  <section>
+
+
+
+
+
+
+
+
+
+<header class="post-header">
+  <h1 class="post-title p-name" itemprop="name headline">Optimizing Performance in React</h1>
+  <h2 class="post-subtitle">We will see different techniques and tools that will help you improve the performance of your React applications</h2>
+
+  <p class="post-meta">
+    <time class="dt-published" datetime="2021-11-26T00:00:00-03:00" itemprop="datePublished"><i class="fa fa-calendar"></i> Nov 26, 2021
+    </time>
+
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 13 mins</span>
+  </p>
+<div class="post-tags">
+<a class="post-tag" href="/tags.html#react">#react</a><a class="post-tag" href="/tags.html#performance">#performance</a>
+</div></header>
+<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+    <div class="post-content e-content" itemprop="articleBody">
+
+      <p>Performance has an impact on the quality of the application and the user experience. There are different decisions that impact the overall performance of an application, from how we code to how the application infrastructure is configured. In this post we will focus on how to write our React applications to optimize them. Internally, React uses several techniques to minimize the number of costly DOM operations required to update the UI. This will lead to a fast user interface without doing much work to specifically optimize for performance. Nevertheless, there are several ways you can speed up your React application.</p>
+
+<h2 id="reactfragment">React.Fragment</h2>
+
+<p>React requires that you always group a set of elements into a parent element. It is common for React developers that not know <code class="language-plaintext highlighter-rouge">Fragment</code> to wrap with the <code class="language-plaintext highlighter-rouge">div</code> element, as shown in the following example:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>Title<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Content<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</code></pre></div></div>
+
+<p>As this element <code class="language-plaintext highlighter-rouge">div</code> has no functionality other than grouping elements, this can cause performance issues as it adds an extra node to DOM. React provides Fragments for this, which doesn’t any extra node. There’re two syntaxes for Fragments, one is using <code class="language-plaintext highlighter-rouge">&lt;React.Fragment&gt;&lt;/React.Fragment&gt;</code> or with the short syntax <code class="language-plaintext highlighter-rouge">&lt;&gt;&lt;/&gt;</code>. The above example can be written with Fragment in the following ways:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">&lt;</span><span class="nc">React</span><span class="p">.</span><span class="nc">Fragment</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>Title<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Content<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nc">React</span><span class="p">.</span><span class="nc">Fragment</span><span class="p">&gt;</span>
+</code></pre></div></div>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">&lt;&gt;</span>
+    <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>Title<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Content<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+<span class="p">&lt;/&gt;</span>
+</code></pre></div></div>
+
+<h2 id="use-packaging-in-production-mode">Use packaging in Production mode</h2>
+
+<p>When you’re developing a React application, helpful warnings and error messages are presented. These help you to identity bugs and problems during the development, but they also come at a performance cost.</p>
+
+<p>If you look at the React source code, you’ll see a lots of code with <code class="language-plaintext highlighter-rouge">if (process.env.NODE_ENV != 'production')</code>. This snippets of code that React is executing in your development environment is not something that the user needs. For production environments this code is unnecessary. You can achieve this in different ways depending on how you built your app:</p>
+
+<ul>
+  <li>If you built your project with create-react-app, so you can run <code class="language-plaintext highlighter-rouge">npm run build</code> to build the production code.</li>
+  <li>If you used webpack, so you can run <code class="language-plaintext highlighter-rouge">webpack -p</code> which is the same as <code class="language-plaintext highlighter-rouge">webpack --optimize-minimize --define process.env.NODE_ENV="'production'"</code>
+</li>
+</ul>
+
+<h2 id="use-memoization">Use memoization</h2>
+
+<p>Memoization is an optimization technique to increase the performance of the application by storing the results and returning the cached result when the inputs are the sames.</p>
+
+<p>React provides React.memo and useMemo for memoization which store the cached components.</p>
+
+<p>When functional components is rendered using React.memo or useMemo then its results are saved in memory and next time that the component getting called with the same props, the result is a cache component without any execution.</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">UserDisplay</span> <span class="o">=</span> <span class="p">(</span><span class="nx">userDetails</span><span class="p">)</span> <span class="o">=&gt;</span><span class="p">{</span>
+    <span class="kd">const</span> <span class="p">{</span><span class="nx">name</span><span class="p">,</span> <span class="nx">age</span><span class="p">,</span> <span class="nx">address</span><span class="p">}</span> <span class="o">=</span> <span class="nx">userDetails</span><span class="p">;</span>
+
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="p">&lt;&gt;</span>
+            <span class="p">&lt;</span><span class="nt">h4</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">name</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">h4</span><span class="p">&gt;</span>
+            <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">age</span><span class="si">}</span> , <span class="si">{</span><span class="nx">address</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+        <span class="p">&lt;/&gt;</span>
+    <span class="p">)</span>
+<span class="p">}</span>
+<span class="k">export</span> <span class="k">default</span> <span class="nx">React</span><span class="p">.</span><span class="nx">memo</span><span class="p">(</span><span class="nx">UserDisplay</span><span class="p">);</span>
+<span class="c1">// 1 - UserDisplay component gets called and executed, and then rendered</span>
+<span class="p">&lt;</span><span class="nc">UserDisplay</span>
+  <span class="na">name</span><span class="p">=</span><span class="s">"Test"</span>
+  <span class="na">age</span><span class="p">=</span><span class="s">"30"</span>
+  <span class="na">address</span><span class="p">=</span><span class="s">"Test address"</span>
+<span class="p">/&gt;</span>
+<span class="c1">// 2 - The cached result will render without any execution</span>
+<span class="p">&lt;</span><span class="nc">UserDisplay</span>
+  <span class="na">name</span><span class="p">=</span><span class="s">"Test"</span>
+  <span class="na">age</span><span class="p">=</span><span class="s">"30"</span>
+  <span class="na">address</span><span class="p">=</span><span class="s">"Test address"</span>
+<span class="p">/&gt;</span>
+<span class="c1">// Third - UserDisplay component gets called and executed, and then rendered</span>
+<span class="c1">// because the *name* value is different</span>
+<span class="p">&lt;</span><span class="nc">UserDisplay</span>
+  <span class="na">name</span><span class="p">=</span><span class="s">"New Test"</span>
+  <span class="na">age</span><span class="p">=</span><span class="s">"30"</span>
+  <span class="na">address</span><span class="p">=</span><span class="s">"Test address"</span>
+<span class="p">/&gt;</span>
+</code></pre></div></div>
+
+<h2 id="code-splitting">Code Splitting</h2>
+
+<p>Before explaining <em>code splitting</em> it’s important to undertand the concept of <em>Lazy loading</em>. This means that the resources (images, script, etc.) should be loaded when they are really needed. So instead of loadind the whole page and rendering in the browser, only the critical components are loaded first and then the rest only when they needed. In this way, time and memory are not wasted with processes that do not benefit the user experience.</p>
+
+<p>Now, <em>code splitting</em> es a technique that allow us to achieve the <em>lazy loading</em> concept by splitting the application into different files instead of delivering one file. There are different criteria to split the file. Some of the most common and that can be combined are:</p>
+
+<p><strong>1- Split by routes:</strong></p>
+
+<p>This will leaves with different file for each top level route. In the next example, you will have three files: one for the DynamicPage component, one for the NoMatch component and one for the main application.</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nx">React</span><span class="p">,</span> <span class="p">{</span><span class="nx">Suspense</span><span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react</span><span class="dl">'</span>
+<span class="k">import</span> <span class="p">{</span><span class="nx">Switch</span><span class="p">,</span> <span class="nx">BrowserRouter</span> <span class="k">as</span> <span class="nx">Router</span><span class="p">,</span> <span class="nx">Route</span><span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react-router-dom</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">importedComponent</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react-imported-component</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="k">import</span> <span class="nx">Home</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./Home</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">Loading</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./Loading</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="kd">const</span> <span class="nx">AsyncDynamicPAge</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">lazy</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="k">import</span><span class="p">(</span><span class="cm">/* webpackChunkName:'DynamicPage' */</span> <span class="dl">'</span><span class="s1">./DynamicPage</span><span class="dl">'</span><span class="p">));</span>
+<span class="kd">const</span> <span class="nx">AsyncNoMatch</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">lazy</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="k">import</span><span class="p">(</span><span class="cm">/* webpackChunkName:'NoMatch' */</span> <span class="dl">'</span><span class="s1">./NoMatch</span><span class="dl">'</span><span class="p">));</span>
+
+<span class="kd">const</span> <span class="nx">App</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="p">&lt;</span><span class="nc">Router</span><span class="p">&gt;</span>
+            <span class="p">&lt;</span><span class="nc">Suspense</span> <span class="na">fallback</span><span class="p">=</span><span class="si">{</span><span class="nx">Loading</span><span class="si">}</span><span class="p">&gt;</span>
+                <span class="p">&lt;</span><span class="nc">Switch</span><span class="p">&gt;</span>
+                    <span class="p">&lt;</span><span class="nc">Route</span> <span class="na">exact</span> <span class="na">path</span><span class="p">=</span><span class="s">"/"</span> <span class="na">component</span><span class="p">=</span><span class="si">{</span><span class="nx">Home</span><span class="si">}</span><span class="p">/&gt;</span>
+                    <span class="p">&lt;</span><span class="nc">Route</span> <span class="na">exact</span> <span class="na">path</span><span class="p">=</span><span class="s">"/dynamic"</span> <span class="na">component</span><span class="p">=</span><span class="si">{</span><span class="nx">AsyncDynamicPAge</span><span class="si">}</span><span class="p">/&gt;</span>
+                    <span class="p">&lt;</span><span class="nc">Route</span> <span class="na">component</span><span class="p">=</span><span class="si">{</span><span class="nx">AsyncNoMatch</span><span class="si">}</span><span class="p">/&gt;</span>
+                <span class="p">&lt;/</span><span class="nc">Switch</span><span class="p">&gt;</span>
+            <span class="p">&lt;/</span><span class="nc">Suspense</span><span class="p">&gt;</span>
+        <span class="p">&lt;/</span><span class="nc">Router</span><span class="p">&gt;</span>
+    <span class="p">)</span>
+        <span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="nx">App</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>The way to indicate webpack that we want to split the code into different files is through <em>dynamic imports</em> with the keyword <em>import</em>.</p>
+
+<p><code class="language-plaintext highlighter-rouge">React.lazy()</code> is a function that allow you to implement the <em>dynamic imports</em> for components in React. <code class="language-plaintext highlighter-rouge">React.Suspense</code> has a <em>fallback</em> property that receive a React element that you want to render while the component is loading with <code class="language-plaintext highlighter-rouge">React.lazy()</code>.</p>
+
+<p>Also, you will have to configure the webpack file as follows:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">...</span><span class="w">
+</span><span class="err">module.exports</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="err">...</span><span class="w">
+  </span><span class="err">output:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="err">filename:</span><span class="w"> </span><span class="err">'</span><span class="p">[</span><span class="err">name</span><span class="p">]</span><span class="err">.</span><span class="p">[</span><span class="err">hash</span><span class="p">]</span><span class="err">.js'</span><span class="p">,</span><span class="w">
+    </span><span class="err">...</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p><strong>2- Split by vendor:</strong></p>
+
+<p>This approach will help you in two ways: it helps the browser to store those resources that change with less frequency; and it help the browser to take advantage of parallel downloading to potencially reduce load time.</p>
+
+<p>An example of a webpack configuration is as follows:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">...</span>
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">entry</span><span class="p">:</span> <span class="p">{</span>
+    <span class="na">vendor</span><span class="p">:</span> <span class="p">[</span><span class="dl">'</span><span class="s1">semantic-ui-react</span><span class="dl">'</span><span class="p">],</span>
+    <span class="na">app</span><span class="p">:</span> <span class="dl">'</span><span class="s1">./src/index.js</span><span class="dl">'</span>
+  <span class="p">},</span>
+  <span class="p">...</span>
+  <span class="na">optimization</span><span class="p">:</span> <span class="p">{</span>
+    <span class="na">splitChunks</span><span class="p">:</span> <span class="p">{</span>
+      <span class="na">cacheGroups</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">styles</span><span class="p">:</span> <span class="p">{</span>
+          <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">styles</span><span class="dl">'</span><span class="p">,</span>
+          <span class="na">test</span><span class="p">:</span> <span class="sr">/</span><span class="se">\.</span><span class="sr">css$/</span><span class="p">,</span>
+          <span class="na">chunks</span><span class="p">:</span> <span class="dl">'</span><span class="s1">all</span><span class="dl">'</span><span class="p">,</span>
+          <span class="na">enforce</span><span class="p">:</span> <span class="kc">true</span>
+        <span class="p">},</span>
+        <span class="na">vendor</span><span class="p">:</span> <span class="p">{</span>
+          <span class="na">chunks</span><span class="p">:</span> <span class="dl">'</span><span class="s1">initial</span><span class="dl">'</span><span class="p">,</span>
+          <span class="na">test</span><span class="p">:</span> <span class="dl">'</span><span class="s1">vendor</span><span class="dl">'</span><span class="p">,</span>
+          <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">vendor</span><span class="dl">'</span><span class="p">,</span>
+          <span class="na">enforce</span><span class="p">:</span> <span class="kc">true</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">},</span>
+  <span class="p">...</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">entry.vendor: [‘semantic-ui-react’]</code>  specifies which vendor we want to extract from our main application. The <code class="language-plaintext highlighter-rouge">optimization</code> will help you to reduce file size.</p>
+
+<p><strong>3- Extract css styles:</strong></p>
+
+<p>You can use ExtractTextWebpackPlugin in webpack to extract all css code into a separate css file. This will also help the browser to cache this file and do parallel downloading on page load.</p>
+
+<h2 id="virtualizing-the-long-lists">Virtualizing the long lists</h2>
+
+<p>If your application renders long lists of data, it’s recommend that you use the <em>windowing</em> technique. This only renders a subset at any time and render the remaining data whenever scrolled, and reduce the re-rendering time, as well as the number of nodes created in the DOM.</p>
+
+<p><a href="https://react-window.vercel.app/#/examples/list/fixed-size">react-window</a> and <a href="https://bvaughn.github.io/react-virtualized/#/components/List">react-virtualized</a> are popular libraries of <em>windowing</em> in React.</p>
+
+<h2 id="implement-throttling-and-debouncing-to-avoid-multiple-api-calls">Implement Throttling and Debouncing to avoid multiple API calls</h2>
+
+<p>Debouncing and Throttling are widely-used techniques that help us in limiting the rate at which a function fires off. These two techniques give us a layer of control between the event and the execution of the functions attached to them. API servers often implement either of these two techniques to prevent the application from being overloaded.</p>
+
+<p>Both these techniques are almost identical and help us reduce the number of function calls being made but they have one small, but significant difference among them.</p>
+
+<p>Debouncing is a technique in which no matter how many times a user fires an event, the call will be made only after a specific amount of time has passed after the user stops firing the event.For example, let’s say a user is typing something in a search box. This search box makes API calls and has a debounce function attached to it with a specified time duration of 400ms. So now, unless 400ms have passed after the user stopped typing, the API call wouldn’t be made.</p>
+
+<p>Throttling is a technique that makes the next function call strictly after a certain period of time. No matter how many times the user fires an event, the function attached will be executed only once in the given time period.</p>
+
+<p>Debouncing can be used when the result of the most recent event occurrence is what is important. For example, a search query on an e-commerce website.</p>
+
+<p>Throttling can be used when the input provided to the function call doesn’t matter or is the same each time. For example, infinite scrolling on a webpage. Here, we need to check how far the user is from the bottom of the page. If they’re too close, we request more data and append it to the page. Here debouncing wouldn’t work as it would only trigger the event when the user has stopped scrolling but we need to start fetching the content before the user reaches the bottom.</p>
+
+<h2 id="enable-gzip-on-your-web-server">Enable Gzip on your web server</h2>
+
+<p>All modern browser support and automatically negotiate Gzip compression for the HTTP requests. Enabling Gzip compression will help reduce the size of responses, which will impact resource download time.</p>
+
+<p>Check your web server documentation to enable compression:</p>
+
+<ul>
+  <li>Apache: Use <a href="http://httpd.apache.org/docs/current/mod/mod_deflate.html">mod_deflate</a>
+</li>
+  <li>Nginx: Use   <a href="https://nginx.org/en/docs/http/ngx_http_gzip_module.html">ngx_http_gzip_module</a>
+</li>
+</ul>
+
+<h2 id="useful-tools">Useful tools</h2>
+
+<p>We can’t talk about performance if we don’t measure it. We need to perform comparisons before and after making changes to your code to track your progress.</p>
+
+<p>Here some tools that can help you with this:</p>
+
+<h3 id="why-did-you-render">Why Did You Render</h3>
+
+<p><a href="https://www.npmjs.com/package/@welldone-software/why-did-you-render">Why Did You Render</a> is a library that helps detect why a component is re-rendering. It does this by modifying the behavior of the code at runtime using <em>monkey patching</em> React.</p>
+
+<h3 id="react-profiler">React Profiler</h3>
+
+<p><a href="https://reactjs.org/blog/2018/09/10/introducing-the-react-profiler.html">React Profiler</a> is a DevTools that you can install in your browser and collect timing information about each component that’s rendered.</p>
+
+<h3 id="webpack-bundle-analyzer">Webpack Bundle Analyzer</h3>
+
+<p><a href="https://github.com/webpack-contrib/webpack-bundle-analyzer">Webpack Bundle Analyzer</a> provide you a visual representation about the sizes of your files.</p>
+
+<h2 id="sources">Sources</h2>
+
+<ul>
+  <li><a href="https://hackernoon.com/lessons-learned-code-splitting-with-webpack-and-react-f012a989113">Lessons Learned: Code Splitting with Webpack and React</a></li>
+  <li><a href="https://www.freecodecamp.org/news/learn-webpack-for-react-a36d4cac5060/">How to use Webpack with React: an in-depth tutorial</a></li>
+  <li><a href="https://es.reactjs.org/docs/optimizing-performance.html">Optimizando el Rendimiento</a></li>
+  <li><a href="https://www.c-sharpcorner.com/article/performance-optimization-techniques-for-react-applications/">Performance Optimization Techniques For React Applications</a></li>
+  <li><a href="https://blog.bitsrc.io/improve-your-react-app-performance-by-using-throttling-and-debouncing-101afbe9055">Improve Your React App Performance by Using Throttling and Debouncing</a></li>
+  <li><a href="https://medium.com/swlh/9-performance-optimization-strategies-for-reactjs-development-36f6d03a0912">9 Performance Optimization Strategies for ReactJS Development</a></li>
+  <li><a href="https://www.toptal.com/react/componentes-react-eficientes-una-guia-para-optimizar-el-desempeno-de-react">Componentes React Eficientes: Una Guía para Optimizar el Desempeño de React</a></li>
+  <li><a href="https://ourcodeworld.co/articulos/leer/934/top-9-las-mejores-tecnicas-de-optimizacion-para-aplicaciones-react">Top 9: Las Mejores técnicas de optimización para aplicaciones React</a></li>
+</ul>
+
+
+    </div>
+
+</article>
+<div class="post-nav">
+<span></span><a class="next" href="/docker/2021/12/02/docker-limit-resources.html" title="How to set Docker Resources Limit">How to set Docker Resources Limit...</a>
+</div>
+<div class="post-related">
+      <div>Related Articles</div>
+      <ul>
+        <li><a class="post-link" href="/docker/2021/12/02/docker-limit-resources.html" title="How to set Docker Resources Limit">How to set Docker Resources Limit</a></li>
+<li><a class="post-link" href="/docker/2022/03/16/uid-y-gid-en-Docker.html" title="How to set Docker Resources Limit">UID/GID in Docker</a></li>
+<li><a class="post-link" href="/postgres/2021/12/13/connections-pool.html" title="How to set Docker Resources Limit">Connection Pooling</a></li>
+<li><a class="post-link" href="/react/2022/04/15/better-react-code.html" title="How to set Docker Resources Limit">Better React code</a></li>
+</ul>
+    </div>
+<div class="post-comments"></div></section>
+</div>
+
+
+  </section>
+  <section class="sidebar" style="margin-left: 15px;">
+    <!-- Get sidebar items --><style type="text/css" media="screen">
+.post-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+</style>
+
+<div class="post-menu">
+  <div class="post-menu-title">TOC</div>
+  <div class="post-menu-content"></div>
+</div>
+
+<script>
+  function generateContent() {
+    var menu = document.querySelector(".post-menu");
+    var menuContent =  menu.querySelector(".post-menu-content");
+    var headings = document.querySelector(".post-content").querySelectorAll("h2, h3, h4, h5, h6");
+
+    // Hide menu when no headings
+    if (headings.length === 0) {
+      return menu.style.display = "none";
+    }
+
+    // Generate post menu
+    var menuHTML = '';
+    for (var i = 0; i < headings.length; i++) {
+      var h = headings[i];
+      menuHTML += (
+        '<li class="h-' + h.tagName.toLowerCase() + '">'
+        + '<a href="#h-' + h.getAttribute('id') + '">' + h.textContent + '</a></li>');
+    }
+
+    menuContent.innerHTML = '<ul>' + menuHTML + '</ul>';
+
+    // The header element
+    var header = document.querySelector('header.site-header');
+
+    function doMenuCollapse(index, over_items) {
+      var items = menuContent.firstChild.children;
+
+      if (over_items == undefined) {
+        over_items = 20;
+      }
+
+      if (items.length < over_items) {
+        return;
+      }
+
+      var activeItem = items[index];
+      var beginItem = activeItem
+      var endItem = activeItem
+      var beginIndex = index;
+      var endIndex = index + 1;
+      while (beginIndex >= 0
+        && !items[beginIndex].classList.contains('h-h2')) {
+        beginIndex -= 1;
+      }
+      while (endIndex < items.length
+        && !items[endIndex].classList.contains('h-h2')) {
+        endIndex += 1;
+      }
+      for (var i = 0; i < beginIndex; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+      for (var i = beginIndex + 1; i < endIndex; i++) {
+        item = items[i]
+        // if (!item.classList.contains('h-h2')) {
+          item.style.display = '';
+        // }
+      }
+      for (var i = endIndex; i < items.length; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+    }
+
+    // Init menu collapsed
+    doMenuCollapse(-1);
+
+    // Active the menu item
+    window.addEventListener('scroll', function (event) {
+      var lastActive = menuContent.querySelector('.active');
+      var changed = true;
+      var activeIndex = -1;
+      for (var i = headings.length - 1; i >= 0; i--) {
+        var h = headings[i];
+        var headingRect = h.getBoundingClientRect();
+        var headerRect = header.getBoundingClientRect();
+        var headerTop = Math.floor(headerRect.top);
+        var headerHeight = Math.floor(headerRect.height);
+        var headerHeight = headerTop + headerHeight + 20;
+        if (headingRect.top <= headerHeight) {
+          var id = 'h-' + h.getAttribute('id');
+          var a = menuContent.querySelector('a[href="#' + id  + '"]');
+          var curActive = a.parentNode;
+          if (curActive) {
+            curActive.classList.add('active');
+            activeIndex = i;
+          }
+          if (lastActive == curActive) {
+            changed = false;
+          }
+          break;
+        }
+      }
+      if (changed) {
+        if (lastActive) {
+          lastActive.classList.remove('active');
+        }
+        doMenuCollapse(activeIndex);
+      }
+      event.preventDefault();
+    });
+  }
+  generateContent();
+</script>
+</section>
+</div>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+    <div class="site-footer-inner">
+<div>All rights reserved <span class="copyleft">©</span> Eva Villarreal Guzmán 2022 </div>
+      <div>Powered by <a title="Jekyll is a simple, blog-aware, static site
+      generator." href="https://jekyllrb.com/">Jekyll</a> &amp; <a title="Yat, yet
+      another theme." href="https://github.com/jeffreytse/jekyll-theme-yat">Yat Theme</a>.</div>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

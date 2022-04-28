@@ -1,0 +1,2 @@
+I"U<p>This post is a compilation of my learnings in React, while I gained experience, that allowed me to write  code in a more maintainable, readable and reusable way. We’ll look at React techniques and conventions, as well as anti-patterns, such as using indexes as key and spreading properties on DOM elements, which should be avoided.</p>
+:ET

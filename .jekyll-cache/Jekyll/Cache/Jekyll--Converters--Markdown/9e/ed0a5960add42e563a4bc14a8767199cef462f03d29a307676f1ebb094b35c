@@ -1,0 +1,1283 @@
+I"[<p>This post is a compilation of my learnings in React, while I gained experience, that allowed me to write  code in a more maintainable, readable and reusable way. We’ll look at React techniques and conventions, as well as anti-patterns, such as using indexes as key and spreading properties on DOM elements, which should be avoided.</p>
+
+<h2 id="multiline">Multiline</h2>
+
+<p>Whenever we have nested elements, we should always go multiline:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span> 
+  <span class="p">&lt;</span><span class="nc">Header</span> <span class="p">/&gt;</span> 
+  <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span> 
+    <span class="p">&lt;</span><span class="nc">Main</span> <span class="na">content</span><span class="p">=</span><span class="si">{</span><span class="p">...</span><span class="si">}</span> <span class="p">/&gt;</span> 
+  <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span> 
+<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</code></pre></div></div>
+
+<p>This is preferable to the following:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;&lt;</span><span class="nc">Header</span> <span class="p">/&gt;&lt;</span><span class="nt">div</span><span class="p">&gt;&lt;</span><span class="nc">Main</span> <span class="na">content</span><span class="p">=</span><span class="si">{</span><span class="p">...</span><span class="si">}</span> <span class="p">/&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</code></pre></div></div>
+
+<p>The exception is if the children are not elements such as text or variables. In that case, it makes sense to remain on the same line and avoid adding noise to the markup, as follows:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span> 
+  <span class="p">&lt;</span><span class="nc">Alert</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">message</span><span class="si">}</span><span class="p">&lt;/</span><span class="nc">Alert</span><span class="p">&gt;</span> 
+  <span class="p">&lt;</span><span class="nc">Button</span><span class="p">&gt;</span>Close<span class="p">&lt;/</span><span class="nc">Button</span><span class="p">&gt;</span> 
+<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</code></pre></div></div>
+
+<p>Always remember to wrap your elements inside parentheses when you write them on multiple lines. JSX always gets replaced by functions, and functions written on a new line can give you an unexpected result because of automatic semicolon insertion. Suppose, for example, that you are returning JSX from your render method, which is how you create UIs in React.</p>
+
+<p>The following example works fine because the div element is on the same line as the return:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">return</span> <span class="p">&lt;</span><span class="nt">div</span> <span class="p">/&gt;</span>
+</code></pre></div></div>
+
+<p>The following, however, is not right:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">return</span> 
+  <span class="p">&lt;</span><span class="nt">div</span> <span class="p">/&gt;</span>
+</code></pre></div></div>
+
+<p>You can wrap the statement in parentheses, as follows:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">return</span> <span class="p">(</span> 
+  <span class="p">&lt;</span><span class="nt">div</span> <span class="p">/&gt;</span> 
+<span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="multi-properties">Multi-properties</h2>
+
+<p>A common problem in writing JSX comes when an element has multiples attributes. One solution is to write all the attributes on the same line, but this would lead to very long lines that we do not want in our code.</p>
+
+<p>A common solution is to write each attribute on a new line, with one level of indentation, and then align the closing bracket with the opening tag:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">&lt;</span><span class="nt">button</span> 
+  <span class="na">foo</span><span class="p">=</span><span class="s">"bar"</span> 
+  <span class="na">veryLongPropertyName</span><span class="p">=</span><span class="s">"baz"</span> 
+  <span class="na">onSomething</span><span class="p">=</span><span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">handleSomething</span><span class="si">}</span> 
+<span class="p">/&gt;</span>
+</code></pre></div></div>
+
+<h2 id="conditionals">Conditionals</h2>
+
+<p>We use conditionals when, for example, we want to render some components only when certain conditions are matched. There are many different ways to express conditions in JSX, and it is important to understand the benefits and problems of each one of these to write code that is both readable and maintainable.</p>
+
+<p>Suppose we want to show a logout button only if the user is currently logged in to our application.</p>
+
+<p>A simple snippet to start with is as follows:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">let</span> <span class="nx">button</span>
+  
+<span class="k">if</span> <span class="p">(</span><span class="nx">isLoggedIn</span><span class="p">)</span> <span class="p">{</span> 
+  <span class="nx">button</span> <span class="o">=</span> <span class="p">&lt;</span><span class="nc">LogoutButton</span> <span class="p">/&gt;</span>
+<span class="p">}</span> 
+  
+<span class="k">return</span> <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">button</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</code></pre></div></div>
+
+<p>This works, but it is not very readable, especially if there are multiple components and multiple conditions.</p>
+
+<p>In JSX, we can use an inline condition:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span> 
+  <span class="si">{</span><span class="nx">isLoggedIn</span> <span class="o">&amp;&amp;</span> <span class="p">&lt;</span><span class="nc">LoginButton</span> <span class="p">/&gt;</span><span class="si">}</span> 
+<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</code></pre></div></div>
+
+<p>This works because if the condition is false, nothing gets rendered, but if the condition is true, the createElement function of LoginButton gets called, and the element is returned to compose the resulting tree.</p>
+
+<p>If the condition has an alternative (the classic if…else statement) and we want, for example, to show a logout button if the user is logged in and a login button otherwise, we can use JavaScript’s if…else statement as follows:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">let</span> <span class="nx">button</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="nx">isLoggedIn</span><span class="p">)</span> <span class="p">{</span> 
+  <span class="nx">button</span> <span class="o">=</span> <span class="p">&lt;</span><span class="nc">LogoutButton</span> <span class="p">/&gt;</span>
+<span class="p">}</span> <span class="k">else</span> <span class="p">{</span> 
+  <span class="nx">button</span> <span class="o">=</span> <span class="p">&lt;</span><span class="nc">LoginButton</span> <span class="p">/&gt;</span>
+<span class="p">}</span> 
+  
+<span class="k">return</span> <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">button</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</code></pre></div></div>
+
+<p>Alternatively, and better still, we can use a ternary condition that makes the code more compact:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span> 
+  <span class="si">{</span><span class="nx">isLoggedIn</span> <span class="p">?</span> <span class="p">&lt;</span><span class="nc">LogoutButton</span> <span class="p">/&gt;</span> <span class="p">:</span> <span class="p">&lt;</span><span class="nc">LoginButton</span> <span class="p">/&gt;</span><span class="si">}</span> 
+<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</code></pre></div></div>
+
+<p>Let’s now look at the best solution for when things get more complicated and, for example, we have to check more than one variable to determine whether to render a component or not:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
+  <span class="si">{</span><span class="nx">dataIsReady</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nx">isAdmin</span> <span class="o">||</span> <span class="nx">userHasPermissions</span><span class="p">)</span> <span class="o">&amp;&amp;</span> 
+    <span class="p">&lt;</span><span class="nc">SecretData</span> <span class="p">/&gt;</span>
+  <span class="si">}</span>
+<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</code></pre></div></div>
+
+<p>In this case, it is clear that using the inline condition is a good solution, but the readability is strongly impacted. Instead, we can create a helper function inside our component and use it in JSX to verify the condition:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">canShowSecretData</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span> 
+  <span class="kd">const</span> <span class="p">{</span> <span class="nx">dataIsReady</span><span class="p">,</span> <span class="nx">isAdmin</span><span class="p">,</span> <span class="nx">userHasPermissions</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">props</span>
+  <span class="k">return</span> <span class="nx">dataIsReady</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nx">isAdmin</span> <span class="o">||</span> <span class="nx">userHasPermissions</span><span class="p">)</span>
+<span class="p">}</span> 
+  
+<span class="k">return</span> <span class="p">(</span>
+  <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span> 
+    <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">canShowSecretData</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="p">&lt;</span><span class="nc">SecretData</span> <span class="p">/&gt;</span><span class="si">}</span> 
+  <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p>As you can see, this change makes the code more readable and the condition more explicit.</p>
+
+<p>The same applies to computed properties. Suppose you have two single properties for currency and value. Instead of creating the price string inside render, you can create a function:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">getPrice</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span> 
+  <span class="k">return</span> <span class="s2">`</span><span class="p">${</span><span class="nx">props</span><span class="p">.</span><span class="nx">currency</span><span class="p">}${</span><span class="nx">props</span><span class="p">.</span><span class="nx">value</span><span class="p">}</span><span class="s2">`</span>
+<span class="p">}</span>
+   
+<span class="k">return</span> <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">getPrice</span><span class="p">()</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</code></pre></div></div>
+
+<p>This is better because it is isolated and you can easily test it if it contains logic.</p>
+
+<h3 id="external-solutions">External solutions</h3>
+
+<p><strong>A good practice is to avoid external dependencies as much as we can to keep our bundle smaller, but it may be worth it in this particular case because improving the readability of our templates is a big win.</strong> We will see different external solutions:</p>
+
+<h4 id="render-if">render-if</h4>
+
+<p>We can install with the following:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm install --save render-if
+</code></pre></div></div>
+
+<p>We can then easily use it in our projects, as follows:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="p">{</span> <span class="nx">dataIsReady</span><span class="p">,</span> <span class="nx">isAdmin</span><span class="p">,</span> <span class="nx">userHasPermissions</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">props</span>
+
+<span class="kd">const</span> <span class="nx">canShowSecretData</span> <span class="o">=</span> <span class="nx">renderIf</span><span class="p">(</span> 
+  <span class="nx">dataIsReady</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nx">isAdmin</span> <span class="o">||</span> <span class="nx">userHasPermissions</span><span class="p">)</span> 
+<span class="p">);</span>
+   
+<span class="k">return</span> <span class="p">(</span>
+  <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span> 
+    <span class="si">{</span><span class="nx">canShowSecretData</span><span class="p">(&lt;</span><span class="nc">SecretData</span> <span class="p">/&gt;)</span><span class="si">}</span> 
+  <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span> 
+<span class="p">);</span>
+</code></pre></div></div>
+
+<p>Here, we wrap our conditions inside the renderIf function.</p>
+
+<p>The utility function that gets returned can be used as a function that receives the JSX markup to be shown when the condition is true.</p>
+
+<p>One goal is to never add too much logic inside our components. Some of them will require a bit of it, but we should try to keep them as simple as possible so that we can easily spot and fix errors.</p>
+
+<h4 id="jsx-only-if">jsx-only-if</h4>
+
+<p><code class="language-plaintext highlighter-rouge">jsx-only-if</code> lets us write our components as if the condition is always true by setting the conditional function using a Higher-Order Component (HOC).</p>
+
+<p>To use the library, we need to install it as follows:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm install --save react-only-if
+</code></pre></div></div>
+
+<p>Once it is installed, we can use it in our apps in the following way:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nx">onlyIf</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react-only-if</span><span class="dl">'</span>
+
+<span class="kd">const</span> <span class="nx">SecretDataOnlyIf</span> <span class="o">=</span> <span class="nx">onlyIf</span><span class="p">(</span>
+  <span class="p">({</span> <span class="nx">dataIsReady</span><span class="p">,</span> <span class="nx">isAdmin</span><span class="p">,</span> <span class="nx">userHasPermissions</span> <span class="p">})</span> <span class="o">=&gt;</span> <span class="nx">dataIsReady</span> <span class="o">&amp;&amp;</span> 
+  <span class="p">(</span><span class="nx">isAdmin</span> <span class="o">||</span> <span class="nx">userHasPermissions</span><span class="p">)</span>
+<span class="p">)(</span><span class="nx">SecretData</span><span class="p">)</span>
+
+<span class="kd">const</span> <span class="nx">MyComponent</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">(</span>
+  <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nc">SecretDataOnlyIf</span> 
+      <span class="na">dataIsReady</span><span class="p">=</span><span class="si">{</span><span class="p">...</span><span class="si">}</span>
+      <span class="na">isAdmin</span><span class="p">=</span><span class="si">{</span><span class="p">...</span><span class="si">}</span>
+      <span class="na">userHasPermissions</span><span class="p">=</span><span class="si">{</span><span class="p">...</span><span class="si">}</span>
+    <span class="p">/&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="p">)</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="nx">MyComponent</span>
+</code></pre></div></div>
+
+<p>As you can see here, there is no logic at all inside the component itself.</p>
+
+<p>We pass the condition as the first parameter of the onlyIf function, and when the condition is matched, the component is rendered.</p>
+
+<p>The function used to validate the condition receives the props, state, and context of the component.</p>
+
+<p>In this way, we avoid polluting our component with conditionals so that it is easier to understand and reason about.</p>
+
+<h4 id="jsx-control-statements">jsx-control-statements</h4>
+
+<p>This follows the same philosophy as JSX, and it does not add any real functionality to the language; it is just syntactic sugar that gets compiled into JavaScript. This is a Babel Plugin.</p>
+
+<p>Wwe have to install it:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm install --save jsx-control-statements
+</code></pre></div></div>
+
+<p>Once it is installed, we have to add it to the list of our Babel plugins in our <code class="language-plaintext highlighter-rouge">.babelrc</code> file:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>"plugins": ["jsx-control-statements"]
+</code></pre></div></div>
+
+<p>From now on, we can use the syntax provided by the plugin and Babel will transpile it together with the common JSX syntax.</p>
+
+<p>A conditional statement written using the plugin looks like the following snippet:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">&lt;</span><span class="nc">If</span> <span class="na">condition</span><span class="p">=</span><span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">canShowSecretData</span><span class="si">}</span><span class="p">&gt;</span> 
+  <span class="p">&lt;</span><span class="nc">SecretData</span> <span class="p">/&gt;</span> 
+<span class="p">&lt;/</span><span class="nc">If</span><span class="p">&gt;</span>
+</code></pre></div></div>
+
+<p>This gets transpiled into a ternary expression as follows:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="nx">canShowSecretData</span> <span class="p">?</span> <span class="p">&lt;</span><span class="nc">SecretData</span> <span class="p">/&gt;</span> <span class="p">:</span> <span class="kc">null</span><span class="p">}</span>
+</code></pre></div></div>
+
+<p>The If component is great, but if, for some reason, you have nested conditions in your render method, it can easily become messy and hard to follow. This is where the Choose component comes in handy:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">&lt;</span><span class="nc">Choose</span><span class="p">&gt;</span> 
+  <span class="p">&lt;</span><span class="nc">When</span> <span class="na">condition</span><span class="p">=</span><span class="si">{</span><span class="p">...</span><span class="si">}</span><span class="p">&gt;</span> 
+    <span class="p">&lt;</span><span class="nt">span</span><span class="p">&gt;</span>if<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span> 
+  <span class="p">&lt;/</span><span class="nc">When</span><span class="p">&gt;</span> 
+  <span class="p">&lt;</span><span class="nc">When</span> <span class="na">condition</span><span class="p">=</span><span class="si">{</span><span class="p">...</span><span class="si">}</span><span class="p">&gt;</span> 
+    <span class="p">&lt;</span><span class="nt">span</span><span class="p">&gt;</span>else if<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span> 
+  <span class="p">&lt;/</span><span class="nc">When</span><span class="p">&gt;</span> 
+  <span class="p">&lt;</span><span class="nc">Otherwise</span><span class="p">&gt;</span> 
+    <span class="p">&lt;</span><span class="nt">span</span><span class="p">&gt;</span>else<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span> 
+  <span class="p">&lt;/</span><span class="nc">Otherwise</span><span class="p">&gt;</span> 
+<span class="p">&lt;/</span><span class="nc">Choose</span><span class="p">&gt;</span>
+</code></pre></div></div>
+
+<p>Please note that the preceding code gets transpiled into multiple ternaries.</p>
+
+<p>Finally, there is a component (always remember that we are not talking about real components but just syntactic sugar) to manage the loops that is also very convenient:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span> 
+  <span class="p">&lt;</span><span class="nc">For</span> <span class="na">each</span><span class="p">=</span><span class="s">"user"</span> <span class="na">of</span><span class="p">=</span><span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">users</span><span class="si">}</span><span class="p">&gt;</span> 
+    <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">user</span><span class="p">.</span><span class="nx">name</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;</span> 
+  <span class="p">&lt;/</span><span class="nc">For</span><span class="p">&gt;</span> 
+<span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
+</code></pre></div></div>
+
+<p>The preceding code gets transpiled into a map function – no magic there.</p>
+
+<p>If you are used to using linters, you might wonder why the linter is not complaining about that code. The user variable does not exist before the transpilation, nor is it wrapped in a function. To avoid those linting errors, there is another plugin to install: <code class="language-plaintext highlighter-rouge">eslint-plugin-jsx-control-statements</code>.</p>
+
+<h2 id="object-destructuring">Object Destructuring</h2>
+
+<p>Destructuring is often the case that you have to access plenty of properties from your state or props in your component. Rather than assigning them to a variable one by one like the following example:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">student</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">ID</span><span class="p">:</span> <span class="dl">'</span><span class="s1">21</span><span class="dl">'</span><span class="p">,</span>
+  <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Ana</span><span class="dl">'</span><span class="p">,</span>
+<span class="p">};</span>
+
+<span class="kd">const</span> <span class="nx">id</span> <span class="o">=</span> <span class="nx">student</span><span class="p">.</span><span class="nx">ID</span><span class="p">;</span>
+<span class="kd">const</span> <span class="nx">name</span> <span class="o">=</span> <span class="nx">student</span><span class="p">.</span><span class="nx">name</span><span class="p">;</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">id</span><span class="p">);</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">name</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>You can use destructuring assignment in JavaScript:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">student</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">ID</span><span class="p">:</span> <span class="dl">'</span><span class="s1">21</span><span class="dl">'</span><span class="p">,</span>
+  <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Ana</span><span class="dl">'</span><span class="p">,</span>
+<span class="p">};</span>
+
+<span class="kd">const</span> <span class="p">{</span><span class="nx">ID</span><span class="p">,</span> <span class="nx">name</span><span class="p">}</span> <span class="o">=</span> <span class="nx">student</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>You can list the properties you want inside the curly brackets and even rename them using aliases like this:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">student</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">ID</span><span class="p">:</span> <span class="dl">'</span><span class="s1">21</span><span class="dl">'</span><span class="p">,</span>
+  <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Ana</span><span class="dl">'</span><span class="p">,</span>
+<span class="p">};</span>
+
+<span class="kd">const</span> <span class="p">{</span><span class="na">name</span><span class="p">:</span><span class="nx">n</span><span class="p">}</span> <span class="o">=</span> <span class="nx">student</span><span class="p">;</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">n</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>That’s especially beneficial for functional stateless components because they always receive the props object in their function signature. Often you will not use the props but its content, so you can destructure the content already in the function signature.</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// no destructuring</span>
+<span class="kd">function</span> <span class="nx">Greeting</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">props</span><span class="p">.</span><span class="nx">greeting</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;;</span>
+<span class="p">}</span>
+
+<span class="c1">// destructuring</span>
+<span class="kd">function</span> <span class="nx">Greeting</span><span class="p">({</span> <span class="nx">greeting</span> <span class="p">})</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">greeting</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Another great feature is the <strong>rest destructuring</strong>. It is often used for splitting out a part of an object, but keeping the remaining properties in another object.</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// rest destructuring</span>
+<span class="kd">const</span> <span class="p">{</span> <span class="nx">users</span><span class="p">,</span> <span class="p">...</span><span class="nx">rest</span> <span class="p">}</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h3 id="react-state">React State</h3>
+
+<p>useState hook will takes an initial state as an argument and the function will return an array with two values. The first value represents the current state; the second value is a function to update this state.</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">App</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">stories</span> <span class="o">=</span> <span class="p">[</span> <span class="p">...</span> <span class="p">];</span>
+
+  <span class="c1">// less readable version without array destructuring</span>
+  <span class="kd">const</span> <span class="nx">searchTermState</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">useState</span><span class="p">(</span><span class="dl">''</span><span class="p">);</span>
+  <span class="kd">const</span> <span class="nx">searchTerm</span> <span class="o">=</span> <span class="nx">searchTermState</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+  <span class="kd">const</span> <span class="nx">setSearchTerm</span> <span class="o">=</span> <span class="nx">searchTermState</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+
+  <span class="p">...</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>Consider using JavaScript array destructuring in React’s useState hook:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">App</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">stories</span> <span class="o">=</span> <span class="p">[</span> <span class="p">...</span> <span class="p">];</span>
+
+
+  <span class="kd">const</span> <span class="p">[</span><span class="nx">searchTerm</span><span class="p">,</span> <span class="nx">setSearchTerm</span><span class="p">]</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">useState</span><span class="p">(</span><span class="dl">''</span><span class="p">);</span>
+
+  <span class="p">...</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<h2 id="spread-operator">Spread Operator</h2>
+
+<p>Spread Operator literally spreads the contents of an array into its elements which makes operations like concatenation etc. easier. You can clone arrays using this operator.</p>
+
+<p>Let’s say we want to concatenate two arrays, we can do this in different ways:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// using concat function</span>
+<span class="nx">a</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">];</span>
+<span class="nx">b</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">];</span>
+<span class="nx">c</span> <span class="o">=</span> <span class="nx">a</span><span class="p">.</span><span class="nx">concat</span><span class="p">(</span><span class="nx">b</span><span class="p">);</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">c: </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">c</span><span class="p">);</span>
+</code></pre></div></div>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// using Spread operator</span>
+<span class="nx">a</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">];</span>
+<span class="nx">b</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">];</span>
+<span class="nx">c</span> <span class="o">=</span> <span class="p">[...</span><span class="nx">a</span><span class="p">,</span> <span class="p">...</span><span class="nx">b</span><span class="p">];</span> <span class="c1">//spread operator</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">c: </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">c</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>You can easily add some elements in the middle of the two arrays: <code class="language-plaintext highlighter-rouge">[...a, 'something', ...b];</code></p>
+
+<p>In React, you can combine two objects using Spread Operator and add extra properties to that object too, like this:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">person</span> <span class="o">=</span> <span class="p">{</span> <span class="na">name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Jhon</span><span class="dl">"</span><span class="p">};</span>
+<span class="kd">const</span> <span class="nx">student</span> <span class="o">=</span> <span class="p">{</span> <span class="na">ID</span><span class="p">:</span> <span class="dl">"</span><span class="s2">21</span><span class="dl">"</span><span class="p">,</span> <span class="na">GPA</span><span class="p">:</span> <span class="dl">"</span><span class="s2">3.0</span><span class="dl">"</span><span class="p">};</span>
+
+<span class="kd">const</span> <span class="nx">new_object</span> <span class="o">=</span> <span class="p">{</span> <span class="p">...</span><span class="nx">person</span><span class="p">,</span> <span class="p">...</span><span class="nx">student</span><span class="p">,</span> <span class="na">semester</span><span class="p">:</span> <span class="dl">'</span><span class="s1">3</span><span class="dl">'</span><span class="p">};</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">new_object</span><span class="p">);</span> <span class="c1">//output: { name: 'Jhon', ID: '21', GPA: '3.0', semester: '3' }</span>
+</code></pre></div></div>
+
+<h3 id="spreading-properties-on-dom-elements">Spreading properties on DOM elements</h3>
+
+<p>We usually spread the properties to the elements to avoid writing every single one manually, which is shown as follows:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">&lt;</span><span class="nc">Component</span> <span class="si">{</span><span class="p">...</span><span class="nx">props</span><span class="si">}</span> <span class="p">/&gt;</span>
+</code></pre></div></div>
+
+<p>This works very well and it gets transpiled into the following code by Babel:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">_jsx</span><span class="p">(</span><span class="nx">Component</span><span class="p">,</span> <span class="nx">props</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>However, when we spread properties into a DOM element, we run the risk of adding unknown HTML attributes, which is bad practice.</p>
+
+<p>The problem is not related only to the spread operator; passing non-standard properties one by one leads to the same issues and warnings. Since the spread operator hides the single properties we are spreading, it is even harder to figure out what we are passing to the element.</p>
+
+<p>To see the warning in the console, a basic operation we can do is render the following component:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">Spread</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">&lt;</span><span class="nt">div</span> <span class="na">foo</span><span class="p">=</span><span class="s">"bar"</span> <span class="p">/&gt;</span>
+</code></pre></div></div>
+
+<p>The message we get looks like the following because the foo property is not valid for a div element:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">Unknown</span> <span class="nx">prop</span> <span class="s2">`foo`</span> <span class="nx">on</span> <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span> <span class="nx">tag</span><span class="p">.</span> <span class="nx">Remove</span> <span class="k">this</span> <span class="nx">prop</span> <span class="k">from</span> <span class="nx">the</span> <span class="nx">element</span>
+</code></pre></div></div>
+
+<p>In this case, as we said, it is easy to figure out which attribute we are passing and remove it, but if we use the spread operator, as in the following example, we cannot control which properties are passed from the parent:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">Spread</span> <span class="o">=</span> <span class="nx">props</span> <span class="o">=&gt;</span> <span class="p">&lt;</span><span class="nt">div</span> <span class="si">{</span><span class="p">...</span><span class="nx">props</span><span class="si">}</span> <span class="p">/&gt;;</span>
+</code></pre></div></div>
+
+<p>If we use the component in the following way, there are no issues:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">&lt;</span><span class="nc">Spread</span> <span class="na">className</span><span class="p">=</span><span class="s">"foo"</span> <span class="p">/&gt;</span>
+</code></pre></div></div>
+
+<p>This, however, is not the case if we do something such as the following. React complains because we are applying a non-standard attribute to the DOM element:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">&lt;</span><span class="nc">Spread</span> <span class="na">foo</span><span class="p">=</span><span class="s">"bar"</span> <span class="na">className</span><span class="p">=</span><span class="s">"baz"</span> <span class="p">/&gt;</span>
+</code></pre></div></div>
+
+<p>One solution we can use to solve this problem is to create a property called <code class="language-plaintext highlighter-rouge">domProps</code> that we can spread safely to the component because we are explicitly saying that it contains valid DOM properties.</p>
+
+<p>For example, we can change the Spread component in the following way:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">Spread</span> <span class="o">=</span> <span class="nx">props</span> <span class="o">=&gt;</span> <span class="p">&lt;</span><span class="nt">div</span> <span class="si">{</span><span class="p">...</span><span class="nx">props</span><span class="p">.</span><span class="nx">domProps</span><span class="si">}</span> <span class="p">/&gt;</span>
+</code></pre></div></div>
+
+<p>We can then use it as follows:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">&lt;</span><span class="nc">Spread</span> <span class="na">foo</span><span class="p">=</span><span class="s">"bar"</span> <span class="na">domProps</span><span class="p">=</span> <span class="p">/&gt;</span>
+</code></pre></div></div>
+
+<p>With React, <strong>it’s always good practice to be explicit.</strong></p>
+
+<h2 id="arrow-functions-in-react">Arrow Functions in React</h2>
+
+<p>Arrow Functions are a more concise and readable way of writing a function in JavaScript. They are frequently used in React to make things more efficient and simpler.</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// JavaScript ES5 function</span>
+<span class="kd">function</span> <span class="nx">getGreetingFunc</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="dl">'</span><span class="s1">Welcome to JavaScript</span><span class="dl">'</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// JavaScript ES6 arrow function with body</span>
+<span class="kd">const</span> <span class="nx">getGreetingArrow1</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="dl">'</span><span class="s1">Welcome to JavaScript</span><span class="dl">'</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// JavaScript ES6 arrow function without body and implicit return</span>
+<span class="kd">const</span> <span class="nx">getGreetingArrow2</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span>
+  <span class="dl">'</span><span class="s1">Welcome to JavaScript</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">getGreetingFunc</span><span class="p">());</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">getGreetingArrow1</span><span class="p">());</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">getGreetingArrow2</span><span class="p">());</span>
+</code></pre></div></div>
+
+<p>Another example:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// JavaScript ES5 function</span>
+<span class="kd">const</span> <span class="nx">students</span> <span class="o">=</span> <span class="p">[</span>
+  <span class="p">{</span> <span class="na">ID</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="na">present</span><span class="p">:</span> <span class="kc">true</span><span class="p">},</span>
+  <span class="p">{</span> <span class="na">ID</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="na">present</span><span class="p">:</span> <span class="kc">true</span><span class="p">},</span>
+  <span class="p">{</span> <span class="na">ID</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="na">present</span><span class="p">:</span> <span class="kc">false</span><span class="p">},</span> 
+<span class="p">];</span>
+
+<span class="kd">const</span> <span class="nx">presentStudents</span> <span class="o">=</span> <span class="nx">students</span><span class="p">.</span><span class="nx">filter</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">student</span><span class="p">){</span><span class="k">return</span> <span class="nx">student</span><span class="p">.</span><span class="nx">present</span><span class="p">;});</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">presentStudents</span><span class="p">);</span>
+</code></pre></div></div>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// JavaScript ES6 arrow function</span>
+<span class="kd">const</span> <span class="nx">students</span> <span class="o">=</span> <span class="p">[</span>
+  <span class="p">{</span> <span class="na">ID</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="na">present</span><span class="p">:</span> <span class="kc">true</span><span class="p">},</span>
+  <span class="p">{</span> <span class="na">ID</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="na">present</span><span class="p">:</span> <span class="kc">true</span><span class="p">},</span>
+  <span class="p">{</span> <span class="na">ID</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="na">present</span><span class="p">:</span> <span class="kc">false</span><span class="p">},</span> 
+<span class="p">];</span>
+
+<span class="kd">const</span> <span class="nx">presentStudents</span> <span class="o">=</span> <span class="nx">students</span><span class="p">.</span><span class="nx">filter</span><span class="p">(</span><span class="nx">student</span> <span class="o">=&gt;</span> <span class="nx">student</span><span class="p">.</span><span class="nx">present</span><span class="p">);</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">presentStudents</span><span class="p">);</span>
+</code></pre></div></div>
+
+<h2 id="higher-order-functions-in-react">Higher-Order Functions in React</h2>
+
+<p>Higher-order functions allows extracting functions. In this way, you make function testable in isolation from the React component.</p>
+
+<p>For example, if we have to rendered list of users can be filtered based on the value of an input field:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nx">React</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="kd">class</span> <span class="nx">App</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
+
+  <span class="kd">constructor</span><span class="p">(</span><span class="nx">props</span><span class="p">){</span>
+    <span class="k">super</span><span class="p">(</span><span class="nx">props</span><span class="p">);</span>  
+    
+    <span class="k">this</span><span class="p">.</span><span class="nx">state</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="na">query</span><span class="p">:</span> <span class="dl">''</span><span class="p">,</span>
+    <span class="p">};</span>
+    
+    <span class="k">this</span><span class="p">.</span><span class="nx">onChange</span><span class="o">=</span><span class="k">this</span><span class="p">.</span><span class="nx">onChange</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+  <span class="p">}</span>
+  
+  <span class="nx">onChange</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">setState</span><span class="p">({</span> <span class="na">query</span><span class="p">:</span> <span class="nx">event</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">value</span> <span class="p">});</span>
+  <span class="p">}</span>
+  
+  <span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">users</span> <span class="o">=</span> <span class="p">[</span>
+      <span class="p">{</span> <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Elsa</span><span class="dl">'</span> <span class="p">},</span>
+      <span class="p">{</span> <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Juan</span><span class="dl">'</span> <span class="p">},</span>
+    
+    <span class="p">];</span>
+    <span class="k">return</span> <span class="p">(</span>
+      <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
+          <span class="si">{</span> <span class="nx">users</span>
+            <span class="p">.</span><span class="nx">filter</span><span class="p">(</span><span class="nx">user</span> <span class="o">=&gt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">query</span> <span class="o">===</span> <span class="nx">user</span><span class="p">.</span><span class="nx">name</span><span class="p">)</span>
+            <span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">myuser</span> <span class="o">=&gt;</span> <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">myuser</span><span class="p">.</span><span class="nx">name</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;)</span>
+          <span class="si">}</span>
+        <span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">input</span>
+          <span class="na">type</span><span class="p">=</span><span class="s">"text"</span>
+          <span class="na">onChange</span><span class="p">=</span><span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">onChange</span><span class="si">}</span>
+        <span class="p">/&gt;</span>
+      <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+    <span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>The doFilter() function can be exported from the file and tested in isolation as pure (higher-order) function.</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nx">React</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="kd">const</span> <span class="nx">doFilter</span> <span class="o">=</span> <span class="nx">query</span> <span class="o">=&gt;</span> <span class="nx">user</span> <span class="o">=&gt;</span>
+   <span class="nx">query</span> <span class="o">===</span> <span class="nx">user</span><span class="p">.</span><span class="nx">name</span><span class="p">;</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="kd">class</span> <span class="nx">App</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
+
+  <span class="kd">constructor</span><span class="p">(</span><span class="nx">props</span><span class="p">){</span>
+    <span class="k">super</span><span class="p">(</span><span class="nx">props</span><span class="p">);</span>  
+    
+    <span class="k">this</span><span class="p">.</span><span class="nx">state</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="na">query</span><span class="p">:</span> <span class="dl">''</span><span class="p">,</span>
+    <span class="p">};</span>
+    
+    <span class="k">this</span><span class="p">.</span><span class="nx">onChange</span><span class="o">=</span><span class="k">this</span><span class="p">.</span><span class="nx">onChange</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+  <span class="p">}</span>
+  
+  <span class="nx">onChange</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">setState</span><span class="p">({</span> <span class="na">query</span><span class="p">:</span> <span class="nx">event</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">value</span> <span class="p">});</span>
+  <span class="p">}</span>
+  
+  <span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">users</span> <span class="o">=</span> <span class="p">[</span>
+      <span class="p">{</span> <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Elsa</span><span class="dl">'</span> <span class="p">},</span>
+      <span class="p">{</span> <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Juan</span><span class="dl">'</span> <span class="p">},</span>
+    
+    <span class="p">];</span>
+    <span class="k">return</span> <span class="p">(</span>
+      <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
+          <span class="si">{</span> <span class="nx">users</span>
+            <span class="p">.</span><span class="nx">filter</span><span class="p">(</span><span class="nx">doFilter</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">query</span><span class="p">))</span>
+            <span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">myuser</span> <span class="o">=&gt;</span> <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">myuser</span><span class="p">.</span><span class="nx">name</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;)</span>
+          <span class="si">}</span>
+        <span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">input</span>
+          <span class="na">type</span><span class="p">=</span><span class="s">"text"</span>
+          <span class="na">onChange</span><span class="p">=</span><span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">onChange</span><span class="si">}</span>
+        <span class="p">/&gt;</span>
+      <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+    <span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="map-reduce--filter-in-react">Map, Reduce &amp; Filter in React</h2>
+
+<p>A very common operation in UI development is to display lists of items. When it comes to showing lists, using JavaScript as a template language is a very good idea.</p>
+
+<p>If we write a function that returns an array inside our JSX template, each element of the array gets compiled into an element.</p>
+
+<p>We can use any JavaScript expressions inside curly braces, and the most common way to generate an array of elements, given an array of objects, is to use map.</p>
+
+<p>For example:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nx">React</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="kd">class</span> <span class="nx">App</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
+  <span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">users</span> <span class="o">=</span> <span class="p">[</span>
+      <span class="p">{</span> <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Víctor</span><span class="dl">'</span> <span class="p">},</span>
+      <span class="p">{</span> <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Milagros</span><span class="dl">'</span> <span class="p">},</span>
+    <span class="p">];</span>
+
+    <span class="k">return</span> <span class="p">(</span>
+      <span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
+           <span class="si">{</span><span class="nx">users</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">user</span> <span class="o">=&gt;</span> <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">user</span><span class="p">.</span><span class="nx">name</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;)</span><span class="si">}</span>
+      <span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
+    <span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>The same can be applied for custom-tailored cases where filter() or reduce() make more sense rather than rendering an output for each mapped item.</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nx">React</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="kd">class</span> <span class="nx">App</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
+  <span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">users</span> <span class="o">=</span> <span class="p">[</span>
+      <span class="p">{</span> <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Víctor</span><span class="dl">'</span><span class="p">,</span> <span class="na">isDeveloper</span><span class="p">:</span> <span class="kc">true</span> <span class="p">},</span>
+      <span class="p">{</span> <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Milagros</span><span class="dl">'</span><span class="p">,</span> <span class="na">isDeveloper</span><span class="p">:</span> <span class="kc">false</span> <span class="p">},</span>
+      <span class="p">{</span> <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Julieta</span><span class="dl">'</span><span class="p">,</span> <span class="na">isDeveloper</span><span class="p">:</span> <span class="kc">true</span> <span class="p">},</span>
+    <span class="p">];</span>
+
+    <span class="k">return</span> <span class="p">(</span>
+      <span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
+        <span class="si">{</span><span class="nx">users</span>
+          <span class="p">.</span><span class="nx">filter</span><span class="p">(</span><span class="nx">user</span> <span class="o">=&gt;</span> <span class="nx">user</span><span class="p">.</span><span class="nx">isDeveloper</span><span class="p">)</span>
+          <span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">user</span> <span class="o">=&gt;</span> <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">user</span><span class="p">.</span><span class="nx">name</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;)</span>
+        <span class="si">}</span>
+      <span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
+    <span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="sub-rendering">Sub-rendering</h2>
+
+<p>It is worth stressing that we always want to keep our components very small and our render methods very clean and simple.</p>
+
+<p>However, that is not an easy goal, especially when you are creating an application iteratively, and in the first iteration, you are not sure exactly how to split the components into smaller ones. So, what should we be doing when the render method becomes too big to maintain? One solution is to split it into smaller functions in a way that lets us keep all the logic in the same component.</p>
+
+<p>Let’s look at an example:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">renderUserMenu</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span> 
+  <span class="c1">// JSX for user menu </span>
+<span class="p">}</span> 
+   
+<span class="kd">const</span> <span class="nx">renderAdminMenu</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span> 
+  <span class="c1">// JSX for admin menu </span>
+<span class="p">}</span> 
+   
+<span class="k">return</span> <span class="p">(</span> 
+  <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span> 
+    <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>Welcome back!<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span> 
+    <span class="si">{</span><span class="nx">userExists</span> <span class="o">&amp;&amp;</span> <span class="nx">renderUserMenu</span><span class="p">()</span><span class="si">}</span> 
+    <span class="si">{</span><span class="nx">userIsAdmin</span> <span class="o">&amp;&amp;</span> <span class="nx">renderAdminMenu</span><span class="p">()</span><span class="si">}</span> 
+  <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span> 
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p>This is not always considered best practice because it seems more obvious to split the component into smaller ones. However, sometimes it helps to keep the render method cleaner.</p>
+
+<h2 id="using-indexes-as-a-key">Using indexes as a key</h2>
+
+<p>The key property uniquely identifies an element in the DOM, and React uses it to check whether the element is new or whether it has to be updated when the component properties or state change.</p>
+
+<p>Using keys is always a good idea and if you don’t do it, React gives a warning in the console (in development mode). However, it is not simply a matter of using a key; sometimes, the value that we decide to use as a key can make a difference. In fact, using the wrong key can give us unexpected behaviors in some instances. In this section, we will see one of those instances.</p>
+
+<p>Let’s create a List component, as shown here:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">FC</span><span class="p">,</span> <span class="nx">useState</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react</span><span class="dl">'</span>
+
+<span class="kd">const</span> <span class="nx">List</span><span class="p">:</span> <span class="nx">FC</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+
+<span class="p">}</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="nx">List</span>
+</code></pre></div></div>
+
+<p>Then we define our state:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="p">[</span><span class="nx">items</span><span class="p">,</span> <span class="nx">setItems</span><span class="p">]</span> <span class="o">=</span> <span class="nx">useState</span><span class="p">([</span><span class="dl">'</span><span class="s1">foo</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">bar</span><span class="dl">'</span><span class="p">])</span>
+</code></pre></div></div>
+
+<p>The implementation of the click handler insert a new item at the top of the list:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">handleClick</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span> 
+  <span class="kd">const</span> <span class="nx">newItems</span> <span class="o">=</span> <span class="nx">items</span><span class="p">.</span><span class="nx">slice</span><span class="p">()</span>
+  <span class="nx">newItems</span><span class="p">.</span><span class="nx">unshift</span><span class="p">(</span><span class="dl">'</span><span class="s1">baz</span><span class="dl">'</span><span class="p">)</span>
+
+  <span class="nx">setItems</span><span class="p">(</span><span class="nx">newItems</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Finally, in render, we show the list and the + button to add the <code class="language-plaintext highlighter-rouge">baz</code> item at the top of the list:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">return</span> <span class="p">(</span> 
+  <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span> 
+    <span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span> 
+      <span class="si">{</span><span class="nx">items</span><span class="p">.</span><span class="nx">map</span><span class="p">((</span><span class="nx">item</span><span class="p">,</span> <span class="nx">index</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">(</span> 
+        <span class="p">&lt;</span><span class="nt">li</span> <span class="na">key</span><span class="p">=</span><span class="si">{</span><span class="nx">index</span><span class="si">}</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">item</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;</span> 
+      <span class="p">))</span><span class="si">}</span> 
+    <span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span> 
+
+    <span class="p">&lt;</span><span class="nt">button</span> <span class="na">onClick</span><span class="p">=</span><span class="si">{</span><span class="nx">handleClick</span><span class="si">}</span><span class="p">&gt;</span>+<span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span> 
+  <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span> 
+<span class="p">)</span> 
+</code></pre></div></div>
+
+<p>If you run the component inside the browser, you will not see any problems; clicking the + button inserts a new item at the top of the list.</p>
+
+<p>Let’s change render in the following way, adding an input field near each item. We then use an input field because we can edit its content, making it easier to figure out the problem:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">return</span> <span class="p">(</span> 
+  <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span> 
+    <span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span> 
+      <span class="si">{</span><span class="nx">items</span><span class="p">.</span><span class="nx">map</span><span class="p">((</span><span class="nx">item</span><span class="p">,</span> <span class="nx">index</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">(</span> 
+        <span class="p">&lt;</span><span class="nt">li</span> <span class="na">key</span><span class="p">=</span><span class="si">{</span><span class="nx">index</span><span class="si">}</span><span class="p">&gt;</span> 
+          <span class="si">{</span><span class="nx">item</span><span class="si">}</span> 
+          <span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="p">=</span><span class="s">"text"</span> <span class="p">/&gt;</span> 
+        <span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;</span> 
+      <span class="p">))</span><span class="si">}</span> 
+    <span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span> 
+    <span class="p">&lt;</span><span class="nt">button</span> <span class="na">onClick</span><span class="p">=</span><span class="si">{</span><span class="nx">handleClick</span><span class="si">}</span><span class="p">&gt;</span>+<span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span> 
+  <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span> 
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p>If we run this component again in the browser, copy the values of the items in the input fields, and then click +, we will get unexpected behavior. The items shift down while the input elements remain in the same position, in such a way that their value does not match the value of the items anymore.</p>
+
+<p>What we can see is that React, instead of inserting the new element on top, swaps the text of the two existing elements, and inserts the last item at the bottom as if it was new. The reason it does that is that we are using the index of the map function as the key.</p>
+
+<p>In fact, the index always starts from 0, even if we push a new item to the top of the list, so React thinks that we changed the values of the existing two, and added a new element at index 2. The behavior is the same as it would have been without using the key property at all.</p>
+
+<p>This is a very common pattern because we may think that providing any key is always the best solution, but it is not like that at all. <strong>The key has to be unique and stable, identifying one, and only one, item.</strong></p>
+
+<p>To solve this problem, we can, for example, use the value of the item if we expect it not to be repeated within the list, or create a unique identifier.</p>
+
+<h2 id="handler-function-in-jsx">Handler Function in JSX</h2>
+
+<p>The <strong>synthetic event</strong> is a wrapper around the browser’s native event, with more functions that are useful to prevent native browser behavior (e.g. refreshing a page after the user clicks a form’s submit button). Always pass functions to these handlers, not the return value of the function, except when the return value is a function:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// don't do this</span>
+<span class="p">&lt;</span><span class="nt">input</span>
+  <span class="na">id</span><span class="p">=</span><span class="s">"search"</span>
+  <span class="na">type</span><span class="p">=</span><span class="s">"text"</span>
+  <span class="na">onChange</span><span class="p">=</span><span class="si">{</span><span class="nx">handleChange</span><span class="p">()</span><span class="si">}</span>
+<span class="p">/&gt;</span>
+
+<span class="c1">// do this instead</span>
+<span class="p">&lt;</span><span class="nt">input</span>
+  <span class="na">id</span><span class="p">=</span><span class="s">"search"</span>
+  <span class="na">type</span><span class="p">=</span><span class="s">"text"</span>
+  <span class="na">onChange</span><span class="p">=</span><span class="si">{</span><span class="nx">handleChange</span><span class="si">}</span>
+<span class="p">/&gt;</span>
+</code></pre></div></div>
+
+<h2 id="callback-handlers-in-jsx">Callback Handlers in JSX</h2>
+
+<p>There is no way to pass information as JavaScript data types up the component tree, since props are naturally only passed downwards. However, we can introduce a callback handler as a function.</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">App</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">stories</span> <span class="o">=</span> <span class="p">[</span> <span class="p">...</span> <span class="p">];</span>
+
+  <span class="c1">// Callback function gets introduced</span>
+  <span class="kd">const</span> <span class="nx">handleSearch</span> <span class="o">=</span> <span class="nx">event</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="c1">// Callback function is used elsewhere </span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">value</span><span class="p">);</span>
+  <span class="p">};</span>
+
+
+  <span class="k">return</span> <span class="p">(</span>
+    <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>My Hacker Stories<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+
+      <span class="p">&lt;</span><span class="nc">Search</span> <span class="na">onSearch</span><span class="p">=</span><span class="si">{</span><span class="nx">handleSearch</span><span class="si">}</span> <span class="p">/&gt;</span>
+      <span class="p">&lt;</span><span class="nt">hr</span> <span class="p">/&gt;</span>
+
+      <span class="p">&lt;</span><span class="nc">List</span> <span class="na">list</span><span class="p">=</span><span class="si">{</span><span class="nx">stories</span><span class="si">}</span> <span class="p">/&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+  <span class="p">);</span>
+<span class="p">};</span>
+
+<span class="kd">const</span> <span class="nx">Search</span> <span class="o">=</span> <span class="nx">props</span> <span class="o">=&gt;</span> <span class="p">{</span>
+
+  <span class="kd">const</span> <span class="p">[</span><span class="nx">searchTerm</span><span class="p">,</span> <span class="nx">setSearchTerm</span><span class="p">]</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">useState</span><span class="p">(</span><span class="dl">''</span><span class="p">);</span>
+
+  <span class="kd">const</span> <span class="nx">handleChange</span> <span class="o">=</span> <span class="nx">event</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">setSearchTerm</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">value</span><span class="p">);</span>
+
+    <span class="c1">//  It “calls back” to the place it was introduced</span>
+    <span class="nx">props</span><span class="p">.</span><span class="nx">onSearch</span><span class="p">(</span><span class="nx">event</span><span class="p">);</span>
+
+  <span class="p">};</span>
+
+  <span class="k">return</span> <span class="p">(</span> <span class="p">...</span> <span class="p">);</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<h2 id="inline-handler-in-jsx">Inline Handler in JSX</h2>
+
+<p>Inline handlers allow us to execute the function right in the JSX. There are two solutions using the incoming function in the Item component as an inline handler. First, using JavaScript’s bind method:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">Item</span> <span class="o">=</span> <span class="p">({</span> <span class="nx">item</span><span class="p">,</span> <span class="nx">onRemoveItem</span> <span class="p">})</span> <span class="o">=&gt;</span> <span class="p">(</span>
+  <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">span</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="p">=</span><span class="si">{</span><span class="nx">item</span><span class="p">.</span><span class="nx">url</span><span class="si">}</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">item</span><span class="p">.</span><span class="nx">title</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">span</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">item</span><span class="p">.</span><span class="nx">author</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">span</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">item</span><span class="p">.</span><span class="nx">num_comments</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">span</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">item</span><span class="p">.</span><span class="nx">points</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">span</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">button</span> <span class="na">type</span><span class="p">=</span><span class="s">"button"</span> <span class="na">onClick</span><span class="p">=</span><span class="si">{</span><span class="nx">onRemoveItem</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">item</span><span class="p">)</span><span class="si">}</span><span class="p">&gt;</span>
+        Dismiss
+      <span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="p">);</span>
+</code></pre></div></div>
+
+<p>Using JavaScript’s bind method on a function allows us to bind arguments directly to that function that should be used when executing it. The bind method returns a new function with the bound argument attached.</p>
+
+<p>The second and more popular solution is to use a wrapping arrow function, which allows us to sneak in arguments like item:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">Item</span> <span class="o">=</span> <span class="p">({</span> <span class="nx">item</span><span class="p">,</span> <span class="nx">onRemoveItem</span> <span class="p">})</span> <span class="o">=&gt;</span> <span class="p">(</span>
+  <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">span</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="p">=</span><span class="si">{</span><span class="nx">item</span><span class="p">.</span><span class="nx">url</span><span class="si">}</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">item</span><span class="p">.</span><span class="nx">title</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">span</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">item</span><span class="p">.</span><span class="nx">author</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">span</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">item</span><span class="p">.</span><span class="nx">num_comments</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">span</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">item</span><span class="p">.</span><span class="nx">points</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">span</span><span class="p">&gt;</span>
+
+      <span class="p">&lt;</span><span class="nt">button</span> <span class="na">type</span><span class="p">=</span><span class="s">"button"</span> <span class="na">onClick</span><span class="p">=</span><span class="si">{</span><span class="p">()</span> <span class="o">=&gt;</span> <span class="nx">onRemoveItem</span><span class="p">(</span><span class="nx">item</span><span class="p">)</span><span class="si">}</span><span class="p">&gt;</span>
+        Dismiss
+      <span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="p">);</span>
+</code></pre></div></div>
+
+<p>This is a quick solution because sometimes we don’t want to refactor a function component’s concise function body back to a block body to define an appropriate handler between function signature and return statement. While this way is more concise than the others, it can also be more difficult to debug because JavaScript logic may be hidden in JSX. It becomes even more verbose if the wrapping arrow function encapsulates more than one line of implementation logic, by using a block body instead of a concise body. This should be avoided:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">Item</span> <span class="o">=</span> <span class="p">({</span> <span class="nx">item</span><span class="p">,</span> <span class="nx">onRemoveItem</span> <span class="p">})</span> <span class="o">=&gt;</span> <span class="p">(</span>
+  <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
+    ...
+    <span class="p">&lt;</span><span class="nt">span</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">button</span>
+        <span class="na">type</span><span class="p">=</span><span class="s">"button"</span>
+        <span class="na">onClick</span><span class="p">=</span><span class="si">{</span><span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+          <span class="c1">// do something else</span>
+
+          <span class="c1">// note: avoid using complex logic in JSX</span>
+
+          <span class="nx">onRemoveItem</span><span class="p">(</span><span class="nx">item</span><span class="p">);</span>
+        <span class="p">}</span><span class="si">}</span>
+      <span class="p">&gt;</span>
+        Dismiss
+      <span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="p">);</span>
+</code></pre></div></div>
+
+<p>All three handler versions, two of which are inline and the normal handler, are acceptable. The non-inlined handler moves the implementation details into the function component’s block body; the inline handler move the implementation details into the JSX.</p>
+
+<h2 id="react-fragments">React Fragments</h2>
+
+<p>A fragment wraps other elements into a single top-level element without adding to the rendered output. If you prefer to omit the wrapping <code class="language-plaintext highlighter-rouge">&lt;div&gt;</code> or <code class="language-plaintext highlighter-rouge">&lt;span&gt;</code> elements, substitute them with an empty tag that is allowed in JSX, and doesn’t introduce intermediate elements in our rendered HTML.</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">Search</span> <span class="o">=</span> <span class="p">({</span> <span class="nx">search</span><span class="p">,</span> <span class="nx">onSearch</span> <span class="p">})</span> <span class="o">=&gt;</span> <span class="p">(</span>
+ <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
+
+   <span class="p">&lt;</span><span class="nt">label</span> <span class="na">htmlFor</span><span class="p">=</span><span class="s">"search"</span><span class="p">&gt;</span>Search: <span class="p">&lt;/</span><span class="nt">label</span><span class="p">&gt;</span>
+   <span class="p">&lt;</span><span class="nt">input</span>
+     <span class="na">id</span><span class="p">=</span><span class="s">"search"</span>
+     <span class="na">type</span><span class="p">=</span><span class="s">"text"</span>
+     <span class="na">value</span><span class="p">=</span><span class="si">{</span><span class="nx">search</span><span class="si">}</span>
+     <span class="na">onChange</span><span class="p">=</span><span class="si">{</span><span class="nx">onSearch</span><span class="si">}</span>
+   <span class="p">/&gt;</span>
+
+ <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+
+<span class="p">);</span>
+</code></pre></div></div>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">Search</span> <span class="o">=</span> <span class="p">({</span> <span class="nx">search</span><span class="p">,</span> <span class="nx">onSearch</span> <span class="p">})</span> <span class="o">=&gt;</span> <span class="p">(</span>
+ <span class="p">&lt;&gt;</span>
+   <span class="p">&lt;</span><span class="nt">label</span> <span class="na">htmlFor</span><span class="p">=</span><span class="s">"search"</span><span class="p">&gt;</span>Search: <span class="p">&lt;/</span><span class="nt">label</span><span class="p">&gt;</span>
+   <span class="p">&lt;</span><span class="nt">input</span>
+     <span class="na">id</span><span class="p">=</span><span class="s">"search"</span>
+     <span class="na">type</span><span class="p">=</span><span class="s">"text"</span>
+     <span class="na">value</span><span class="p">=</span><span class="si">{</span><span class="nx">search</span><span class="si">}</span>
+     <span class="na">onChange</span><span class="p">=</span><span class="si">{</span><span class="nx">onSearch</span><span class="si">}</span>
+   <span class="p">/&gt;</span>
+ <span class="p">&lt;/&gt;</span>
+<span class="p">);</span>
+</code></pre></div></div>
+
+<h2 id="creating-enum-types--using-symbols">Creating enum Types  using Symbols</h2>
+
+<p>Enums allow you to define constants with semantic names and unique values. Given that the values of symbols are different, they make excellent values for enumerated types.</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">directions</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="na">UP</span>   <span class="p">:</span> <span class="nb">Symbol</span><span class="p">(</span> <span class="dl">'</span><span class="s1">UP</span><span class="dl">'</span> <span class="p">),</span>
+    <span class="na">DOWN</span> <span class="p">:</span> <span class="nb">Symbol</span><span class="p">(</span> <span class="dl">'</span><span class="s1">DOWN</span><span class="dl">'</span> <span class="p">),</span>
+    <span class="na">LEFT</span> <span class="p">:</span> <span class="nb">Symbol</span><span class="p">(</span> <span class="dl">'</span><span class="s1">LEFT</span><span class="dl">'</span> <span class="p">),</span>
+    <span class="na">RIGHT</span><span class="p">:</span> <span class="nb">Symbol</span><span class="p">(</span> <span class="dl">'</span><span class="s1">RIGHT</span><span class="dl">'</span> <span class="p">)</span>
+<span class="p">};</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">directions</span><span class="p">);</span>
+</code></pre></div></div>
+
+<h2 id="use-typescript">Use Typescript</h2>
+
+<p>TypeScript is a superset of JavaScript which means that any feature in JavaScript is available in TypeScript.</p>
+
+<p>The most prominent feature unique to TypeScript—the one that gave TypeScript its name—is, as noted, strong typing: a TypeScript variable is associated with a type that tells the compiler what kind of data it can hold. In addition, TypeScript does support type inference, and includes a catch-all any type, which means that variables don’t have to have their types assigned explicitly by the programmer; more on that in a moment.</p>
+
+<h3 id="strongly-typed-function-component-props">Strongly-typed Function Component Props</h3>
+
+<p>React function components are just functions that take in a props parameter and return JSX. We can make them strongly-type function parameters.</p>
+
+<p>Let’s start by adding a type annotation for the props:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">Hello</span> <span class="o">=</span> <span class="p">(</span><span class="nx">props</span><span class="p">:</span> <span class="p">{</span> <span class="nl">who</span><span class="p">:</span> <span class="nx">string</span> <span class="p">})</span> <span class="o">=&gt;</span> <span class="p">(</span>
+  <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Hello, <span class="si">{</span><span class="nx">props</span><span class="p">.</span><span class="nx">who</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+<span class="p">);</span>
+</code></pre></div></div>
+
+<p>In this way, we have just made Hello’s props strongly-typed.</p>
+
+<p>Now, we can shorten the Hello component slightly by destructuring the props parameter:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">Hello</span> <span class="o">=</span> <span class="p">({</span> <span class="nx">who</span> <span class="p">}:</span> <span class="p">{</span> <span class="nl">who</span><span class="p">:</span> <span class="nx">string</span> <span class="p">})</span> <span class="o">=&gt;</span> <span class="p">(</span>
+  <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Hello, <span class="si">{</span><span class="nx">who</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+<span class="p">);</span>
+</code></pre></div></div>
+
+<p><strong>Using interface or type alias for the props is arguably more readable when the component has more than a couple of props.</strong> This is also better if the type is referenced elsewhere in the app:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">type</span> <span class="nx">Props</span> <span class="o">=</span> <span class="p">{</span> <span class="na">who</span><span class="p">:</span> <span class="nx">string</span> <span class="p">}</span>
+<span class="kd">const</span> <span class="nx">Hello</span> <span class="o">=</span> <span class="p">({</span> <span class="nx">who</span> <span class="p">}:</span> <span class="nx">Props</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Hello, <span class="si">{</span><span class="nx">who</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+</code></pre></div></div>
+
+<p>Also, our Hello component is an arrow function.</p>
+
+<p>If we have a prop that is optional:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">type</span> <span class="nx">Props</span> <span class="o">=</span> <span class="p">{</span> 
+  <span class="na">who</span><span class="p">:</span> <span class="nx">string</span><span class="p">;</span> 
+  <span class="nx">message</span><span class="p">?:</span> <span class="nx">string</span> 
+<span class="p">};</span>
+<span class="kd">const</span> <span class="nx">Hello</span> <span class="o">=</span> <span class="p">({</span> <span class="nx">who</span><span class="p">,</span> <span class="nx">message</span> <span class="p">}:</span> <span class="nx">Props</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">(</span>
+  <span class="p">&lt;</span><span class="nc">React</span><span class="p">.</span><span class="nc">Fragment</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Hello, <span class="si">{</span><span class="nx">who</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+    <span class="si">{</span><span class="nx">message</span> <span class="o">&amp;&amp;</span> <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">message</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span><span class="si">}</span>
+  <span class="p">&lt;/</span><span class="nc">React</span><span class="p">.</span><span class="nc">Fragment</span><span class="p">&gt;</span>
+<span class="p">);</span>
+</code></pre></div></div>
+
+<p>message is <code class="language-plaintext highlighter-rouge">undefined</code> if it hasn’t been passed.</p>
+
+<p>The short circuit operator (&amp;&amp;) is used to render the message only if it has been passed into the component. This is a typical pattern when rendering elements driven by optional props.</p>
+
+<p>We can specifying a default for a function component prop. The first way is to use a static property called <code class="language-plaintext highlighter-rouge">defaultProps</code> on the function component. This is set to an object literal that contains the values to set the props to:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">Component</span><span class="p">.</span><span class="nx">defaultProps</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">prop1</span><span class="p">:</span> <span class="nx">value1</span><span class="p">,</span>
+  <span class="na">prop2</span><span class="p">:</span> <span class="nx">value2</span><span class="p">,</span>
+  <span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Continuing with the previous example:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">type</span> <span class="nx">Props</span> <span class="o">=</span> <span class="p">{</span> <span class="na">who</span><span class="p">:</span> <span class="nx">string</span><span class="p">;</span> <span class="nx">message</span><span class="p">?:</span> <span class="nx">string</span> <span class="p">};</span>
+<span class="kd">const</span> <span class="nx">Hello</span> <span class="o">=</span> <span class="p">({</span> <span class="nx">who</span><span class="p">,</span> <span class="nx">message</span> <span class="p">}:</span> <span class="nx">Props</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">(</span>
+  <span class="p">&lt;</span><span class="nc">React</span><span class="p">.</span><span class="nc">Fragment</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Hello, <span class="si">{</span><span class="nx">who</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+    <span class="si">{</span><span class="nx">message</span> <span class="o">&amp;&amp;</span> <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">message</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span><span class="si">}</span>
+  <span class="p">&lt;/</span><span class="nc">React</span><span class="p">.</span><span class="nc">Fragment</span><span class="p">&gt;</span>
+<span class="p">);</span>
+<span class="nx">Hello</span><span class="p">.</span><span class="nx">defaultProps</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">message</span><span class="p">:</span> <span class="dl">"</span><span class="s2">How are you?</span><span class="dl">"</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>There is another way to provide default prop values to a function component. This approach is to use the standard syntax for default function parameters:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">Component</span> <span class="o">=</span> <span class="p">({</span> 
+  <span class="nx">prop1</span> <span class="o">=</span> <span class="nx">value1</span><span class="p">,</span>
+  <span class="nx">prop2</span> <span class="o">=</span> <span class="nx">value2</span><span class="p">,</span>
+  <span class="p">...</span>
+<span class="p">}:</span> <span class="nx">Props</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
+</code></pre></div></div>
+
+<p>Refactoring Hello component:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">type</span> <span class="nx">Props</span> <span class="o">=</span> <span class="p">{</span> <span class="na">who</span><span class="p">:</span> <span class="nx">string</span><span class="p">;</span> <span class="nx">message</span><span class="p">?:</span> <span class="nx">string</span> <span class="p">};</span>
+<span class="kd">const</span> <span class="nx">Hello</span> <span class="o">=</span> <span class="p">({</span> <span class="nx">who</span><span class="p">,</span> <span class="nx">message</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">How are you?</span><span class="dl">"</span> <span class="p">}:</span> <span class="nx">Props</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">(</span>
+  <span class="p">&lt;</span><span class="nc">React</span><span class="p">.</span><span class="nc">Fragment</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Hello, <span class="si">{</span><span class="nx">who</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+    <span class="si">{</span><span class="nx">message</span> <span class="o">&amp;&amp;</span> <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">message</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span><span class="si">}</span>
+  <span class="p">&lt;/</span><span class="nc">React</span><span class="p">.</span><span class="nc">Fragment</span><span class="p">&gt;</span>
+<span class="p">);</span>
+</code></pre></div></div>
+
+<p>The default function parameter approach is arguably more readable than the <code class="language-plaintext highlighter-rouge">defaultProps</code> approach for defining default props. This is because the default value is closer to where the prop is defined. So, our eyes don’t need to scan right to the bottom of the component and back up again to fully understand a component’s props. It is also worth noting that <code class="language-plaintext highlighter-rouge">defaultProps</code> may be deprecated in React function components in a future release.</p>
+
+<p>If the who prop is now an object containing name and friend properties and we add a renderMessage prop that is a function, so we can make the definition of the Props as the next:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">type</span> <span class="nx">Who</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">name</span><span class="p">:</span> <span class="nx">string</span><span class="p">;</span>
+  <span class="nl">friend</span><span class="p">:</span> <span class="nx">boolean</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nx">type</span> <span class="nx">Props</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">who</span><span class="p">:</span> <span class="nx">Who</span><span class="p">;</span>
+  <span class="nx">message</span><span class="p">?:</span> <span class="nx">string</span><span class="p">;</span>
+  <span class="nx">renderMessage</span><span class="p">?:</span> <span class="p">(</span><span class="na">message</span><span class="p">:</span> <span class="nx">string</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">React</span><span class="p">.</span><span class="nx">ReactNode</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">const</span> <span class="nx">Hello</span> <span class="o">=</span> <span class="p">({</span>
+  <span class="nx">who</span><span class="p">,</span>
+  <span class="nx">renderMessage</span><span class="p">,</span>
+  <span class="nx">message</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">How are you?</span><span class="dl">"</span>
+<span class="p">}:</span> <span class="nx">Props</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">(</span>
+  <span class="p">&lt;</span><span class="nc">React</span><span class="p">.</span><span class="nc">Fragment</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>
+      Hello, <span class="si">{</span><span class="nx">who</span><span class="p">.</span><span class="nx">name</span><span class="si">}</span>
+      <span class="si">{</span><span class="nx">who</span><span class="p">.</span><span class="nx">friend</span> <span class="o">&amp;&amp;</span> <span class="dl">"</span><span class="s2"> my friend</span><span class="dl">"</span><span class="si">}</span>
+    <span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+    <span class="si">{</span><span class="nx">message</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nx">renderMessage</span> <span class="p">?</span> <span class="nx">renderMessage</span><span class="p">(</span><span class="nx">message</span><span class="p">)</span> <span class="p">:</span> <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">message</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;)</span><span class="si">}</span>
+  <span class="p">&lt;/</span><span class="nc">React</span><span class="p">.</span><span class="nc">Fragment</span><span class="p">&gt;</span>
+<span class="p">);</span>
+</code></pre></div></div>
+
+<p>An example consumption of Hello is as follows:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">&lt;</span><span class="nc">Hello</span>
+  <span class="na">who</span><span class="p">=</span>
+  <span class="na">message</span><span class="p">=</span><span class="s">"Hey, how are you?"</span>
+  <span class="na">renderMessage</span><span class="p">=</span><span class="si">{</span><span class="nx">m</span> <span class="o">=&gt;</span> <span class="p">&lt;</span><span class="nt">i</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">m</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">i</span><span class="p">&gt;</span><span class="si">}</span>
+<span class="p">/&gt;</span>
+</code></pre></div></div>
+
+<p><strong>Summarizing, create strongly-typed function props using the following syntax:</strong></p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">(</span><span class="nx">param1</span><span class="p">:</span> <span class="nx">Type1</span><span class="p">,</span> <span class="nx">param2</span><span class="p">:</span> <span class="nx">Type2</span><span class="p">,</span> <span class="p">...)</span> <span class="o">=&gt;</span> <span class="nx">ReturnType</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h3 id="strongly-typed-function-component-state">Strongly-typed Function Component State</h3>
+
+<h4 id="usestate">useState</h4>
+
+<p>In some cases, TypeScript can infer the type of the state returned from a <code class="language-plaintext highlighter-rouge">useState</code> hook from the initial value. So, state with the <code class="language-plaintext highlighter-rouge">useState</code> hook is automatically strongly-typed.</p>
+
+<p>For the instances when TypeScriptss inference isn’t required, we can explicitly pass the state type into the <code class="language-plaintext highlighter-rouge">useState</code> generic parameter:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="p">[...]</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">useState</span><span class="o">&lt;</span><span class="nx">StateType</span><span class="o">&gt;</span><span class="p">(...);</span>
+</code></pre></div></div>
+
+<p>For example:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="p">[</span><span class="nx">count</span><span class="p">,</span> <span class="nx">setCount</span><span class="p">]</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">useState</span><span class="o">&lt;</span><span class="nx">number</span> <span class="o">|</span> <span class="kc">null</span><span class="o">&gt;</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+</code></pre></div></div>
+
+<h4 id="usereducer">useReducer</h4>
+
+<p>The <code class="language-plaintext highlighter-rouge">useReducer</code> hook is excellent for implementing complex state scenarios. It uses a Redux like pattern for state management where object literals called actions are passed into a function called a reducer to change state.</p>
+
+<p>Let’s create these below the State type:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">type</span> <span class="nx">Increment</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="nx">readonly</span> <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">increment</span><span class="dl">'</span><span class="p">;</span>
+  <span class="nx">readonly</span> <span class="na">incrementStep</span><span class="p">:</span> <span class="nx">number</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="nx">type</span> <span class="nx">Decrement</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="nx">readonly</span> <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">decrement</span><span class="dl">'</span><span class="p">;</span>
+  <span class="nx">readonly</span> <span class="na">decrementStep</span><span class="p">:</span> <span class="nx">number</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>So, the actions will have a type property, which uniquely defines the type of action that needs to be performed along with the amount that the counter will need to be incremented or decremented. We have used the <code class="language-plaintext highlighter-rouge">readonly</code> keyword on the action properties so that they are immutable.</p>
+
+<p>Next, we are going to create a union type called Actions from the Increment and Decrement types. This union type will eventually be used as the type for a parameter for the action in the reducer. Let’s add this under the Decrement type:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">type</span> <span class="nx">Actions</span> <span class="o">=</span> <span class="nx">Increment</span> <span class="o">|</span> <span class="nx">Decrement</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>Moving on to the reducer function. Let’s create the function’s signature:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">reducer</span> <span class="o">=</span> <span class="p">(</span><span class="nx">state</span><span class="p">:</span> <span class="nx">State</span><span class="p">,</span> <span class="nx">action</span><span class="p">:</span> <span class="nx">Actions</span><span class="p">):</span> <span class="nx">State</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>Next, we’ll use a switch statement to handle each type of action, returning the new state in each branch:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">reducer</span> <span class="o">=</span> <span class="p">(</span><span class="nx">state</span><span class="p">:</span> <span class="nx">State</span><span class="p">,</span> <span class="nx">action</span><span class="p">:</span> <span class="nx">Actions</span><span class="p">):</span> <span class="nx">State</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="k">switch</span> <span class="p">(</span><span class="nx">action</span><span class="p">.</span><span class="nx">type</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="dl">'</span><span class="s1">increment</span><span class="dl">'</span><span class="p">:</span>
+      <span class="k">return</span> <span class="p">{</span> <span class="na">count</span><span class="p">:</span> <span class="nx">state</span><span class="p">.</span><span class="nx">count</span> <span class="o">+</span> <span class="nx">action</span><span class="p">.</span><span class="nx">incrementStep</span> <span class="p">};</span>
+    <span class="k">case</span> <span class="dl">'</span><span class="s1">decrement</span><span class="dl">'</span><span class="p">:</span>
+      <span class="k">return</span> <span class="p">{</span> <span class="na">count</span><span class="p">:</span> <span class="nx">state</span><span class="p">.</span><span class="nx">count</span> <span class="o">-</span> <span class="nx">action</span><span class="p">.</span><span class="nx">decrementStep</span> <span class="p">};</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="nx">state</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>We are now going to make the reducer super type-safe by leveraging the never type.</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">reducer</span> <span class="o">=</span> <span class="p">(</span><span class="nx">state</span><span class="p">:</span> <span class="nx">State</span><span class="p">,</span> <span class="nx">action</span><span class="p">:</span> <span class="nx">Actions</span><span class="p">):</span> <span class="nx">State</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="k">switch</span> <span class="p">(</span><span class="nx">action</span><span class="p">.</span><span class="nx">type</span><span class="p">)</span> <span class="p">{</span>
+    <span class="p">...</span>
+    <span class="na">default</span><span class="p">:</span>
+      <span class="nx">neverReached</span><span class="p">(</span><span class="nx">action</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="nx">state</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="kd">const</span> <span class="nx">neverReached</span> <span class="o">=</span> <span class="p">(</span><span class="nx">never</span><span class="p">:</span> <span class="nx">never</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{};</span>
+</code></pre></div></div>
+
+<p>This allows to the editor reminded us to implement the additional switch branch in the reducer if we don’t implemented. TypeScript will know that there is an action type that we haven’t handled. The <code class="language-plaintext highlighter-rouge">never</code> type in the switch statement’s default branch to tell the TypeScript compiler that this should never be reached:</p>
+
+<p>Now that we have fully implemented the reducer, we can use it within the Counter component using the <code class="language-plaintext highlighter-rouge">useReducer</code> hook.</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">Counter</span> <span class="o">=</span> <span class="p">(</span> <span class="p">...</span> <span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="p">[</span><span class="nx">state</span><span class="p">,</span> <span class="nx">dispatch</span><span class="p">]</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">useReducer</span><span class="p">(</span><span class="nx">reducer</span><span class="p">,</span> <span class="p">{</span> <span class="na">count</span><span class="p">:</span> <span class="nx">initialCount</span> <span class="p">});</span>
+
+  <span class="k">return</span> <span class="p">(</span> <span class="p">...</span> <span class="p">);</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>The type of state is <code class="language-plaintext highlighter-rouge">State</code> and the type of the dispatch function is <code class="language-plaintext highlighter-rouge">Dispatch&lt;Actions&gt;</code>. TypeScript has cleverly inferred these types. We can explicitly define the types by passing them into the generic parameters of <code class="language-plaintext highlighter-rouge">useReducer</code>:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">Counter</span> <span class="o">=</span> <span class="p">(</span> <span class="p">...</span> <span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="p">[</span><span class="nx">state</span><span class="p">,</span> <span class="nx">dispatch</span><span class="p">]</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">useReducer</span><span class="o">&lt;</span><span class="nx">React</span><span class="p">.</span><span class="nx">Reducer</span><span class="o">&lt;</span><span class="nx">State</span><span class="p">,</span> <span class="nx">Actions</span><span class="o">&gt;&gt;</span><span class="p">(</span>
+    <span class="nx">reducer</span><span class="p">,</span> 
+    <span class="p">{</span> <span class="na">count</span><span class="p">:</span> <span class="nx">initialCount</span> <span class="p">}</span>
+  <span class="p">);</span>
+
+  <span class="k">return</span> <span class="p">(</span> <span class="p">...</span> <span class="p">);</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>We can complete our first implementation of the Counter component by rendering the current count and dispatching the actions when the buttons are clicked:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">Counter</span> <span class="o">=</span> <span class="p">(</span> <span class="p">...</span> <span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="p">...</span>
+  <span class="k">return</span> <span class="p">(</span>
+    <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">state</span><span class="p">.</span><span class="nx">count</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">button</span> <span class="na">onClick</span><span class="p">=</span><span class="si">{</span><span class="p">()</span> <span class="o">=&gt;</span> <span class="nx">dispatch</span><span class="p">({</span> <span class="na">type</span><span class="p">:</span> <span class="dl">"</span><span class="s2">increment</span><span class="dl">"</span><span class="p">,</span> <span class="nx">incrementStep</span> <span class="p">})</span><span class="si">}</span><span class="p">&gt;</span>
+        Add <span class="si">{</span><span class="nx">incrementStep</span><span class="si">}</span>
+      <span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">button</span> <span class="na">onClick</span><span class="p">=</span><span class="si">{</span><span class="p">()</span> <span class="o">=&gt;</span> <span class="nx">dispatch</span><span class="p">({</span> <span class="na">type</span><span class="p">:</span> <span class="dl">"</span><span class="s2">decrement</span><span class="dl">"</span><span class="p">,</span> <span class="nx">decrementStep</span> <span class="p">})</span><span class="si">}</span><span class="p">&gt;</span>
+        Subtract <span class="si">{</span><span class="nx">decrementStep</span><span class="si">}</span>
+      <span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">button</span> <span class="na">onClick</span><span class="p">=</span><span class="si">{</span><span class="p">()</span> <span class="o">=&gt;</span> <span class="nx">dispatch</span><span class="p">({</span> <span class="na">type</span><span class="p">:</span> <span class="dl">"</span><span class="s2">double</span><span class="dl">"</span> <span class="p">})</span><span class="si">}</span><span class="p">&gt;</span>
+        Double
+      <span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+  <span class="p">);</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<h3 id="strongly-typed-events">Strongly-typed Events</h3>
+
+<p>We have an input with an onChange event handler inline:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">&lt;</span><span class="nt">input</span>
+  <span class="na">type</span><span class="p">=</span><span class="s">"text"</span>
+  <span class="na">value</span><span class="p">=</span><span class="si">{</span><span class="nx">criteria</span><span class="si">}</span>
+  <span class="na">onChange</span><span class="p">=</span><span class="si">{</span><span class="nx">e</span> <span class="o">=&gt;</span> <span class="nx">setCriteria</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">currentTarget</span><span class="p">.</span><span class="nx">value</span><span class="p">)</span><span class="si">}</span>
+<span class="p">/&gt;</span>
+</code></pre></div></div>
+
+<p>The parameter type for inline event handlers is always inferred correctly. <code class="language-plaintext highlighter-rouge">e</code> is of type <code class="language-plaintext highlighter-rouge">React.ChangeEvent&lt;HTMLInputElement&gt;</code>.</p>
+
+<p>Let’s refactor the implementation to use a named function for the event handler:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">Searchbox</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="p">[</span><span class="nx">criteria</span><span class="p">,</span> <span class="nx">setCriteria</span><span class="p">]</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">useState</span><span class="p">(</span><span class="dl">""</span><span class="p">);</span>
+
+  <span class="kd">const</span> <span class="nx">handleChange</span> <span class="o">=</span> <span class="nx">e</span> <span class="o">=&gt;</span> <span class="nx">setCriteria</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">currentTarget</span><span class="p">.</span><span class="nx">value</span><span class="p">);</span>
+
+  <span class="k">return</span> <span class="p">(</span>
+    <span class="p">&lt;</span><span class="nt">input</span>
+      <span class="na">type</span><span class="p">=</span><span class="s">"text"</span>
+      <span class="na">value</span><span class="p">=</span><span class="si">{</span><span class="nx">criteria</span><span class="si">}</span>
+      <span class="na">onChange</span><span class="p">=</span><span class="si">{</span><span class="nx">handleChange</span><span class="si">}</span>
+    <span class="p">/&gt;</span>
+  <span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>What is the type of <code class="language-plaintext highlighter-rouge">e</code> now? <code class="language-plaintext highlighter-rouge">e</code> is now of type <code class="language-plaintext highlighter-rouge">any</code> because TypeScript can’t infer this. So, our named function event handler is not strongly-typed.</p>
+
+<p>To make handleChange strongly-typed we need to add the parameter type:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">handleChange</span> <span class="o">=</span> <span class="p">(</span><span class="nx">e</span><span class="p">:</span> <span class="nx">React</span><span class="p">.</span><span class="nx">ChangeEvent</span><span class="o">&lt;</span><span class="nx">HTMLInputElement</span><span class="o">&gt;</span><span class="p">)</span> <span class="o">=&gt;</span>
+  <span class="nx">setCriteria</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">currentTarget</span><span class="p">.</span><span class="nx">value</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>So, the type for event props is:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">(</span><span class="nx">param1</span><span class="p">:</span> <span class="nx">type1</span><span class="p">,</span> <span class="nx">param2</span><span class="p">:</span> <span class="nx">type2</span><span class="p">,</span> <span class="p">...)</span> <span class="o">=&gt;</span> <span class="k">void</span>
+</code></pre></div></div>
+
+<p>Notice that the return type is void, which signifies nothing is returned from the function.</p>
+
+<h3 id="strongly-typed-context">Strongly-typed Context</h3>
+
+<p>React context allows several components in a tree to share some data. It’s more convenient than passing the data via props down the component tree. The context is provided at a point in the component tree, and then all the children of the provider can access the context if they wish.</p>
+
+<p>Let’s start by creating our theme using Reacts createContext function:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">defaultTheme</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">white</span><span class="dl">"</span><span class="p">;</span>
+<span class="kd">const</span> <span class="nx">useTheme</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nx">React</span><span class="p">.</span><span class="nx">useContext</span><span class="p">(</span><span class="nx">ThemeContext</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>The return type of <code class="language-plaintext highlighter-rouge">useTheme</code> is string because this is the type of the context value. The type for the context is inferred correctly if a sensible default is provided when it is created. If the context is providing values that consumers don’t change, then this is fine. However, what if we want the user to change the theme? In this case, our context would need to provide a function for updating the theme, and this can’t really be provided as a default value.</p>
+
+<p>So, enhancing context is going to be a little more complex:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">type</span> <span class="nx">ThemeContextType</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">theme</span><span class="p">:</span> <span class="nx">string</span><span class="p">;</span>
+  <span class="nl">setTheme</span><span class="p">:</span> <span class="p">(</span><span class="na">value</span><span class="p">:</span> <span class="nx">string</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="k">void</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>React’s <code class="language-plaintext highlighter-rouge">createContext</code> function expects us to supply a parameter for initial context value. We can supply a default value for the theme property, but it doesn’t make sense to provide a default implementation for the <code class="language-plaintext highlighter-rouge">setTheme</code> method. So, a simple approach is to pass in <code class="language-plaintext highlighter-rouge">undefined</code> as the initial value:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">ThemeContext</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createContext</span><span class="p">(</span><span class="kc">undefined</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>The type of the context value is inferred to be <code class="language-plaintext highlighter-rouge">undefined</code> if in strict mode or any if not.</p>
+
+<p>So, <code class="language-plaintext highlighter-rouge">ThemeContext</code> isn’t typed as we require at the moment. But <code class="language-plaintext highlighter-rouge">createContext</code> is a generic function. So, we can pass in the type for the Context value as a generic parameter:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">context</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createContext</span><span class="o">&lt;</span><span class="nx">ContextType</span><span class="o">&gt;</span><span class="p">(...)</span>
+</code></pre></div></div>
+
+<p>Therefore, we can type our context as follows:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">ThemeContext</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createContext</span><span class="o">&lt;</span><span class="nx">ThemeContextType</span> <span class="o">|</span> <span class="kc">undefined</span><span class="o">&gt;</span><span class="p">(</span>
+  <span class="kc">undefined</span>
+<span class="p">);</span>
+</code></pre></div></div>
+
+<h3 id="strongly-typed-refs-in-function-components">Strongly-typed refs in function components</h3>
+
+<p>The <code class="language-plaintext highlighter-rouge">useRef</code> hook can be used to access all the properties and methods of an element.</p>
+
+<p>Below is an example of using the useRef hook:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">Search</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">input</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">useRef</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+  <span class="nx">React</span><span class="p">.</span><span class="nx">useEffect</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">input</span><span class="p">.</span><span class="nx">current</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">input</span><span class="p">.</span><span class="nx">current</span><span class="p">.</span><span class="nx">focus</span><span class="p">();</span>
+    <span class="p">}</span>
+  <span class="p">},</span> <span class="p">[]);</span>
+  <span class="k">return</span> <span class="p">(</span>
+    <span class="p">&lt;</span><span class="nt">form</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">input</span> <span class="na">ref</span><span class="p">=</span><span class="si">{</span><span class="nx">input</span><span class="si">}</span> <span class="na">type</span><span class="p">=</span><span class="s">"search"</span> <span class="p">/&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">form</span><span class="p">&gt;</span>
+  <span class="p">);</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>The type of input.current is inferred to be <code class="language-plaintext highlighter-rouge">null</code> if strict mode is on, otherwise it is inferred to be <code class="language-plaintext highlighter-rouge">any</code>.</p>
+
+<p>We can explicitly define the type of the element returned from <code class="language-plaintext highlighter-rouge">useRef</code> by passing a generic type parameter:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">element</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">useRef</span><span class="o">&lt;</span><span class="nx">ElementType</span><span class="o">&gt;</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+</code></pre></div></div>
+:ET
