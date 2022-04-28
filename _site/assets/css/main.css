@@ -169,7 +169,7 @@ html[data-scroll-status="down"] .framework .sidebar { top: 20px; }
 
 .pagination .post-title a { text-decoration: none; }
 
-.pagination .post-title a:after { content: "NEW"; position: absolute; margin-left: 8px; margin-top: 3px; padding: 0px 3px; background-color: #ff5100; color: #fff; font-size: 10px; font-weight: 600; border-radius: 2px; }
+.pagination .post-title a:after { content: "NEW"; position: absolute; margin-left: 8px; margin-top: 3px; padding: 0px 3px; background-color: #fff; color: #fff; font-size: 10px; font-weight: 600; border-radius: 2px; }
 
 .pagination .post-title a:visited:after { background-color: #fff; }
 
