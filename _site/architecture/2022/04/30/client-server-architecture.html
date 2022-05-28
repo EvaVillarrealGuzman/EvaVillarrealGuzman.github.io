@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-translate-customization" content="108d9124921d80c3-80e20d618ff053c8-g4f02ec6f3dba68b7-c">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Web application concepts | Eva Villarreal Guzmán</title>
+<meta name="generator" content="Jekyll v4.2.2">
+<meta property="og:title" content="Web application concepts">
+<meta name="author" content="Eva Villarreal Guzmán">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="The development of the World Wide Web has had a profound effect on all of our lives. Initially, the Web was primarily a universally accessible information store and it had little effect on software systems. These systems ran on local computers and were only accessible from within an organization. Around 2000, the Web started to evolve and more and more functionality was added to browsers. This meant that web-based systems could be developed where, instead of a special-purpose user interface, these systems could be accessed using a web browser. This led to the development of a vast range of new system products that delivered innovative services, accessed over the Web. These are often funded by adverts that are displayed on the user’s screen and do not involve direct payment from users.">
+<meta property="og:description" content="The development of the World Wide Web has had a profound effect on all of our lives. Initially, the Web was primarily a universally accessible information store and it had little effect on software systems. These systems ran on local computers and were only accessible from within an organization. Around 2000, the Web started to evolve and more and more functionality was added to browsers. This meant that web-based systems could be developed where, instead of a special-purpose user interface, these systems could be accessed using a web browser. This led to the development of a vast range of new system products that delivered innovative services, accessed over the Web. These are often funded by adverts that are displayed on the user’s screen and do not involve direct payment from users.">
+<link rel="canonical" href="http://localhost:4001/architecture/2022/04/30/client-server-architecture.html">
+<meta property="og:url" content="http://localhost:4001/architecture/2022/04/30/client-server-architecture.html">
+<meta property="og:site_name" content="Eva Villarreal Guzmán">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2022-04-30T00:00:00-03:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="Web application concepts">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Eva Villarreal Guzmán"},"dateModified":"2022-04-30T00:00:00-03:00","datePublished":"2022-04-30T00:00:00-03:00","description":"The development of the World Wide Web has had a profound effect on all of our lives. Initially, the Web was primarily a universally accessible information store and it had little effect on software systems. These systems ran on local computers and were only accessible from within an organization. Around 2000, the Web started to evolve and more and more functionality was added to browsers. This meant that web-based systems could be developed where, instead of a special-purpose user interface, these systems could be accessed using a web browser. This led to the development of a vast range of new system products that delivered innovative services, accessed over the Web. These are often funded by adverts that are displayed on the user’s screen and do not involve direct payment from users.","headline":"Web application concepts","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4001/architecture/2022/04/30/client-server-architecture.html"},"url":"http://localhost:4001/architecture/2022/04/30/client-server-architecture.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="shortcut icon" href="">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-noto-sans@0.0.72/index.min.css">
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <script src="/assets/js/main.js"></script><link type="application/atom+xml" rel="alternate" href="http://localhost:4001/feed.xml" title="Eva Villarreal Guzmán">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/default.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js"></script>
+<!-- and it's easy to individually load additional languages -->
+<script charset="UTF-8" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/languages/go.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+// Init highlight js
+document.addEventListener('DOMContentLoaded', function(event) {
+  var els = document.querySelectorAll('pre code')
+
+  function addLangData(block) {
+    var outer = block.parentElement.parentElement.parentElement;
+    var lang = block.getAttribute('data-lang');
+    for (var i = 0; i < outer.classList.length; i++) {
+      var cls = outer.classList[i];
+      if (cls.startsWith('language-')) {
+        lang = cls;
+        break;
+      }
+    }
+    if (!lang) {
+      cls = block.getAttribute('class');
+      lang = cls ? cls.replace('hljs ', '') : '';
+    }
+    if (lang.startsWith('language-')) {
+      lang = lang.substr(9);
+    }
+    block.setAttribute('class', 'hljs ' + lang);
+    block.parentNode.setAttribute('data-lang', lang);
+  }
+
+  function addBadge(block) {
+    var enabled = ('true' || 'true').toLowerCase();
+    if (enabled == 'true') {
+      var pre = block.parentElement;
+      pre.classList.add('badge');
+    }
+  }
+
+  function handle(block) {
+    addLangData(block);
+    addBadge(block)
+    hljs.highlightBlock(block);
+  }
+
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i];
+    handle(el);
+  }
+});
+</script>
+
+<style>
+  /* code language badge */
+  pre.badge::before {
+    content: attr(data-lang);
+    color: #fff;
+    background-color: #ff4e00;
+    padding: 0 .5em;
+    border-radius: 0 2px;
+    text-transform: uppercase;
+    text-align: center;
+    min-width: 32px;
+    display: inline-block;
+    position: absolute;
+    right: 0;
+  }
+
+  /* fix wrong badge display for firefox browser */
+  code > table pre::before {
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<header class="site-header " role="banner">
+
+  <div class="wrapper">
+    <div class="site-header-inner">
+<span class="site-brand"><a class="site-brand-inner" rel="author" href="/">
+  <img class="site-favicon" title="Eva Villarreal Guzmán" src="" onerror="this.style.display='none'">
+  Eva Villarreal Guzmán
+</a>
+</span><nav class="site-nav">
+          <input type="checkbox" id="nav-trigger" class="nav-trigger">
+          <label for="nav-trigger">
+            <span class="menu-icon">
+              <svg viewbox="0 0 18 15" width="18px" height="15px">
+                <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+              </svg>
+            </span>
+          </label>
+
+          <div class="trigger">
+<a class="page-link" href="/about.html">ABOUT</a><a class="page-link" href="/archives.html">ARCHIVES</a><a class="page-link" href="/categories.html">CATEGORIES</a><a class="page-link" href="/">HOME</a><a class="page-link" href="/tags.html">TAGS</a>
+
+
+
+
+
+
+
+
+
+<span class="page-link">
+
+
+
+<div id="google_translate_element" style="display: none;">
+</div>
+
+<span class="ct-language">
+  <ul class="list-unstyled ct-language-dropdown">
+    
+      <li>
+        <a href="#" class="lang-select" data-lang="en">
+          
+          <img src="https://cdn.countryflags.com/thumbs/united-states-of-america/flag-400.png" title="English">
+          
+        </a>
+      </li>
+    
+  </ul>
+</span>
+
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'en',
+    autoDisplay: false,
+    layout: google.translate.TranslateElement.InlineLayout.VERTICAL
+  }, 'google_translate_element');
+
+  // Links to cross-origin destinations are unsafe
+  var gll = document.getElementsByClassName('goog-logo-link')[0];
+  if (gll) {
+    gll.setAttribute('rel', 'noopener');
+  }
+
+  function restoreLang() {
+    var iframe = document.getElementsByClassName('goog-te-banner-frame')[0];
+    if (!iframe) return;
+
+    var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
+    var restore_el = innerDoc.getElementsByTagName("button");
+
+    for (var i = 0; i < restore_el.length; i++) {
+      if (restore_el[i].id.indexOf("restore") >= 0) {
+        restore_el[i].click();
+        var close_el = innerDoc.getElementsByClassName("goog-close-link");
+        close_el[0].click();
+        return;
+      }
+    }
+  }
+
+  function triggerHtmlEvent(element, eventName) {
+    var event;
+    if (document.createEvent) {
+      event = document.createEvent('HTMLEvents');
+      event.initEvent(eventName, true, true);
+      element.dispatchEvent(event);
+    } else {
+      event = document.createEventObject();
+      event.eventType = eventName;
+      element.fireEvent('on' + event.eventType, event);
+    }
+  }
+
+  var googleCombo = document.querySelector("select.goog-te-combo");
+  var langSelect = document.querySelector('.ct-language');
+  langSelect.addEventListener('click', function(event) {
+    if (!event.target) {
+      return;
+    }
+
+    var selected = document.querySelector('.ct-language .ct-language-selected');
+    if (selected) {
+      selected.classList.remove('ct-language-selected');
+    }
+
+    var target = event.target;
+    while (target && target !== langSelect ) {
+      if (target.matches('.lang-select')) {
+        break;
+      }
+      target = target.parentElement;
+    }
+
+    if (target && target.matches('.lang-select')) {
+      var lang = target.getAttribute('data-lang');
+      if (googleCombo.value == lang) {
+        restoreLang();
+      } else {
+        target.parentElement.classList.add('ct-language-selected');
+        googleCombo.value = lang;
+        triggerHtmlEvent(googleCombo, 'change');
+      }
+    }
+
+    event.preventDefault();
+  });
+}
+</script>
+
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+</span>
+</div>
+        </nav>
+</div>
+  </div>
+</header>
+
+<script>
+  function initHeader() {
+    var lastScrollY = getScrollPos().y;
+    var documentElement = document.documentElement;
+
+    function storeScrollData() {
+      var y = getScrollPos().y;var scrollStatus = "";
+
+      if (y <= 0) {
+        scrollStatus = "top";
+      } else if ((window.innerHeight + y) >= document.body.offsetHeight) {
+        scrollStatus = "bottom";
+      } else {
+        var isScrollDown = (y - lastScrollY > 0) ? true : false;
+        scrollStatus = isScrollDown ? "down" : "up";
+      }
+
+      lastScrollY = y;
+      documentElement.setAttribute("data-scroll-status", scrollStatus);
+    }
+
+    window.addEventListener('scroll', function(e) {
+      storeScrollData();
+    });
+
+    storeScrollData();
+  }
+  document.addEventListener('DOMContentLoaded', initHeader);
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+  function hashLocate(hashValue) {
+    hashValue = hashValue.replace(/^.*#h-/, '');
+    hashValue = decodeURIComponent(hashValue);
+    var element = document.getElementById(hashValue);
+
+    if (!element) {
+      return;
+    }
+
+    var header = document.querySelector('header.site-header');
+    var headerRect = header.getBoundingClientRect();
+    var headerTop = Math.floor(headerRect.top);
+    var headerHeight = Math.floor(headerRect.height);
+    var scrollPos = getScrollPos();
+    var offsetY = element.offsetTop - (headerTop + headerHeight + 20);
+
+    if (offsetY == scrollPos.y) {
+      return;
+    }
+
+    if (headerTop == 0  && offsetY > scrollPos.y) {
+      offsetY += headerHeight + 2;
+    } else if (headerTop < 0  && offsetY < scrollPos.y) {
+      offsetY -= headerHeight - 2;
+    }
+
+    smoothScrollTo(offsetY);
+  }
+
+  // The first event occurred
+  window.addEventListener('load', function(event) {
+    if (window.location.hash) {
+      hashLocate(window.location.hash);
+    }
+  });
+
+  // The first event occurred
+  window.addEventListener('click', function(event) {
+    if (event.target.tagName.toLowerCase() == 'a') {
+      hashLocate(event.target.getAttribute('href'));
+    }
+  });
+</script>
+<div class="theme-toggle">
+  <input type="checkbox" id="theme-switch">
+  <label for="theme-switch">
+    <div class="toggle"></div>
+    <div class="names">
+      <p class="light">Light</p>
+      <p class="dark">Dark</p>
+    </div>
+  </label>
+</div>
+
+
+
+
+<script>
+  (function() {
+    var sw = document.getElementById('theme-switch');
+    var html = document.getElementsByTagName('html')[0];
+    var nightModeOption = ('auto' || 'auto').toLowerCase();
+    var storage = nightModeOption === 'manual'
+        ? localStorage
+        : sessionStorage;
+    var themeData = loadThemeData();
+
+    function saveThemeData(data) {
+      storage.setItem('theme', JSON.stringify(data));
+    }
+
+    function loadThemeData() {
+      var data = storage.getItem('theme');
+      try {
+        data = JSON.parse(data ? data : '');
+      } catch(e) {
+        data = { nightShift: undefined, autoToggleAt: 0 };
+        saveThemeData(data);
+      }
+      return data;
+    }
+
+    function handleThemeToggle(nightShift) {
+      themeData.nightShift = nightShift;
+      saveThemeData(themeData);
+      html.dataset.theme = nightShift ? 'dark' : 'light';
+      setTimeout(function() {
+        sw.checked = nightShift ? true : false;
+      }, 50);
+    }
+
+    function autoThemeToggle() {
+      // Next time point of theme toggle
+      var now = new Date();
+      var toggleAt = new Date();
+      var hours = now.getHours();
+      var nightShift = hours >= 19 || hours <=7;
+
+      if (nightShift) {
+        if (hours > 7) {
+          toggleAt.setDate(toggleAt.getDate() + 1);
+        }
+        toggleAt.setHours(7);
+      } else {
+        toggleAt.setHours(19);
+      }
+
+      toggleAt.setMinutes(0);
+      toggleAt.setSeconds(0);
+      toggleAt.setMilliseconds(0)
+
+      var delay = toggleAt.getTime() - now.getTime();
+
+      // auto toggle theme mode
+      setTimeout(function() {
+        handleThemeToggle(!nightShift);
+      }, delay);
+
+      return {
+        nightShift: nightShift,
+        toggleAt: toggleAt.getTime()
+      };
+    }
+
+    // Listen the theme toggle event
+    sw.addEventListener('change', function(event) {
+      handleThemeToggle(event.target.checked);
+    });
+
+    if (nightModeOption == 'auto') {
+      var data = autoThemeToggle();
+
+      // Toggle theme by local setting
+      if (data.toggleAt > themeData.autoToggleAt) {
+        themeData.autoToggleAt = data.toggleAt;
+        handleThemeToggle(data.nightShift);
+      } else {
+        handleThemeToggle(themeData.nightShift);
+      }
+    } else if (nightModeOption == 'manual') {
+      handleThemeToggle(themeData.nightShift);
+    } else {
+      var nightShift = themeData.nightShift;
+      if (nightShift === undefined) {
+        nightShift = nightModeOption === 'on';
+      }
+      handleThemeToggle(nightShift);
+    }
+  })();
+</script>
+<div id="click-to-top" class="click-to-top">
+  <i class="fa fa-arrow-up"></i>
+</div>
+<script>
+  (function () {
+    const clickToTop = document.getElementById('click-to-top');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 100) {
+        clickToTop.classList.add('show')
+      }else {
+        clickToTop.classList.remove('show')
+      }
+    });
+    clickToTop.addEventListener('click', () => {
+      window.smoothScrollTo(0);
+    });
+  })();
+</script>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <div class="framework">
+  <section class="main">
+
+     <div class="post">
+  <section>
+
+
+
+
+
+
+
+
+
+<header class="post-header">
+  <h1 class="post-title p-name" itemprop="name headline">Web application concepts</h1>
+  <h2 class="post-subtitle">In this post we will see basic concepts about web systems. We will see how a browser and a server interact, what is an API and a web services and how a client server architecture works.</h2>
+
+  <p class="post-meta">
+    <time class="dt-published" datetime="2022-04-30T00:00:00-03:00" itemprop="datePublished"><i class="fa fa-calendar"></i> Apr 30, 2022
+    </time>
+
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 26 mins</span>
+  </p>
+<div class="post-tags">
+<a class="post-tag" href="/tags.html#architecture">#architecture</a><a class="post-tag" href="/tags.html#client-server">#client-server</a><a class="post-tag" href="/tags.html#web">#web</a><a class="post-tag" href="/tags.html#api%20rest">#api rest</a><a class="post-tag" href="/tags.html#soap">#soap</a><a class="post-tag" href="/tags.html#web%20service">#web service</a>
+</div></header>
+<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+    <div class="post-content e-content" itemprop="articleBody">
+
+      <p>The development of the World Wide Web has had a profound effect on all of our lives. Initially, the Web was primarily a universally accessible information store and it had little effect on software systems. These systems ran on local computers and were only accessible from within an organization. Around 2000, the Web started to evolve and more and more functionality was added to browsers. This meant that web-based systems could be developed where, instead of a special-purpose user interface, these systems could be accessed using a web browser. This led to the development of a vast range of new system products that delivered innovative services, accessed over the Web. These are often funded by adverts that are displayed on the user’s screen and do not involve direct payment from users.</p>
+
+<p>As well as these system products, the development of web browsers that could run small programs and do some local processing led to an evolution in business and
+organizational software. Instead of writing software and deploying it on users’ PCs, the software was deployed on a web server. This made it much cheaper to change and upgrade the software, as there was no need to install the software on every PC. It also reduced costs, as user interface development is particularly expensive. Consequently, wherever it has been possible to do so, many businesses have moved to web-based interaction with company software systems.</p>
+
+<p>The next stage in the development of web-based systems was the notion of web services. Web services are software components that deliver specific, useful functionality and which are accessed over the Web. Applications are constructed by integrating these web services, which may be provided by different companies. In principle, this linking can be dynamic so that an application may use different web services each time that it is executed.</p>
+
+<p>In the last few years, the notion of <em>software as a service</em> has been developed. It has been proposed that software will not normally run on local computers but will run on <em>computing clouds</em> that are accessed over the Internet. If you use a service such as web-based mail, you are using a cloud-based system. A computing cloud is a huge number of linked computer systems that is shared by many users. Users do not buy software but pay according to how much the software is used or are given free access in return for watching adverts that are displayed on their screen. The advent of the web, therefore, has led to a significant change in the way that business software is organized. Before the web, business applications were mostly monolithic, single programs running on single computers or computer clusters. Communications were local, within an organization. Now, software is highly distributed, sometimes across the world. Business applications are not programmed from scratch but involve extensive reuse of components and programs.</p>
+
+<h2 id="browser-and-server-interaction-flow">Browser and server interaction flow</h2>
+
+<p>When a browser requests for a web page, the following set of events takes place:</p>
+
+<p>1- A user enters the URL of the website or file in the browser. The browser then requests the DNS(Domain Name System) server<br>
+2- The DNS server looks up the IP address of the web server and once it finds it, sends it back to the browser<br>
+3- The browser then sends over an HTTP/HTTPS request to the web server’s IP (provided by the DNS server in the previous step)<br>
+4- The server responds with the necessary information or data<br>
+5- The browser renders the data and the website is displayed</p>
+
+<h2 id="urls-elements">URL’s elements</h2>
+
+<p>An URL (<em>Uniform Resource Locator</em>) is a unique web address. Represents the location of a specific resource on the Internet. The term URL refers to a subsets of URIs (<em>Uniform Resource Indicators</em>) that, in addition to identifying the web resource, also provide the means to locate it.</p>
+
+<p>Every web page are <em>online</em> resources and every web page have a URL. But not all URLs point to a web page, but there are other resources on the Internet such as files, images, services, web applications, etc. Each web page is made up of a number of resources such as HTML, hyperlinks to other pages, CSS, javascript, images, files, etc. Each of them have their own URL.</p>
+
+<p>Depending on the URL, it can contain the following elements:</p>
+
+<p><img src="https://zvelo.com/wp-content/uploads/2018/08/full-path-url-structure.jpg" alt=""></p>
+
+<ul>
+  <li>
+<strong>Top Level Domain</strong>: TLD it is one of the domains at the highest level of the Domain Name System hierarchy. It is the last tagged part of a fully qualified domain name. Administration and responsibility for TLDs are delegated to organizations by The Internet Corporation for Assigned Names and Numbers (<a href="https://www.icann.org/">ICANN</a>) and The Internet Assigned Numbers Authority (<a href="https://www.iana.org">IANA</a>), which maintains the <a href="https://www.iana.org/domains/root/files">root zone of the DNS</a>. Some examples are .com, .net, .org, .edu, .ar, .us and <a href="https://en.wikipedia.org/wiki/List_of_Internet_top-level_domains">more</a>.The TLD is always present.</li>
+  <li>
+<strong>Domain name</strong>: A domain name is the registered identification “string” (or word/phrase) used by the <a href="https://www.verisign.com/en_US/website-presence/online/domain-name-system/index.xhtml">Domain Name System</a>  to define a specific area of control and autonomy (also known as the location of a website). A domain name is one level below the TLD. A single TLD can contain hundreds of thousands or even millions of individual “second level” domains. The domain can also be called a second level domain. Some examples are google.com, apple.com, amazon.com. The domain name is always present.</li>
+  <li>
+<strong>Subdomain</strong>: Subdomains express relative dependency and represent part of a top-level domain. In this way, subdomains are commonly used to divide domains into smaller segments for communication purposes, content type, internationalization, or for other reasons. The subdomain is always present, although not always visible. Some of the most common examples of subdomains (in bold) are:
+    <ul>
+      <li>
+<strong>www</strong>.example.com</li>
+      <li>
+<strong>blog</strong>.example.com</li>
+      <li>
+<strong>support</strong>.example.com</li>
+      <li>
+<strong>mail</strong>.example.com</li>
+    </ul>
+  </li>
+  <li>
+<strong>Protocol</strong>: The protocol in a URL determines how data is transferred between the <em>host</em> and a web browser (or client). HTTP and HTTPS are two of the most common protocols that you will find in most URLs, although there are other Internet protocols such as FTP, DNS, DHCP, IMAP, SMTP, etc. The communication protocol appears before any subdomain in a URL. The protocol is followed by a colon and two forward slashes that separate it from the <em>hostname</em>. For example: <strong>https</strong>://google.com, where HTTPS is the protocol.</li>
+  <li>
+<strong>Path</strong>: The path refers to the exact location of a page, post, file or other asset. It is often analogous to the underlying file structure of the website. The path resides after the <em>hostname</em> and is separated by “/” (forward slash). The path also consists of any file extensions, such as images (.jpg or .png, etc.), documents (.pdf or .docx), and more. But not all URLs will show a path. For example, when you visit a site’s home page, you may not see a path or file name. This is because many modern websites may rewrite URLs (such as the home page) for simplicity and elegance, such as omitting the typical index.html. The path is always present, although not always visible.</li>
+  <li>
+<strong>HTML anchors</strong>: HTML anchors are used on websites to implement <em>bookmarks</em> and internal page navigation elements. They can be used to provide links to specific locations within a page. Anchors will be placed immediately after the file/path of a URL (when present).</li>
+  <li>
+<strong>Parameters</strong>: The parameters are found at the end of the URL or within the path, depending on the implementation. URL parameters are represented in key/value pairs, beginning with a “?” And separated by an “&amp;”. They can also be set dynamically in the path as values separated by slashes and other characters (depending on which system is used and how it is implemented). Parameters are commonly used for tracking and analytics, as well as encoding specific information for use on websites and apps. For example, a URL with parameters:
+    <ul>
+      <li>https://www.example.com/solutions?user=123&color=blue</li>
+      <li>https://www.example.com/solutions/user/123/color/blue</li>
+    </ul>
+  </li>
+</ul>
+
+<blockquote>
+  <p>NOTE: TLD, domain name and subdomain make up the <em>hostname</em></p>
+</blockquote>
+
+<blockquote>
+  <p>NOTE: A URL may exclude or omit the sending domain and the <em>hostname</em> may not include the subdomain. This is known as a <em>naked domain</em>. For example, our website https://google.com does not show a subdomain.</p>
+</blockquote>
+
+<h2 id="about-api-and-web-services">About API and Web Services</h2>
+
+<h3 id="api">API</h3>
+
+<p>API stands for <strong>Application Programming Interface</strong>.</p>
+
+<p>It is a software interface that allows two distinct services/applications to interact without one having to know the implementation details of the other. It is what we call, protocol agnostic.</p>
+
+<h3 id="web-service">Web service</h3>
+
+<p>A web service is a medium that lets two machines communicate with each other over a network.</p>
+
+<p>In other words, it allows communication between the client and the server applications using the XML, JSON, and other plain text open standards over the World Wide Web (WWW).</p>
+
+<h4 id="types">Types</h4>
+
+<p><strong>SOAP web services</strong> – SOAP which stands for <strong>Simple Object Access Protocol</strong>, is a specification that enables applications to communicate with other applications. It uses an XML-based protocol to access web services over HTTP.</p>
+
+<p><strong>RESTful web services</strong> – REST which stands for <strong>Representational State Transfer</strong>, is a service developed on the REST architecture and is often called a RESTful service. They are lightweight, maintainable, and scalable in nature. The underlying protocol for REST is HTTP.</p>
+
+<h3 id="api-vs-web-services">API vs web services</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>API</th>
+      <th>Web Services</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Not all APIs are web services</td>
+      <td>All web services are APIs</td>
+    </tr>
+    <tr>
+      <td>APIs can use any style for communication</td>
+      <td>A web service can use SOAP, REST, and XML-RPC for communication</td>
+    </tr>
+    <tr>
+      <td>APIs can also be used to invoke functions within a software, so it does not always need a network for its operation</td>
+      <td>A web service will always need a network for its operation</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="introduction-to-http">Introduction to HTTP</h2>
+
+<p>HTTP (Hypertext Transfer Protocol) is a client-server protocol that enables a client and server to communicate over a network using request/response. It’s an application layer protocol that relies on TCP/IP for its services.</p>
+
+<p>HTTPS is an extension of the Hypertext Transfer Protocol. It is used for secure communication over a computer network. In HTTPS, the communication protocol is encrypted using a TLS-encrypted TCP connection.</p>
+
+<h3 id="the-architecture-of-http">The architecture of HTTP</h3>
+
+<p><strong>Client:</strong> the client sends a request to the server via the HTTP protocol</p>
+
+<p><strong>Server:</strong> here, the server processes the request and sends the response for the requested information to the client</p>
+
+<h3 id="the-basic-aspects-of-http">The basic aspects of HTTP</h3>
+
+<ul>
+  <li>HTTP is <strong>connectionless</strong>: each client request is treated as a unique and independent connection.</li>
+  <li>HTTP is <strong>stateless but not sessionless</strong>. By stateless we mean that, HTTP does not keep any information about the client. Therefore, there is no relation between any requests that are being carried out consecutively on the same connection.</li>
+  <li>HTTP is <strong>extensible/customized</strong>. It can be integrated with any new functionality just by setting up or providing an agreement between a client and a server.</li>
+</ul>
+
+<h3 id="http-requests-and-http-response">HTTP Requests and HTTP Response</h3>
+
+<p><strong>HTTP requests</strong> are the messages sent by the client to initiate an action on a resource identified by a given URL over the network. There are various HTTP request methods for specific purposes.</p>
+
+<p>The components of an HTTP request are as below:</p>
+
+<ul>
+  <li>The method to be applied to the resource – an HTTP method (like GET, PUT, POST HEAD or OPTIONS), that describes the action to be performed. We have already discussed the various HTTP methods in the previous lesson.</li>
+  <li>The resource identifier – resource identified by a given request URL.</li>
+  <li>Headers (optional) – headers are the information sent to the server in the form of key/value pairs, which contains the details of what the browser wants and will accept from the server.</li>
+  <li>Params (optional) – used for sending additional data to the server. For example, a query parameter.</li>
+  <li>Message body (optional) – These are additional information required by the server to process current requests properly. For example, a file type of JSON or XML sent in the case of a POST or PUT method request.</li>
+</ul>
+
+<p>After receiving and processing an HTTP request message, a server responds with an <strong>HTTP response</strong> message.</p>
+
+<h3 id="methods">Methods</h3>
+
+<h4 id="get-method">GET Method</h4>
+
+<p>The GET method is used by the client to fetch the data from the server.</p>
+
+<h4 id="post-method">POST Method</h4>
+
+<p>The HTTP POST method sends data to the server to create a new resource.</p>
+
+<h4 id="put-method">PUT Method</h4>
+
+<p>The HTTP PUT method will update an existing resource or create a new resource on the server, depending on the request payload.</p>
+
+<p>PUT is idempotent.: This means that an outcome will remain the same even if it’s called several times successively. For instance, calling the POST several times with the same request data may create a new resource each time, therefore, it is not idempotent.</p>
+
+<h4 id="delete-method">DELETE Method</h4>
+
+<p>The HTTP DELETE method deletes the specified resource on the server.</p>
+
+<p>DELETE is idempotent, which means that an outcome will remain the same even if it’s called several times successively with the same request data.</p>
+
+<h3 id="http-status-codes">HTTP Status Codes</h3>
+
+<p>In a server’s HTTP response, status codes indicate whether a specific HTTP request has been successfully completed or an error has occurred.</p>
+
+<p>A HTTP status code can indicate the client or server error as well.</p>
+
+<p>The HTTP response status codes are divided into 5 categories as shown in the table below:</p>
+
+<p><img src="https://evavillarrealguzman.github.io/img/client-server-arquitecture/status-code.png" alt=""></p>
+
+<h3 id="http-headers">HTTP Headers</h3>
+
+<p>The client and the server can pass some additional information using HTTP headers through a request or a response.</p>
+
+<p>An HTTP header is basically a key-value, where its key is a case-insensitive string and value is a single or array of string.</p>
+
+<h4 id="types-of-http-headers">Types of HTTP headers</h4>
+
+<p>These are grouped into different categories below, based on their context:</p>
+
+<ul>
+  <li>
+<strong>General headers:</strong> this is used for both request and response and there is no relation to the message data.</li>
+  <li>
+<strong>Request headers:</strong> these are client headers, sent during the HTTP request and they contain information about the resource to be fetched.</li>
+  <li>
+<strong>Response headers:</strong> these are server headers and are part of the HTTP response. They give more details about the server resource context.</li>
+  <li>
+<strong>Entity headers:</strong> these headers give meta-information about the content of the body of the message like MIME type, Content-length, etc.</li>
+</ul>
+
+<h3 id="http-parameters">HTTP Parameters</h3>
+
+<p>When a client uses the HTTP GET method to request a certain resource from the web server, the client may also send certain parameters through the requested URL in the form of a query parameter, path parameter, or a form parameter.</p>
+
+<h4 id="query-parameter">Query parameter</h4>
+
+<p>The query parameter is a name-value pair and is the part of a requested GET URL. Have a look at the example below:</p>
+
+<p>For the GET call, the client sends a query parameter in the form of a name-value pair ( page=2 ) and requests the web server for all the users on the ‘2’ listing page.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -X GET https://reqres.in/api/users?page=2
+</code></pre></div></div>
+
+<h4 id="path-parameter">Path parameter</h4>
+
+<p>The path parameter is part of a requested GET URL path. Have a look at the example below:</p>
+
+<p>For this GET call, the client sends a path parameter and requests the web server for details of the user whose id is ‘2’.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -X GET https://reqres.in/api/users/2
+</code></pre></div></div>
+
+<h4 id="form-parameter">Form parameter</h4>
+
+<p>In an HTTP POST request, a certain piece of information is sent as a form parameter in the form of a name-value pair.</p>
+
+<p>The client sends the form parameters in the requested body in the format that the Content-Type header field specifies. For example:</p>
+
+<ul>
+  <li>Content-Type: application/x-www-form-urlencoded</li>
+  <li>Content-Type: multipart/form-data – if you use file uploads</li>
+  <li>But the content type could be anything, ranging from text/plain, application/json, etc</li>
+</ul>
+
+<h2 id="web-service-1">Web service</h2>
+
+<h3 id="introduction-to-rest-api">Introduction to REST API</h3>
+
+<p>REST, or Representational State Transfer, is an architectural design that defines a set of rules for creating web services that interact between systems. Web services that follow this architecture are termed, ‘RESTful web services’.</p>
+
+<p>At a very high level, the RESTful system consists of two major components:</p>
+
+<ul>
+  <li>A server that hosts the resources</li>
+  <li>A client that connects to the server to fetch the resources</li>
+</ul>
+
+<p>REST uses HTTP (Hypertext Transfer Protocol) or HTTPS (Hypertext Transfer Protocol Secure) to exchange data between client and server using HTTP methods – GET, POST, UPDATE, DELETE, HEAD, PATCH, etc.</p>
+
+<p>REST is more flexible architecture and loose guidelines than SOAP. As a result, it’s lightweight and better performing.</p>
+
+<h4 id="benefits-of-using-rest">Benefits of using REST</h4>
+
+<p>By following the principles of REST, we can benefit from the loose coupling between the server and the client, reliability, scalability, and better performance of the application. Few of the benefits of REST are listed below:</p>
+
+<ul>
+  <li>
+<strong>Simplicity</strong> – REST web services are easy and simple to develop compared to SOAP web services</li>
+  <li>
+<strong>Light-weight</strong> – REST advocates simple communication with the server over HTTP that supports plain XML, JSON formats in comparison to SOAP which supports only XML</li>
+  <li>
+<strong>Architecture is similar to Web</strong> –the architecture of REST is very similar to how the web is designed. So, developers who understand the web can easily understand and develop RESTful web services</li>
+  <li>
+<strong>Scalability</strong> – the REST architecture advocates refraining from the conversational state that allows us to easily add multiple instances of the components or application behind load balancers</li>
+</ul>
+
+<h4 id="guiding-principles-of-rest">Guiding principles of REST</h4>
+
+<p>A RESTful service needs to comply with the following 6 guiding constraints:</p>
+
+<p><strong>Client–Server</strong> – the main principle behind this is the separation of concerns, i.e, separating the user interface concern from the data storage concerns. By following this principle, we can improve the:<br>
+    - portability of the user interface across platforms<br>
+    - scalability by simplifying the server component <br>
+<strong>Stateless</strong> – each request from the client must be sent to the server with all the necessary information to understand the request and the request cannot take advantage of any stored context on the server. The session state is therefore maintained entirely on the client.<br>
+<strong>Cacheable</strong> – cache constraints require that the data within a response to a request be implicitly or explicitly denoted as cacheable or non-cacheable to prevent clients from giving stale information. If a response is cacheable, then a client cache is given the right to reuse that response data for later, equivalent requests. This allows us to minimize the network calls made to the server.<br>
+<strong>Uniform Interface</strong> – this is the fundamental principle of the RESTful system. It simplifies and decouples the architecture of the system, allows us to independently scale the components, and improve the interactions between components and other systems. The four architectural constraints that RESTful system should follow in order to a uniform interface are:<br>
+    - resource identification<br>
+    - manipulation of resources through representations<br>
+    - self-descriptive messages<br>
+    - hypermedia as the engine of application state (HATEOS)<br>
+<strong>Layered System</strong> – the layered system style allows an architecture to be divided into a number of hierarchical layers or tiers by constraining each of the layer’s behavior such that each layer cannot access beyond the immediate layer with which they are interacting with. This allows us to independently scale the layers.<br>
+<strong>Code on-demand</strong> – this principle is an optional one. REST allows client functionality to be extended by downloading executable scripts that can be executed on client-side like Java applets or Javascript.</p>
+
+<h3 id="introduction-to-soap">Introduction to SOAP</h3>
+
+<p>SOAP (Simple Object Access Protocol) is an XML-based protocol for accessing web services over HTTP and few other protocols. It has some specifications which can be used across all applications and platforms.</p>
+
+<p>SOAP has been a really popular messaging protocol for a long time. It comes with strict rules which make features such as the ACID (Atomicity, Consistency, Isolation, Durability) properties and authorization possible. However, SOAP generally requires a lot of bandwidth and resources, which results in slower operations.</p>
+
+<h4 id="advantages">Advantages</h4>
+
+<ul>
+  <li>SOAP communicates over HTTP, HTTPS, TCP, SMTP, FTP, XMPP, and more, unlike REST which communicates over HTTP and HTTPS only.</li>
+  <li>SOAP can have its own implementation of security SOAP WS-Security that allows it to encrypt messages and have authentication data in the message header.</li>
+  <li>SOAP is ACID-compliant (Atomicity, Consistency, Isolation, and Durability).</li>
+</ul>
+
+<h4 id="soap-messages">SOAP Messages</h4>
+
+<p>The SOAP message is an XML document which has the following components:</p>
+
+<p><img src="https://evavillarrealguzman.github.io/img/client-server-arquitecture/soap-message.png" alt=""></p>
+
+<ul>
+  <li>An <strong>Envelope element</strong> that encapsulates the SOAP header and SOAP body, which form the SOAP message. This is the root of the SOAP message. It needs to have at least one SOAP body.</li>
+  <li>A <strong>SOAP Header</strong> element that contains metadata about the message such as credentials that can be used for authentication. It consists of two attributes:
+    <ul>
+      <li>Actor – defines the list of services or nodes that should receive the SOAP message in the chain the message propagation defined by SOAP</li>
+      <li>MustUnderstand – labels that tell whether the header is mandatory or optional. When this attribute is set, the service node that receives the SOAP message will process and validate its semantics</li>
+    </ul>
+  </li>
+</ul>
+
+<p>A SOAP Header can also have complex types that can be used in the SOAP body as mentioned like so:</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0"?&gt;</span>
+<span class="nt">&lt;soapenv:Envelope</span> <span class="na">xmlns:soapenv=</span><span class="s">"http://schemas.xmlsoap.org/soap/envelope/"</span> <span class="na">xmlns:soap=</span><span class="s">"http://educative.io/soap-automation"</span><span class="nt">&gt;</span>
+   <span class="nt">&lt;soapenv:Header&gt;</span>
+       <span class="nt">&lt;soap:requestId</span> <span class="na">soapenv:mustUnderstand=</span><span class="s">"true"</span><span class="nt">&gt;</span>dc7e2763-6495<span class="nt">&lt;/soap:requestId&gt;</span>
+   <span class="nt">&lt;/soapenv:Header&gt;</span>
+   <span class="nt">&lt;soapenv:Body&gt;</span>
+       ..............
+    <span class="nt">&lt;/soapenv:Body&gt;</span>
+<span class="nt">&lt;/soapenv:Envelope&gt;</span> 
+</code></pre></div></div>
+
+<ul>
+  <li>A <strong>SOAP Body</strong> contains the information about the request and response. The complexType described in the SOAP Header will be used here.</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0"?&gt;</span>
+<span class="nt">&lt;soapenv:Envelope</span> <span class="na">xmlns:soapenv=</span><span class="s">"http://schemas.xmlsoap.org/soap/envelope/"</span> <span class="na">xmlns:soap=</span><span class="s">"http://educative.io/soap-automation"</span><span class="nt">&gt;</span>
+   <span class="nt">&lt;soapenv:Header&gt;</span>
+       <span class="nt">&lt;soap:requestId</span> <span class="na">soapenv:mustUnderstand=</span><span class="s">"true"</span><span class="nt">&gt;</span>dc7e2763-6495<span class="nt">&lt;/soap:requestId&gt;</span>
+   <span class="nt">&lt;/soapenv:Header&gt;</span>
+   <span class="nt">&lt;soapenv:Body&gt;</span>
+       <span class="nt">&lt;soap:getStudentsRequest&gt;</span>
+           <span class="nt">&lt;soap:firstName&gt;</span>John<span class="nt">&lt;/soap:firstName&gt;</span>
+           <span class="nt">&lt;soap:lastName&gt;</span>Doe<span class="nt">&lt;/soap:lastName&gt;</span>
+           <span class="nt">&lt;soap:gender&gt;</span>Male<span class="nt">&lt;/soap:gender&gt;</span>
+       <span class="nt">&lt;/soap:getStudentsRequest&gt;</span>
+    <span class="nt">&lt;/soapenv:Body&gt;</span>
+<span class="nt">&lt;/soapenv:Envelope&gt;</span>
+</code></pre></div></div>
+
+<ul>
+  <li>Fault (optional) – holds data about any errors that could be thrown by the web service. This is part of SOAP body.</li>
+</ul>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;soapenv:Envelope</span> <span class="na">xmlns:soapenv=</span><span class="s">"http://schemas.xmlsoap.org/soap/envelope/"</span><span class="nt">&gt;</span>
+   <span class="nt">&lt;soapenv:Header/&gt;</span>
+   <span class="nt">&lt;soapenv:Body&gt;</span>
+      <span class="nt">&lt;soapenv:Fault&gt;</span>
+         <span class="nt">&lt;faultcode&gt;</span>soapenv:Server<span class="nt">&lt;/faultcode&gt;</span>
+         <span class="nt">&lt;faultstring</span> <span class="na">xml:lang=</span><span class="s">"en"</span><span class="nt">&gt;</span>student with id '103' not found<span class="nt">&lt;/faultstring&gt;</span>
+      <span class="nt">&lt;/soapenv:Fault&gt;</span>
+   <span class="nt">&lt;/soapenv:Body&gt;</span>
+<span class="nt">&lt;/soapenv:Envelope&gt;</span>
+</code></pre></div></div>
+
+<h4 id="web-services-description-language-wsdl">Web Services Description Language (WSDL)</h4>
+
+<p>WSDL is an XML document that describes a web service and its components. It consists of the location of the web service, the methods contained in the web service, and its data types. All these information are described using the following elements:</p>
+
+<ul>
+  <li>
+<strong>types</strong> – defines data types used by the web service</li>
+  <li>
+<strong>message</strong> – defines data elements for each operation</li>
+  <li>
+<strong>portType</strong> – operations that can be performed and the messages involved</li>
+  <li>
+<strong>binding</strong> – defines the protocol and data format for each port type</li>
+  <li>
+<strong>service</strong> – defines where the web service is hosted</li>
+</ul>
+
+<p>A sample WSDL XML document is given below:</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="UTF-8" standalone="no"?&gt;</span>
+<span class="nt">&lt;wsdl:definitions</span> <span class="na">xmlns:wsdl=</span><span class="s">"http://schemas.xmlsoap.org/wsdl/"</span> <span class="na">xmlns:sch=</span><span class="s">"http://educative.io/soap-automation"</span> <span class="na">xmlns:soap=</span><span class="s">"http://schemas.xmlsoap.org/wsdl/soap/"</span> <span class="na">xmlns:tns=</span><span class="s">"http://educative.io/soap-automation"</span> <span class="na">targetNamespace=</span><span class="s">"http://educative.io/soap-automation"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;wsdl:types&gt;</span>
+        <span class="nt">&lt;xs:schema</span> <span class="na">xmlns:xs=</span><span class="s">"http://www.w3.org/2001/XMLSchema"</span> <span class="na">elementFormDefault=</span><span class="s">"qualified"</span> <span class="na">targetNamespace=</span><span class="s">"http://educative.io/soap-automation"</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;xs:element</span> <span class="na">name=</span><span class="s">"getStudentsRequest"</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;xs:complexType&gt;</span>
+                    <span class="nt">&lt;xs:sequence&gt;</span>
+                        <span class="nt">&lt;xs:element</span> <span class="na">name=</span><span class="s">"id"</span> <span class="na">nillable=</span><span class="s">"true"</span> <span class="na">type=</span><span class="s">"xs:int"</span> <span class="nt">/&gt;</span>
+                        <span class="nt">&lt;xs:element</span> <span class="na">name=</span><span class="s">"firstName"</span> <span class="na">nillable=</span><span class="s">"true"</span> <span class="na">type=</span><span class="s">"xs:string"</span> <span class="nt">/&gt;</span>
+                        <span class="nt">&lt;xs:element</span> <span class="na">name=</span><span class="s">"lastName"</span> <span class="na">nillable=</span><span class="s">"true"</span> <span class="na">type=</span><span class="s">"xs:string"</span> <span class="nt">/&gt;</span>
+                        <span class="nt">&lt;xs:element</span> <span class="na">name=</span><span class="s">"gender"</span> <span class="na">nillable=</span><span class="s">"true"</span> <span class="na">type=</span><span class="s">"xs:string"</span> <span class="nt">/&gt;</span>
+                    <span class="nt">&lt;/xs:sequence&gt;</span>
+                <span class="nt">&lt;/xs:complexType&gt;</span>
+            <span class="nt">&lt;/xs:element&gt;</span>
+            <span class="nt">&lt;xs:element</span> <span class="na">name=</span><span class="s">"getStudentsResponse"</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;xs:complexType&gt;</span>
+                    <span class="nt">&lt;xs:sequence</span> <span class="na">maxOccurs=</span><span class="s">"unbounded"</span><span class="nt">&gt;</span>
+                        <span class="nt">&lt;xs:element</span> <span class="na">name=</span><span class="s">"students"</span> <span class="na">type=</span><span class="s">"tns:student"</span> <span class="nt">/&gt;</span>
+                    <span class="nt">&lt;/xs:sequence&gt;</span>
+                <span class="nt">&lt;/xs:complexType&gt;</span>
+            <span class="nt">&lt;/xs:element&gt;</span>
+            <span class="nt">&lt;xs:complexType</span> <span class="na">name=</span><span class="s">"student"</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;xs:sequence&gt;</span>
+                    <span class="nt">&lt;xs:element</span> <span class="na">name=</span><span class="s">"id"</span> <span class="na">type=</span><span class="s">"xs:int"</span> <span class="nt">/&gt;</span>
+                    <span class="nt">&lt;xs:element</span> <span class="na">name=</span><span class="s">"firstName"</span> <span class="na">type=</span><span class="s">"xs:string"</span> <span class="nt">/&gt;</span>
+                    <span class="nt">&lt;xs:element</span> <span class="na">name=</span><span class="s">"lastName"</span> <span class="na">type=</span><span class="s">"xs:string"</span> <span class="nt">/&gt;</span>
+                    <span class="nt">&lt;xs:element</span> <span class="na">name=</span><span class="s">"gender"</span> <span class="na">type=</span><span class="s">"xs:string"</span> <span class="nt">/&gt;</span>
+                <span class="nt">&lt;/xs:sequence&gt;</span>
+            <span class="nt">&lt;/xs:complexType&gt;</span>
+        <span class="nt">&lt;/xs:schema&gt;</span>
+    <span class="nt">&lt;/wsdl:types&gt;</span>
+    <span class="nt">&lt;wsdl:message</span> <span class="na">name=</span><span class="s">"getStudentsResponse"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;wsdl:part</span> <span class="na">element=</span><span class="s">"tns:getStudentsResponse"</span> <span class="na">name=</span><span class="s">"getStudentsResponse"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;/wsdl:part&gt;</span>
+    <span class="nt">&lt;/wsdl:message&gt;</span>
+    <span class="nt">&lt;wsdl:message</span> <span class="na">name=</span><span class="s">"getStudentsRequest"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;wsdl:part</span> <span class="na">element=</span><span class="s">"tns:getStudentsRequest"</span> <span class="na">name=</span><span class="s">"getStudentsRequest"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;/wsdl:part&gt;</span>
+    <span class="nt">&lt;/wsdl:message&gt;</span>
+    <span class="nt">&lt;wsdl:portType</span> <span class="na">name=</span><span class="s">"StudentsPort"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;wsdl:operation</span> <span class="na">name=</span><span class="s">"getStudents"</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;wsdl:input</span> <span class="na">message=</span><span class="s">"tns:getStudentsRequest"</span> <span class="na">name=</span><span class="s">"getStudentsRequest"</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;/wsdl:input&gt;</span>
+            <span class="nt">&lt;wsdl:output</span> <span class="na">message=</span><span class="s">"tns:getStudentsResponse"</span> <span class="na">name=</span><span class="s">"getStudentsResponse"</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;/wsdl:output&gt;</span>
+        <span class="nt">&lt;/wsdl:operation&gt;</span>
+    <span class="nt">&lt;/wsdl:portType&gt;</span>
+    <span class="nt">&lt;wsdl:binding</span> <span class="na">name=</span><span class="s">"StudentsPortSoap11"</span> <span class="na">type=</span><span class="s">"tns:StudentsPort"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;soap:binding</span> <span class="na">style=</span><span class="s">"document"</span> <span class="na">transport=</span><span class="s">"http://schemas.xmlsoap.org/soap/http"</span> <span class="nt">/&gt;</span>
+        <span class="nt">&lt;wsdl:operation</span> <span class="na">name=</span><span class="s">"getStudents"</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;soap:operation</span> <span class="na">soapAction=</span><span class="s">""</span> <span class="nt">/&gt;</span>
+            <span class="nt">&lt;wsdl:input</span> <span class="na">name=</span><span class="s">"getStudentsRequest"</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;soap:body</span> <span class="na">use=</span><span class="s">"literal"</span> <span class="nt">/&gt;</span>
+            <span class="nt">&lt;/wsdl:input&gt;</span>
+            <span class="nt">&lt;wsdl:output</span> <span class="na">name=</span><span class="s">"getStudentsResponse"</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;soap:body</span> <span class="na">use=</span><span class="s">"literal"</span> <span class="nt">/&gt;</span>
+            <span class="nt">&lt;/wsdl:output&gt;</span>
+        <span class="nt">&lt;/wsdl:operation&gt;</span>
+    <span class="nt">&lt;/wsdl:binding&gt;</span>
+    <span class="nt">&lt;wsdl:service</span> <span class="na">name=</span><span class="s">"StudentsPortService"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;wsdl:port</span> <span class="na">binding=</span><span class="s">"tns:StudentsPortSoap11"</span> <span class="na">name=</span><span class="s">"StudentsPortSoap11"</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;soap:address</span> <span class="na">location=</span><span class="s">"http://ezifyautomationlabs.com:6566/educative-soap/ws"</span> <span class="nt">/&gt;</span>
+        <span class="nt">&lt;/wsdl:port&gt;</span>
+    <span class="nt">&lt;/wsdl:service&gt;</span>
+<span class="nt">&lt;/wsdl:definitions&gt;</span>
+</code></pre></div></div>
+
+<h4 id="soap-vs-rest">SOAP vs REST</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th>SOAP</th>
+      <th>REST</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Approach</td>
+      <td>Data available as services: getValue</td>
+      <td>Data available as resources: “value”</td>
+    </tr>
+    <tr>
+      <td>Performance</td>
+      <td>Requires more bandwidth and compute power</td>
+      <td>Uses fewer resources</td>
+    </tr>
+    <tr>
+      <td>Message Format</td>
+      <td>Only XML</td>
+      <td>XML, HTML, JSON etc.</td>
+    </tr>
+    <tr>
+      <td>Transfer Protocols</td>
+      <td>SMTP, HTTP, UDP, etc.</td>
+      <td>HTTP only</td>
+    </tr>
+  </tbody>
+</table>
+
+<h1 id="fuentes">
+<a href="#header-1"></a>Fuentes</h1>
+
+<ul>
+  <li><a href="https://zvelo.com/anatomy-of-full-path-url-hostname-protocol-path-more/">https://zvelo.com/anatomy-of-full-path-url-hostname-protocol-path-more/</a></li>
+  <li><a href="https://zvelo.com/base-domain-url-vs-full-path-url-whats-the-difference/">Base Domain URL vs. Full Path URL. What’s the Difference?</a></li>
+  <li><a href="https://www.educative.io/edpresso/rest-api-vs-soap">REST API vs. SOAP</a></li>
+  <li><a href="https://www.educative.io/courses/learn-rest-soap-api-test-automation-java">Learn REST and SOAP API Test Automation in Java</a></li>
+  <li>Software Engineering, ninth edition - Ian Sommerville</li>
+</ul>
+
+
+    </div>
+
+</article>
+<div class="post-nav">
+<a class="previous" href="/react/2022/04/15/better-react-code.html" title="Better React code">Better React code</a><a class="next" href="/methodology/2022/05/27/agile-methodology.html" title="Agile Methodology">Agile Methodology</a>
+</div>
+<div class="post-related">
+      <div>Related Articles</div>
+      <ul>
+        <li><a class="post-link" href="/postgres/2021/12/13/connections-pool.html" title="Agile Methodology">Connection Pooling</a></li>
+<li><a class="post-link" href="/react/2021/11/26/react-performance.html" title="Agile Methodology">Optimizing Performance in React</a></li>
+<li><a class="post-link" href="/docker/2022/01/08/https-con-docker-y-apache.html" title="Agile Methodology">HTTPS with Docker and Apache</a></li>
+<li><a class="post-link" href="/methodology/2022/05/27/agile-methodology.html" title="Agile Methodology">Agile Methodology</a></li>
+</ul>
+    </div>
+<div class="post-comments"></div></section>
+</div>
+
+
+  </section>
+  <section class="sidebar" style="margin-left: 15px;">
+    <!-- Get sidebar items --><style type="text/css" media="screen">
+.post-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+</style>
+
+<div class="post-menu">
+  <div class="post-menu-title">TOC</div>
+  <div class="post-menu-content"></div>
+</div>
+
+<script>
+  function generateContent() {
+    var menu = document.querySelector(".post-menu");
+    var menuContent =  menu.querySelector(".post-menu-content");
+    var headings = document.querySelector(".post-content").querySelectorAll("h2, h3, h4, h5, h6");
+
+    // Hide menu when no headings
+    if (headings.length === 0) {
+      return menu.style.display = "none";
+    }
+
+    // Generate post menu
+    var menuHTML = '';
+    for (var i = 0; i < headings.length; i++) {
+      var h = headings[i];
+      menuHTML += (
+        '<li class="h-' + h.tagName.toLowerCase() + '">'
+        + '<a href="#h-' + h.getAttribute('id') + '">' + h.textContent + '</a></li>');
+    }
+
+    menuContent.innerHTML = '<ul>' + menuHTML + '</ul>';
+
+    // The header element
+    var header = document.querySelector('header.site-header');
+
+    function doMenuCollapse(index, over_items) {
+      var items = menuContent.firstChild.children;
+
+      if (over_items == undefined) {
+        over_items = 20;
+      }
+
+      if (items.length < over_items) {
+        return;
+      }
+
+      var activeItem = items[index];
+      var beginItem = activeItem
+      var endItem = activeItem
+      var beginIndex = index;
+      var endIndex = index + 1;
+      while (beginIndex >= 0
+        && !items[beginIndex].classList.contains('h-h2')) {
+        beginIndex -= 1;
+      }
+      while (endIndex < items.length
+        && !items[endIndex].classList.contains('h-h2')) {
+        endIndex += 1;
+      }
+      for (var i = 0; i < beginIndex; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+      for (var i = beginIndex + 1; i < endIndex; i++) {
+        item = items[i]
+        // if (!item.classList.contains('h-h2')) {
+          item.style.display = '';
+        // }
+      }
+      for (var i = endIndex; i < items.length; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+    }
+
+    // Init menu collapsed
+    doMenuCollapse(-1);
+
+    // Active the menu item
+    window.addEventListener('scroll', function (event) {
+      var lastActive = menuContent.querySelector('.active');
+      var changed = true;
+      var activeIndex = -1;
+      for (var i = headings.length - 1; i >= 0; i--) {
+        var h = headings[i];
+        var headingRect = h.getBoundingClientRect();
+        var headerRect = header.getBoundingClientRect();
+        var headerTop = Math.floor(headerRect.top);
+        var headerHeight = Math.floor(headerRect.height);
+        var headerHeight = headerTop + headerHeight + 20;
+        if (headingRect.top <= headerHeight) {
+          var id = 'h-' + h.getAttribute('id');
+          var a = menuContent.querySelector('a[href="#' + id  + '"]');
+          var curActive = a.parentNode;
+          if (curActive) {
+            curActive.classList.add('active');
+            activeIndex = i;
+          }
+          if (lastActive == curActive) {
+            changed = false;
+          }
+          break;
+        }
+      }
+      if (changed) {
+        if (lastActive) {
+          lastActive.classList.remove('active');
+        }
+        doMenuCollapse(activeIndex);
+      }
+      event.preventDefault();
+    });
+  }
+  generateContent();
+</script>
+</section>
+</div>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+    <div class="site-footer-inner">
+<div>All rights reserved <span class="copyleft">©</span> Eva Villarreal Guzmán 2022 </div>
+      <div>Powered by <a title="Jekyll is a simple, blog-aware, static site
+      generator." href="https://jekyllrb.com/">Jekyll</a> &amp; <a title="Yat, yet
+      another theme." href="https://github.com/jeffreytse/jekyll-theme-yat">Yat Theme</a>.</div>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

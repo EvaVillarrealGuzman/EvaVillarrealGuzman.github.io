@@ -2,8 +2,8 @@
 title: Distributed System Design
 layout: post
 subtitle: Distributed systems are inherently more complex than centralized systems. This makes them more difficult to design, implement, and test. It is harder to understand the emergent properties of distributed systems because of the complexity of the interactions between system components and the system infrastructure. For example, rather than the performance of the system being dependent on the execution speed of one processor, it depends on the network bandwidth, the network load, and the speed of all of the computers that are part of the system.
-categories: arquitecture
-tags: [Distributed system, arquitecture, design]
+categories: architecture
+tags: [Distributed system, architecture, design]
 ---
 
 Whenever we are designing a large system, we need to consider a few things:
