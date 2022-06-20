@@ -397,7 +397,7 @@ A sample WSDL XML document is given below:
 | Transfer Protocols           |SMTP, HTTP, UDP, etc. | HTTP only    |
 
 
-# [](#header-1)Fuentes
+# Sources
 
 - [https://zvelo.com/anatomy-of-full-path-url-hostname-protocol-path-more/](https://zvelo.com/anatomy-of-full-path-url-hostname-protocol-path-more/)
 - [Base Domain URL vs. Full Path URL. What’s the Difference?](https://zvelo.com/base-domain-url-vs-full-path-url-whats-the-difference/)
