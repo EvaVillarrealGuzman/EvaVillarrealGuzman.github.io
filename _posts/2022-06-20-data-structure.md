@@ -35,7 +35,7 @@ Look at the figure below; we have made a simple array with four elements. Each i
 
 ![](https://evavillarrealguzman.github.io/img/data-structure/array.png)
 
-The elements of an array are stored contiguously in memory. A physical space is saved in ram memory, one next to the other, to save the elements.
+The elements of an array are stored contiguously in memory. A physical space is saved in RAM memory, one next to the other, to save the elements.
 
 ### Array Indexing
 
